@@ -511,6 +511,30 @@
         <source>Next unread chat</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Message scheduled for %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Message will be sent when %1 is online</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Scheduled messages (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Send when online</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Schedule message...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Send silently</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ChatSelectionPage</name>
@@ -1489,6 +1513,72 @@
         <source>Chosen by:</source>
         <comment>This answer has been chosen by the following users</comment>
         <translation>Valt av:</translation>
+    </message>
+</context>
+<context>
+    <name>ScheduleMessageDialog</name>
+    <message>
+        <source>Schedule message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Schedule</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Messages can only be scheduled up to a year ahead.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pick a time in the future.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ScheduledMessagesPage</name>
+    <message>
+        <source>Reschedule message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reschedule</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Scheduled messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No scheduled messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Long-press the send button to schedule one.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Send now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deleting message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>When online</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
