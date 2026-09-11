@@ -186,6 +186,7 @@ public:
     Q_INVOKABLE void sendPollMessage(qlonglong chatId, const QString &question, const QVariantList &options, bool anonymous, int correctOption, bool multiple, const QString &explanation, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void forwardMessages(const QString &chatId, const QString &fromChatId, const QVariantList &messageIds, bool sendCopy, bool removeCaption);
     Q_INVOKABLE void getMessage(qlonglong chatId, qlonglong messageId);
+    Q_INVOKABLE void getMessageProperties(qlonglong chatId, qlonglong messageId);
     Q_INVOKABLE void getMessageLinkInfo(const QString &url, const QString &extra = "");
     Q_INVOKABLE void getExternalLinkInfo(const QString &url, const QString &extra = "");
     Q_INVOKABLE void getCallbackQueryAnswer(const QString &chatId, const QString &messageId, const QVariantMap &payload);
@@ -293,6 +294,7 @@ signals:
     void copyToDownloadsSuccessful(const QString &fileName, const QString &filePath);
     void copyToDownloadsError(const QString &fileName, const QString &filePath);
     void receivedMessage(qlonglong chatId, qlonglong messageId, const QVariantMap &message);
+    void messagePropertiesReceived(qlonglong chatId, qlonglong messageId, const QVariantMap &messageProperties);
     void messageSendSucceeded(qlonglong messageId, qlonglong oldMessageId, const QVariantMap &message);
     void activeNotificationsUpdated(const QVariantList notificationGroups);
     void notificationGroupUpdated(const QVariantMap notificationGroupUpdate);

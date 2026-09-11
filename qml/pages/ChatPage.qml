@@ -63,6 +63,9 @@ Page {
                                     || (chatGroupInformation.status["@type"] === "chatMemberStatusCreator" && chatGroupInformation.status.is_member)
                                     )
     property var selectedMessages: []
+    // can_be_forwarded/can_be_deleted_* are no longer part of the message itself,
+    // so the selection toolbar collects them per selected message, keyed by message id.
+    property var selectedMessageProperties: ({})
     readonly property bool isSelecting: selectedMessages.length > 0
     readonly property bool canSendMessages: hasSendPrivilege("can_send_basic_messages")
     property bool doSendBotStartMessage
@@ -107,6 +110,9 @@ Page {
             selectionArray.splice(foundIndex, 1);
         } else {
             selectionArray.push(message);
+            if (!selectedMessageProperties[message.id]) {
+                tdLibWrapper.getMessageProperties(Number(chatInformation.id), Number(message.id));
+            }
         }
         selectedMessages = selectionArray;
     }
@@ -516,6 +522,17 @@ Page {
 
     Connections {
         target: tdLibWrapper
+        onMessagePropertiesReceived: {
+            if (String(chatId) !== String(chatPage.chatInformation.id)) {
+                return;
+            }
+            var knownProperties = {};
+            for (var knownId in chatPage.selectedMessageProperties) {
+                knownProperties[knownId] = chatPage.selectedMessageProperties[knownId];
+            }
+            knownProperties[messageId] = messageProperties;
+            chatPage.selectedMessageProperties = knownProperties;
+        }
         onUserUpdated: {
             if ((isPrivateChat || isSecretChat) && chatPartnerInformation.id.toString() === userId ) {
                 chatPartnerInformation = userInformation;
@@ -791,6 +808,7 @@ Page {
 
         property var myMessage: ({})
         property var userInformation: ({})
+        property var messageProperties: ({})
         property var additionalItemsModel: 0
         property var sourceItem
         property bool showCopyMessageToClipboardMenuItem
@@ -808,7 +826,7 @@ Page {
                 }
             },
             NamedAction {
-                visible: messageOptionsDrawer.showForwardMessageMenuItem && messageOptionsDrawer.myMessage.can_be_forwarded
+                visible: messageOptionsDrawer.showForwardMessageMenuItem && messageOptionsDrawer.messageProperties.can_be_forwarded !== false
                 name: qsTr("Forward Message")
                 action: function () {
                     startForwardingMessages([messageOptionsDrawer.myMessage])
@@ -2233,8 +2251,11 @@ Page {
                     }
 
                     IconButton {
+                        // Hidden only once a selected message is known not to be forwardable,
+                        // so a pending properties request never hides the button.
                         visible: !chatPage.isSecretChat && selectedMessages.every(function(message){
-                            return message.can_be_forwarded
+                            var properties = chatPage.selectedMessageProperties[message.id];
+                            return !properties || properties.can_be_forwarded !== false
                         })
                         icon.sourceSize: Qt.size(Theme.iconSizeMedium, Theme.iconSizeMedium)
                         icon.source: "image://theme/icon-m-forward"
@@ -2245,8 +2266,11 @@ Page {
                     }
                     IconButton {
                         icon.source: "image://theme/icon-m-delete"
+                        // Deleting is destructive, so this one waits for confirmation
+                        // rather than assuming it is allowed.
                         visible: chatInformation.id === chatPage.myUserId || selectedMessages.every(function(message){
-                            return message.can_be_deleted_for_all_users
+                            var properties = chatPage.selectedMessageProperties[message.id];
+                            return !!(properties && properties.can_be_deleted_for_all_users)
                         })
                         icon.sourceSize: Qt.size(Theme.iconSizeMedium, Theme.iconSizeMedium)
                         onClicked: {

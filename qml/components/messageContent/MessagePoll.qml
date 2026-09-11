@@ -21,6 +21,7 @@ import QtQuick 2.6
 import Sailfish.Silica 1.0
 import WerkWolf.GTgram 1.0
 
+import "../"
 import "../../js/functions.js" as Functions
 import "../../js/twemoji.js" as Emoji
 
@@ -31,7 +32,7 @@ MessageContentBase {
     readonly property string chatId: rawMessage.chat_id
     readonly property bool isOwnMessage: messageListItem ? messageListItem.isOwnMessage : overlayFlickable.isOwnMessage
     readonly property string messageId: rawMessage.id
-    readonly property bool canEdit: rawMessage.can_be_edited
+    readonly property bool canEdit: !!pollPropertiesLoader.properties.can_be_edited
     readonly property var pollData: rawMessage.content.poll
     property var chosenPollData:({})
     property var chosenIndexes: []
@@ -54,6 +55,13 @@ MessageContentBase {
             action: function () { pollMessageComponent.resetChosen() }
         }
     ]
+
+    MessagePropertiesLoader {
+        id: pollPropertiesLoader
+        chatId: pollMessageComponent.chatId
+        messageId: pollMessageComponent.messageId
+        autoLoad: true
+    }
 
     function handleChoose(index) {
         if(!pollData.type.allow_multiple_answers) {

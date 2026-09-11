@@ -137,6 +137,7 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("updateNewMessage", &TDLibReceiver::processUpdateNewMessage);
     handlers.insert("message", &TDLibReceiver::processMessage);
     handlers.insert("messageLinkInfo", &TDLibReceiver::processMessageLinkInfo);
+    handlers.insert("messageProperties", &TDLibReceiver::processMessageProperties);
     handlers.insert("updateMessageSendSucceeded", &TDLibReceiver::processMessageSendSucceeded);
     handlers.insert("updateActiveNotifications", &TDLibReceiver::processUpdateActiveNotifications);
     handlers.insert("updateNotificationGroup", &TDLibReceiver::processUpdateNotificationGroup);
@@ -471,6 +472,21 @@ void TDLibReceiver::processMessageLinkInfo(const QVariantMap &receivedInformatio
         url = oldExtra;
     }
     emit messageLinkInfoReceived(url, receivedInformation, extra);
+}
+
+void TDLibReceiver::processMessageProperties(const QVariantMap &receivedInformation)
+{
+    // messageProperties carries no chat/message id, so we recover them from @extra,
+    // which TDLibWrapper::getMessageProperties() set to "getMessageProperties:<chatId>:<messageId>".
+    const QStringList extraParts(receivedInformation.value(_EXTRA).toString().split(':'));
+    if (extraParts.size() != 3) {
+        LOG("Received message properties without usable @extra, ignoring");
+        return;
+    }
+    const qlonglong chatId = extraParts.at(1).toLongLong();
+    const qlonglong messageId = extraParts.at(2).toLongLong();
+    LOG("Received message properties " << chatId << messageId);
+    emit messagePropertiesReceived(chatId, messageId, cleanupMap(receivedInformation));
 }
 
 void TDLibReceiver::processMessageSendSucceeded(const QVariantMap &receivedInformation)

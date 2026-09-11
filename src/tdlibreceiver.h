@@ -62,6 +62,7 @@ signals:
     void sponsoredMessageReceived(qlonglong chatId, const QVariantMap &message);
     void newMessageReceived(qlonglong chatId, const QVariantMap &message);
     void messageInformation(qlonglong chatId, qlonglong messageId, const QVariantMap &message);
+    void messagePropertiesReceived(qlonglong chatId, qlonglong messageId, const QVariantMap &messageProperties);
     void messageSendSucceeded(qlonglong messageId, qlonglong oldMessageId, const QVariantMap &message);
     void activeNotificationsUpdated(const QVariantList notificationGroups);
     void notificationGroupUpdated(const QVariantMap notificationGroupUpdate);
@@ -150,6 +151,7 @@ private:
     void processUpdateNewMessage(const QVariantMap &receivedInformation);
     void processMessage(const QVariantMap &receivedInformation);
     void processMessageLinkInfo(const QVariantMap &receivedInformation);
+    void processMessageProperties(const QVariantMap &receivedInformation);
     void processMessageSendSucceeded(const QVariantMap &receivedInformation);
     void processUpdateActiveNotifications(const QVariantMap &receivedInformation);
     void processUpdateNotificationGroup(const QVariantMap &receivedInformation);

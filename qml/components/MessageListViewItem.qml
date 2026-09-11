@@ -45,7 +45,13 @@ ListItem {
         return existingMessage.id === messageId
     });
     readonly property bool isOwnMessage: page.myUserId === myMessage.sender_id.user_id
-    readonly property bool canDeleteMessage: myMessage.can_be_deleted_for_all_users || (myMessage.can_be_deleted_only_for_self && myMessage.chat_id === page.myUserId)
+    readonly property var messageProperties: messagePropertiesLoader.properties
+    readonly property bool canDeleteMessage: !!messageProperties.can_be_deleted_for_all_users || (!!messageProperties.can_be_deleted_only_for_self && myMessage.chat_id === page.myUserId)
+    readonly property bool canEditMessage: !!messageProperties.can_be_edited
+    // Edit/delete stay hidden until TDLib confirms they are allowed; forwarding is
+    // assumed allowed until it says otherwise, so a slow reply never hides a button
+    // that used to be there unconditionally.
+    readonly property bool canForwardMessage: !messagePropertiesLoader.loaded || !!messageProperties.can_be_forwarded
     property bool hasContentComponent
     property bool additionalOptionsOpened
     property bool wasNavigatedTo: false
@@ -61,7 +67,7 @@ ListItem {
 
     readonly property int maxContextMenuItemCount: page.isPortrait ? 5 : 4
     readonly property int baseContextMenuItemCount: (canReplyToMessage ? 1 : 0) +
-        (myMessage.can_be_edited ? 1 : 0) + 2 /* "Select Message" and "More Options..." */
+        (canEditMessage ? 1 : 0) + 2 /* "Select Message" and "More Options..." */
     readonly property bool showCopyMessageToClipboardMenuItem: (baseContextMenuItemCount + 1) <= maxContextMenuItemCount
     readonly property bool showForwardMessageMenuItem: (baseContextMenuItemCount + 2) <= maxContextMenuItemCount
     // And don't count "More Options..." for "Delete Message" if "Delete Message" is the only extra option
@@ -89,6 +95,7 @@ ListItem {
     }
 
     function openContextMenu() {
+        messagePropertiesLoader.load()
         messageOptionsDrawer.open = false
         if (menu) {
             openMenu()
@@ -167,6 +174,14 @@ ListItem {
         openReactions();
     }
 
+    onDownChanged: {
+        // Head start for the context menu: press-and-hold needs the message
+        // properties to decide about "Edit Message" and "Delete Message".
+        if (down && openMenuOnPressAndHold) {
+            messagePropertiesLoader.load();
+        }
+    }
+
     onPressAndHold: {
         if (openMenuOnPressAndHold) {
             openContextMenu()
@@ -209,6 +224,12 @@ ListItem {
         }
     }
 
+    MessagePropertiesLoader {
+        id: messagePropertiesLoader
+        chatId: messageListItem.chatId
+        messageId: messageListItem.messageId
+    }
+
     Loader {
         id: contextMenuLoader
         active: false
@@ -227,7 +248,7 @@ ListItem {
                     text: qsTr("Reply to Message")
                 }
                 MenuItem {
-                    visible: typeof myMessage.can_be_edited !== "undefined" && myMessage.can_be_edited
+                    visible: canEditMessage
                     onClicked: editMessage()
                     text: qsTr("Edit Message")
                 }
@@ -241,7 +262,7 @@ ListItem {
                     text: qsTr("Copy Message to Clipboard")
                 }
                 MenuItem {
-                    visible: showForwardMessageMenuItem
+                    visible: showForwardMessageMenuItem && canForwardMessage
                     onClicked: forwardMessage()
                     text: qsTr("Forward Message")
                 }
@@ -258,6 +279,7 @@ ListItem {
                         messageOptionsDrawer.userInformation = userInformation;
                         messageOptionsDrawer.sourceItem = messageListItem
                         messageOptionsDrawer.additionalItemsModel = additionalItemsModel
+                        messageOptionsDrawer.messageProperties = messageListItem.messageProperties
                         messageOptionsDrawer.showCopyMessageToClipboardMenuItem = !showCopyMessageToClipboardMenuItem
                         messageOptionsDrawer.showForwardMessageMenuItem = !showForwardMessageMenuItem
                         messageOptionsDrawer.showDeleteMessageMenuItem = canDeleteMessage && !haveSpaceForDeleteMessageMenuItem

@@ -75,6 +75,7 @@ DISTFILES += qml/harbour-gtgram.qml \
     qml/components/MessageListViewItem.qml \
     qml/components/MessageListViewItemSimple.qml \
     qml/components/MessageOverlayFlickable.qml \
+    qml/components/MessagePropertiesLoader.qml \
     qml/components/MessageViaLabel.qml \
     qml/components/MultilineEmojiLabel.qml \
     qml/components/PinnedMessageItem.qml \

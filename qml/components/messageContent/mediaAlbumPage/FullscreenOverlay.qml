@@ -20,6 +20,7 @@ import QtQuick 2.6
 import QtGraphicalEffects 1.0
 import WerkWolf.GTgram 1.0
 import Sailfish.Silica 1.0
+import "../../"
 import "../../../js/functions.js" as Functions
 import "../../../js/twemoji.js" as Emoji
 
@@ -58,6 +59,13 @@ Item {
             payload: {fromChatId: message.chat_id, messageIds:[message.id], neededPermissions: neededPermissions},
             state: "forwardMessages"
         });
+    }
+
+    MessagePropertiesLoader {
+        id: overlayPropertiesLoader
+        chatId: overlay.message ? overlay.message.chat_id : 0
+        messageId: overlay.message ? overlay.message.id : 0
+        autoLoad: true
     }
 
     // "header"
@@ -290,7 +298,8 @@ Item {
         }
 
         IconButton {
-             enabled: message.can_be_forwarded
+             // Greyed out only once TDLib has confirmed the message cannot be forwarded
+             enabled: !overlayPropertiesLoader.loaded || !!overlayPropertiesLoader.properties.can_be_forwarded
              opacity: enabled ? 1.0 : 0.2
              icon.source: "image://theme/icon-m-share?" + (pressed
                           ? Theme.highlightColor

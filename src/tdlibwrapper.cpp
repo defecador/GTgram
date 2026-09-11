@@ -147,6 +147,7 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(messageLinkInfoReceived(QString, QVariantMap, QString)), this, SIGNAL(messageLinkInfoReceived(QString, QVariantMap, QString)));
     connect(this->tdLibReceiver, SIGNAL(newMessageReceived(qlonglong, QVariantMap)), this, SIGNAL(newMessageReceived(qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(messageInformation(qlonglong, qlonglong, QVariantMap)), this, SLOT(handleMessageInformation(qlonglong, qlonglong, QVariantMap)));
+    connect(this->tdLibReceiver, SIGNAL(messagePropertiesReceived(qlonglong, qlonglong, QVariantMap)), this, SIGNAL(messagePropertiesReceived(qlonglong, qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(messageSendSucceeded(qlonglong, qlonglong, QVariantMap)), this, SIGNAL(messageSendSucceeded(qlonglong, qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(activeNotificationsUpdated(QVariantList)), this, SIGNAL(activeNotificationsUpdated(QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(notificationGroupUpdated(QVariantMap)), this, SIGNAL(notificationGroupUpdated(QVariantMap)));
@@ -650,6 +651,17 @@ void TDLibWrapper::getMessage(qlonglong chatId, qlonglong messageId)
     requestObject.insert(CHAT_ID, chatId);
     requestObject.insert(MESSAGE_ID, messageId);
     requestObject.insert(_EXTRA, QString("getMessage:%1:%2").arg(chatId).arg(messageId));
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::getMessageProperties(qlonglong chatId, qlonglong messageId)
+{
+    LOG("Retrieving message properties" << chatId << messageId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "getMessageProperties");
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert(MESSAGE_ID, messageId);
+    requestObject.insert(_EXTRA, QString("getMessageProperties:%1:%2").arg(chatId).arg(messageId));
     this->sendRequest(requestObject);
 }
 
