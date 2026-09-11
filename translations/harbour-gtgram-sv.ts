@@ -4,24 +4,12 @@
 <context>
     <name>AboutPage</name>
     <message>
-        <source>About Fernschreiber</source>
-        <translation>Om Fernschreiber</translation>
-    </message>
-    <message>
         <source>A Telegram client for Sailfish OS</source>
         <translation>En Telegram-klient för Sailfish OS</translation>
     </message>
     <message>
-        <source>Send E-Mail</source>
-        <translation>Skicka e-post</translation>
-    </message>
-    <message>
         <source>Licensed under GNU GPLv3</source>
         <translation>Licensierad under GNU GPLv3</translation>
-    </message>
-    <message>
-        <source>Sources on GitHub</source>
-        <translation>Källor på GitHub</translation>
     </message>
     <message>
         <source>Terms of Service</source>
@@ -64,10 +52,6 @@
         <translation>Öppna twemoji på GitHub</translation>
     </message>
     <message>
-        <source>By Sebastian J. Wolf and &lt;a href=&quot;https://github.com/Wunderfitz/harbour-fernschreiber#contributions&quot;&gt;other contributors&lt;/a&gt;</source>
-        <translation>Av Sebastian J. Wolf och &lt;a href=&quot;https://github.com/Wunderfitz/harbour-fernschreiber#contributions&quot;&gt;andra medverkande&lt;/a&gt;</translation>
-    </message>
-    <message>
         <source>This project uses rlottie. Copyright 2020 Samsung Electronics Co., Ltd. and other contributors. Thanks for making it available under the conditions of the MIT License!</source>
         <translation>Detta projekt använder rlottie. Copyright 2018 Samsung Electronics Co. och andra medverkande. Tack för att det gjorts tillgängligt under villkoren för MIT License!</translation>
     </message>
@@ -82,6 +66,22 @@
     <message>
         <source>Open OSM Nominatim Wiki</source>
         <translation>Open OSM Nominatim Wiki</translation>
+    </message>
+    <message>
+        <source>About GTgram</source>
+        <translation>Om GTgram</translation>
+    </message>
+    <message>
+        <source>By %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Based on %1, © 2020 Sebastian J. Wolf and %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>other contributors</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -428,10 +428,6 @@
         <translation>Plats: Hämtar position...</translation>
     </message>
     <message>
-        <source>Copy Message to Clipboard</source>
-        <translation>Kopiera meddelandet till urklipp</translation>
-    </message>
-    <message>
         <source>Message unpinned</source>
         <translation>Meddelandet lösgjort</translation>
     </message>
@@ -489,6 +485,30 @@
     </message>
     <message>
         <source>Obtaining Position...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Forward %Ln messages silently</source>
+        <comment>dialog header</comment>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Forward Silently</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No other chats with unread messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Next unread chat</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -620,7 +640,18 @@
     </message>
 </context>
 <context>
-    <name>FernschreiberUtils</name>
+    <name>FullscreenOverlay</name>
+    <message numerus="yes">
+        <source>Forward %Ln messages</source>
+        <comment>dialog header</comment>
+        <translation>
+            <numerusform>Vidarebefordra %Ln meddelande</numerusform>
+            <numerusform>Vidarebefordra %Ln meddelanden</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>GTgramUtils</name>
     <message>
         <source>sent a picture</source>
         <comment>myself</comment>
@@ -908,17 +939,6 @@
     </message>
 </context>
 <context>
-    <name>FullscreenOverlay</name>
-    <message numerus="yes">
-        <source>Forward %Ln messages</source>
-        <comment>dialog header</comment>
-        <translation>
-            <numerusform>Vidarebefordra %Ln meddelande</numerusform>
-            <numerusform>Vidarebefordra %Ln meddelanden</numerusform>
-        </translation>
-    </message>
-</context>
-<context>
     <name>ImagePage</name>
     <message>
         <source>Download Picture</source>
@@ -953,10 +973,6 @@
     <message>
         <source>OK</source>
         <translation>OK</translation>
-    </message>
-    <message>
-        <source>Welcome to Fernschreiber!</source>
-        <translation>Välkommen till Fernschreiber!</translation>
     </message>
     <message>
         <source>Please enter your phone number to continue.</source>
@@ -1011,8 +1027,12 @@
         <translation>Använd internationellt format, t.ex. %1</translation>
     </message>
     <message>
-        <source>About Fernschreiber</source>
-        <translation>Om Fernschreiber</translation>
+        <source>About GTgram</source>
+        <translation>Om GTgram</translation>
+    </message>
+    <message>
+        <source>Welcome to GTgram!</source>
+        <translation>Välkommen till GTgram!</translation>
     </message>
 </context>
 <context>
@@ -1046,16 +1066,20 @@
         <translation>Mededelande borttaget</translation>
     </message>
     <message>
-        <source>Copy Message to Clipboard</source>
-        <translation>Kopiera meddelandet till urklipp</translation>
-    </message>
-    <message>
         <source>Forward Message</source>
         <translation>Vidarebefordra meddelande</translation>
     </message>
     <message>
         <source>Delete Message</source>
         <translation>Ta bort meddelandet</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Forward Silently</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1197,17 +1221,13 @@
             <numerusform>%Ln olästa meddelanden</numerusform>
         </translation>
     </message>
+    <message>
+        <source>Reply</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>OverviewPage</name>
-    <message>
-        <source>About Fernschreiber</source>
-        <translation>Om Fernschreiber</translation>
-    </message>
-    <message>
-        <source>Fernschreiber</source>
-        <translation>Fernschreiber</translation>
-    </message>
     <message>
         <source>Waiting for network...</source>
         <translation>Väntar på nätverk...</translation>
@@ -1275,6 +1295,30 @@
     <message>
         <source>Unable to open link.</source>
         <translation>Kan inte öppna länk.</translation>
+    </message>
+    <message>
+        <source>GTgram</source>
+        <translation>GTgram</translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Private</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation type="unfinished">Grupper</translation>
+    </message>
+    <message>
+        <source>Channels</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>About GTgram</source>
+        <translation>Om GTgram</translation>
     </message>
 </context>
 <context>
@@ -1558,16 +1602,8 @@
         <translation>Fördröjning innan meddelanden markeras som lästa</translation>
     </message>
     <message>
-        <source>Fernschreiber will wait a bit before messages are marked as read</source>
-        <translation>Fernschreiber väntar en stund innan meddelanden markeras som lästa</translation>
-    </message>
-    <message>
         <source>Open-with menu integration</source>
         <translation>Integrering av menyn &quot;Öppna med&quot;</translation>
-    </message>
-    <message>
-        <source>Integrate Fernschreiber into open-with menu of Sailfish OS</source>
-        <translation>Integrera Fernschreiber med menyn &quot;Öppna med&quot;, i Sailfish OS</translation>
     </message>
     <message>
         <source>Notification feedback</source>
@@ -1596,10 +1632,6 @@
     <message>
         <source>Enable notification sounds</source>
         <translation>Aktivera aviseringsljud</translation>
-    </message>
-    <message>
-        <source>When sounds are enabled, Fernschreiber will use the current Sailfish OS notification sound for chats, which can be configured in the system settings.</source>
-        <translation>När ljud är aktiverat, använder Fernschreiber aktuell Sailfish-signal för chatt-avisering, vilken kan ställas in i systemets ljudinställningar.</translation>
     </message>
     <message>
         <source>Always append message preview to notifications</source>
@@ -1652,6 +1684,18 @@
     <message>
         <source>Automatically play animated GIFs. On some devices, this has been known to cause crashes in the media subsystem; turn this off if you experience that.</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>GTgram will wait a bit before messages are marked as read</source>
+        <translation>GTgram väntar en stund innan meddelanden markeras som lästa</translation>
+    </message>
+    <message>
+        <source>Integrate GTgram into open-with menu of Sailfish OS</source>
+        <translation>Integrera GTgram med menyn &quot;Öppna med&quot;, i Sailfish OS</translation>
+    </message>
+    <message>
+        <source>When sounds are enabled, GTgram will use the current Sailfish OS notification sound for chats, which can be configured in the system settings.</source>
+        <translation>När ljud är aktiverat, använder GTgram aktuell Sailfish-signal för chatt-avisering, vilken kan ställas in i systemets ljudinställningar.</translation>
     </message>
 </context>
 <context>
@@ -1809,12 +1853,12 @@
         <translation>Aktivera endast-online-läge</translation>
     </message>
     <message>
-        <source>Disables offline caching. Certain features may be limited or missing in this mode. Changes require a restart of Fernschreiber to take effect.</source>
-        <translation>Inaktiverar cachelagring offline. Vissa funktioner kan vara begränsade eller saknas helt i det här läget. Ändringar kräver omstart av Fernschreiber för att träda i kraft.</translation>
-    </message>
-    <message>
         <source>Enable storage optimizer</source>
         <translation>Aktivera lagringsoptimering</translation>
+    </message>
+    <message>
+        <source>Disables offline caching. Certain features may be limited or missing in this mode. Changes require a restart of GTgram to take effect.</source>
+        <translation>Inaktiverar cachelagring offline. Vissa funktioner kan vara begränsade eller saknas helt i det här läget. Ändringar kräver omstart av GTgram för att träda i kraft.</translation>
     </message>
 </context>
 <context>

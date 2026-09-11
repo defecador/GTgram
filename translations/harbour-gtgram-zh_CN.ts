@@ -4,24 +4,12 @@
 <context>
     <name>AboutPage</name>
     <message>
-        <source>About Fernschreiber</source>
-        <translation>关于 Fernschreiber</translation>
-    </message>
-    <message>
         <source>A Telegram client for Sailfish OS</source>
         <translation>一个旗鱼系统 Telegram 客户端</translation>
     </message>
     <message>
-        <source>Send E-Mail</source>
-        <translation>发送电子邮件</translation>
-    </message>
-    <message>
         <source>Licensed under GNU GPLv3</source>
         <translation>采用 GNU GPLv3 许可证</translation>
-    </message>
-    <message>
-        <source>Sources on GitHub</source>
-        <translation>源代码位于 GitHub</translation>
     </message>
     <message>
         <source>Terms of Service</source>
@@ -64,10 +52,6 @@
         <translation>打开位于 Github 的 Twemoji 页面</translation>
     </message>
     <message>
-        <source>By Sebastian J. Wolf and &lt;a href=&quot;https://github.com/Wunderfitz/harbour-fernschreiber#contributions&quot;&gt;other contributors&lt;/a&gt;</source>
-        <translation>开发者 Sebastian J. Wolf 及  &lt;a href=&quot;https://github.com/Wunderfitz/harbour-fernschreiber#contributions&quot;&gt;其它贡献者&lt;/a&gt;</translation>
-    </message>
-    <message>
         <source>This project uses rlottie. Copyright 2020 Samsung Electronics Co., Ltd. and other contributors. Thanks for making it available under the conditions of the MIT License!</source>
         <translation>该项目使用 rlottie 版权所有 2020 三星电子有限责任公司。感谢使它在 MIT 许可证下可用。</translation>
     </message>
@@ -82,6 +66,22 @@
     <message>
         <source>Open OSM Nominatim Wiki</source>
         <translation>打开 OSM Nominatim Wiki</translation>
+    </message>
+    <message>
+        <source>About GTgram</source>
+        <translation>关于 GTgram</translation>
+    </message>
+    <message>
+        <source>By %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Based on %1, © 2020 Sebastian J. Wolf and %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>other contributors</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -418,10 +418,6 @@
         <translation>位置:正在获取位置…</translation>
     </message>
     <message>
-        <source>Copy Message to Clipboard</source>
-        <translation>复制消息到剪切板</translation>
-    </message>
-    <message>
         <source>Message unpinned</source>
         <translation>已取消置顶消息</translation>
     </message>
@@ -479,6 +475,29 @@
     </message>
     <message>
         <source>Obtaining Position...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Forward %Ln messages silently</source>
+        <comment>dialog header</comment>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Forward Silently</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No other chats with unread messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Next unread chat</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -609,7 +628,17 @@
     </message>
 </context>
 <context>
-    <name>FernschreiberUtils</name>
+    <name>FullscreenOverlay</name>
+    <message numerus="yes">
+        <source>Forward %Ln messages</source>
+        <comment>dialog header</comment>
+        <translation type="unfinished">
+            <numerusform>转发 %Ln 则消息</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>GTgramUtils</name>
     <message>
         <source>sent a picture</source>
         <comment>myself</comment>
@@ -895,16 +924,6 @@
     </message>
 </context>
 <context>
-    <name>FullscreenOverlay</name>
-    <message numerus="yes">
-        <source>Forward %Ln messages</source>
-        <comment>dialog header</comment>
-        <translation type="unfinished">
-            <numerusform>转发 %Ln 则消息</numerusform>
-        </translation>
-    </message>
-</context>
-<context>
     <name>ImagePage</name>
     <message>
         <source>Download Picture</source>
@@ -939,10 +958,6 @@
     <message>
         <source>OK</source>
         <translation>确认</translation>
-    </message>
-    <message>
-        <source>Welcome to Fernschreiber!</source>
-        <translation>欢迎使用 Fernschreiber ！</translation>
     </message>
     <message>
         <source>Please enter your phone number to continue.</source>
@@ -997,8 +1012,12 @@
         <translation>请使用国际区号格式，例如 %1</translation>
     </message>
     <message>
-        <source>About Fernschreiber</source>
-        <translation>关于 Fernschreiber</translation>
+        <source>About GTgram</source>
+        <translation>关于 GTgram</translation>
+    </message>
+    <message>
+        <source>Welcome to GTgram!</source>
+        <translation>欢迎使用 GTgram ！</translation>
     </message>
 </context>
 <context>
@@ -1032,16 +1051,20 @@
         <translation>已删除消息</translation>
     </message>
     <message>
-        <source>Copy Message to Clipboard</source>
-        <translation>复制消息到剪切板</translation>
-    </message>
-    <message>
         <source>Forward Message</source>
         <translation>转发消息</translation>
     </message>
     <message>
         <source>Delete Message</source>
         <translation>删除消息</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Forward Silently</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1178,17 +1201,13 @@
             <numerusform>%Ln 则未读消息</numerusform>
         </translation>
     </message>
+    <message>
+        <source>Reply</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>OverviewPage</name>
-    <message>
-        <source>About Fernschreiber</source>
-        <translation>关于 Fernschreiber</translation>
-    </message>
-    <message>
-        <source>Fernschreiber</source>
-        <translation>Fernschreiber</translation>
-    </message>
     <message>
         <source>Waiting for network...</source>
         <translation>等候网络连接…</translation>
@@ -1256,6 +1275,30 @@
     <message>
         <source>Unable to open link.</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>GTgram</source>
+        <translation>GTgram</translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Private</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation type="unfinished">群组</translation>
+    </message>
+    <message>
+        <source>Channels</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>About GTgram</source>
+        <translation>关于 GTgram</translation>
     </message>
 </context>
 <context>
@@ -1531,16 +1574,8 @@
         <translation>标记消息已读前延迟</translation>
     </message>
     <message>
-        <source>Fernschreiber will wait a bit before messages are marked as read</source>
-        <translation>Fernschreiber 将会在标记消息已读之前延迟一下</translation>
-    </message>
-    <message>
         <source>Open-with menu integration</source>
         <translation>整合打开方式菜单</translation>
-    </message>
-    <message>
-        <source>Integrate Fernschreiber into open-with menu of Sailfish OS</source>
-        <translation>整合 Fernschreiber 到旗鱼系统打开方式菜单</translation>
     </message>
     <message>
         <source>Notification feedback</source>
@@ -1569,10 +1604,6 @@
     <message>
         <source>Enable notification sounds</source>
         <translation>开启通知声音</translation>
-    </message>
-    <message>
-        <source>When sounds are enabled, Fernschreiber will use the current Sailfish OS notification sound for chats, which can be configured in the system settings.</source>
-        <translation>如果开启声音，Fernschreiber 会采用当前旗鱼系统通知声音作为对话通知声音，你可以在系统设置进行配置。</translation>
     </message>
     <message>
         <source>Always append message preview to notifications</source>
@@ -1625,6 +1656,18 @@
     <message>
         <source>Automatically play animated GIFs. On some devices, this has been known to cause crashes in the media subsystem; turn this off if you experience that.</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>GTgram will wait a bit before messages are marked as read</source>
+        <translation>GTgram 将会在标记消息已读之前延迟一下</translation>
+    </message>
+    <message>
+        <source>Integrate GTgram into open-with menu of Sailfish OS</source>
+        <translation>整合 GTgram 到旗鱼系统打开方式菜单</translation>
+    </message>
+    <message>
+        <source>When sounds are enabled, GTgram will use the current Sailfish OS notification sound for chats, which can be configured in the system settings.</source>
+        <translation>如果开启声音，GTgram 会采用当前旗鱼系统通知声音作为对话通知声音，你可以在系统设置进行配置。</translation>
     </message>
 </context>
 <context>
@@ -1781,12 +1824,12 @@
         <translation>开启仅在线模式</translation>
     </message>
     <message>
-        <source>Disables offline caching. Certain features may be limited or missing in this mode. Changes require a restart of Fernschreiber to take effect.</source>
-        <translation>禁用离线缓存。某些特定功能会在此模式中受限或消失。切换模式需要重启 fernschreiber 才能生效。</translation>
-    </message>
-    <message>
         <source>Enable storage optimizer</source>
         <translation>开启储存加速器</translation>
+    </message>
+    <message>
+        <source>Disables offline caching. Certain features may be limited or missing in this mode. Changes require a restart of GTgram to take effect.</source>
+        <translation>禁用离线缓存。某些特定功能会在此模式中受限或消失。切换模式需要重启 GTgram 才能生效。</translation>
     </message>
 </context>
 <context>

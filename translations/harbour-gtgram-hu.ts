@@ -4,24 +4,12 @@
 <context>
     <name>AboutPage</name>
     <message>
-        <source>About Fernschreiber</source>
-        <translation>A Fernschreiber névjegye</translation>
-    </message>
-    <message>
         <source>A Telegram client for Sailfish OS</source>
         <translation>Sailfish OS Telegram kliens</translation>
     </message>
     <message>
-        <source>Send E-Mail</source>
-        <translation>E-mail küldés</translation>
-    </message>
-    <message>
         <source>Licensed under GNU GPLv3</source>
         <translation>A GNU GPLv3 licensz által engedélyezve</translation>
-    </message>
-    <message>
-        <source>Sources on GitHub</source>
-        <translation>Forráskód a GitHub-on</translation>
     </message>
     <message>
         <source>Terms of Service</source>
@@ -64,10 +52,6 @@
         <translation>twemoji megnyitása a GitHubon</translation>
     </message>
     <message>
-        <source>By Sebastian J. Wolf and &lt;a href=&quot;https://github.com/Wunderfitz/harbour-fernschreiber#contributions&quot;&gt;other contributors&lt;/a&gt;</source>
-        <translation>Sebastian J. Wolf és &lt;a href=&quot;https://github.com/Wunderfitz/harbour-fernschreiber#contributions&quot;&gt;más hozzájárulóktól&lt;/a&gt;</translation>
-    </message>
-    <message>
         <source>This project uses rlottie. Copyright 2020 Samsung Electronics Co., Ltd. and other contributors. Thanks for making it available under the conditions of the MIT License!</source>
         <translation>Ez a projekt rlottie-t használ. Copyright 2020 Samsung Electronics Co., Ltd. és más hozzájárulók. Köszönjük, hogy elérhetővé tették aZ MIT Licenc feltételei alatt!</translation>
     </message>
@@ -82,6 +66,22 @@
     <message>
         <source>Open OSM Nominatim Wiki</source>
         <translation>OSM Nominatim Wiki megnyitása</translation>
+    </message>
+    <message>
+        <source>About GTgram</source>
+        <translation>A GTgram névjegye</translation>
+    </message>
+    <message>
+        <source>By %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Based on %1, © 2020 Sebastian J. Wolf and %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>other contributors</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -420,10 +420,6 @@
         <translation>Helyzet elérése...</translation>
     </message>
     <message>
-        <source>Copy Message to Clipboard</source>
-        <translation>Üzenet másolása vágólapra</translation>
-    </message>
-    <message>
         <source>Message unpinned</source>
         <translation>Üzenet rögzítése feloldva</translation>
     </message>
@@ -481,6 +477,29 @@
     </message>
     <message>
         <source>Obtaining Position...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Forward %Ln messages silently</source>
+        <comment>dialog header</comment>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Forward Silently</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No other chats with unread messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Next unread chat</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -610,7 +629,17 @@
     </message>
 </context>
 <context>
-    <name>FernschreiberUtils</name>
+    <name>FullscreenOverlay</name>
+    <message numerus="yes">
+        <source>Forward %Ln messages</source>
+        <comment>dialog header</comment>
+        <translation>
+            <numerusform>%Ln üzenet továbbítása</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>GTgramUtils</name>
     <message>
         <source>sent a picture</source>
         <comment>myself</comment>
@@ -896,16 +925,6 @@
     </message>
 </context>
 <context>
-    <name>FullscreenOverlay</name>
-    <message numerus="yes">
-        <source>Forward %Ln messages</source>
-        <comment>dialog header</comment>
-        <translation>
-            <numerusform>%Ln üzenet továbbítása</numerusform>
-        </translation>
-    </message>
-</context>
-<context>
     <name>ImagePage</name>
     <message>
         <source>Download Picture</source>
@@ -940,10 +959,6 @@
     <message>
         <source>OK</source>
         <translation>Rendben</translation>
-    </message>
-    <message>
-        <source>Welcome to Fernschreiber!</source>
-        <translation>Üdvözöl a Fernschreiber!</translation>
     </message>
     <message>
         <source>Please enter your phone number to continue.</source>
@@ -998,8 +1013,12 @@
         <translation>Nemzetközi formátum használata, pl. %1</translation>
     </message>
     <message>
-        <source>About Fernschreiber</source>
-        <translation>A Fernschreiber névjegye</translation>
+        <source>About GTgram</source>
+        <translation>A GTgram névjegye</translation>
+    </message>
+    <message>
+        <source>Welcome to GTgram!</source>
+        <translation>Üdvözöl a GTgram!</translation>
     </message>
 </context>
 <context>
@@ -1033,16 +1052,20 @@
         <translation>Üzenet törölve</translation>
     </message>
     <message>
-        <source>Copy Message to Clipboard</source>
-        <translation>Üzenet másolása vágólapra</translation>
-    </message>
-    <message>
         <source>Forward Message</source>
         <translation>Üzenet továbbítása</translation>
     </message>
     <message>
         <source>Delete Message</source>
         <translation>Üzenet törlése</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Forward Silently</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1182,17 +1205,13 @@
             <numerusform>%Ln olvasatlan üzenet</numerusform>
         </translation>
     </message>
+    <message>
+        <source>Reply</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>OverviewPage</name>
-    <message>
-        <source>About Fernschreiber</source>
-        <translation>A Fernschreiber névjegye</translation>
-    </message>
-    <message>
-        <source>Fernschreiber</source>
-        <translation>Fernschreiber</translation>
-    </message>
     <message>
         <source>Waiting for network...</source>
         <translation>Hálózatra várakozás...</translation>
@@ -1260,6 +1279,30 @@
     <message>
         <source>Unable to open link.</source>
         <translation>Nem sikerült megnyitni a linket.</translation>
+    </message>
+    <message>
+        <source>GTgram</source>
+        <translation>GTgram</translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Private</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation type="unfinished">Csoportjaitok</translation>
+    </message>
+    <message>
+        <source>Channels</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>About GTgram</source>
+        <translation>A GTgram névjegye</translation>
     </message>
 </context>
 <context>
@@ -1535,16 +1578,8 @@
         <translation>Késleltetett üzenet olvasottként megjelölése</translation>
     </message>
     <message>
-        <source>Fernschreiber will wait a bit before messages are marked as read</source>
-        <translation>Fernschreiber várni fog egy kicsit, mielőtt megjelöli az üzeneteket olvasottként</translation>
-    </message>
-    <message>
         <source>Open-with menu integration</source>
         <translation>Megnyitás-ezzel menü integráció</translation>
-    </message>
-    <message>
-        <source>Integrate Fernschreiber into open-with menu of Sailfish OS</source>
-        <translation>Fernschreiber integrálása a Sailfish OS megnyitás-ezzel menüjébe</translation>
     </message>
     <message>
         <source>Notification feedback</source>
@@ -1573,10 +1608,6 @@
     <message>
         <source>Enable notification sounds</source>
         <translation>Értesítés hangok bekapcsolása</translation>
-    </message>
-    <message>
-        <source>When sounds are enabled, Fernschreiber will use the current Sailfish OS notification sound for chats, which can be configured in the system settings.</source>
-        <translation>Mikor a hangok be vannak kapcsolva, a Fernschreiber a jelenlegi Sailfish OS értesítés hangokat fogja hasnálni a csevegésekhez, amelyet a rendszerbeállításokban lehet személyre szabni.</translation>
     </message>
     <message>
         <source>Always append message preview to notifications</source>
@@ -1629,6 +1660,18 @@
     <message>
         <source>Automatically play animated GIFs. On some devices, this has been known to cause crashes in the media subsystem; turn this off if you experience that.</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>GTgram will wait a bit before messages are marked as read</source>
+        <translation>GTgram várni fog egy kicsit, mielőtt megjelöli az üzeneteket olvasottként</translation>
+    </message>
+    <message>
+        <source>Integrate GTgram into open-with menu of Sailfish OS</source>
+        <translation>GTgram integrálása a Sailfish OS megnyitás-ezzel menüjébe</translation>
+    </message>
+    <message>
+        <source>When sounds are enabled, GTgram will use the current Sailfish OS notification sound for chats, which can be configured in the system settings.</source>
+        <translation>Mikor a hangok be vannak kapcsolva, a GTgram a jelenlegi Sailfish OS értesítés hangokat fogja hasnálni a csevegésekhez, amelyet a rendszerbeállításokban lehet személyre szabni.</translation>
     </message>
 </context>
 <context>
@@ -1785,12 +1828,12 @@
         <translation>Csak-online mód bekapcsolása</translation>
     </message>
     <message>
-        <source>Disables offline caching. Certain features may be limited or missing in this mode. Changes require a restart of Fernschreiber to take effect.</source>
-        <translation>Kikapcsolja az offline gyorsítótárazást. Néhány lehetőség korlátozódhat vagy hiányozhat ebben a módban. A változás életbelépéséhez a Fernschreiber újraindítása szükséges.</translation>
-    </message>
-    <message>
         <source>Enable storage optimizer</source>
         <translation>Tárhely optimalizáló bekapcsolása</translation>
+    </message>
+    <message>
+        <source>Disables offline caching. Certain features may be limited or missing in this mode. Changes require a restart of GTgram to take effect.</source>
+        <translation>Kikapcsolja az offline gyorsítótárazást. Néhány lehetőség korlátozódhat vagy hiányozhat ebben a módban. A változás életbelépéséhez a GTgram újraindítása szükséges.</translation>
     </message>
 </context>
 <context>

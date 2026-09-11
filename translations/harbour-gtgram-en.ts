@@ -4,24 +4,12 @@
 <context>
     <name>AboutPage</name>
     <message>
-        <source>About Fernschreiber</source>
-        <translation>About Fernschreiber</translation>
-    </message>
-    <message>
         <source>A Telegram client for Sailfish OS</source>
         <translation>A Telegram client for Sailfish OS</translation>
     </message>
     <message>
-        <source>Send E-Mail</source>
-        <translation>Send E-Mail</translation>
-    </message>
-    <message>
         <source>Licensed under GNU GPLv3</source>
         <translation>Licensed under GNU GPLv3</translation>
-    </message>
-    <message>
-        <source>Sources on GitHub</source>
-        <translation>Sources on GitHub</translation>
     </message>
     <message>
         <source>Terms of Service</source>
@@ -64,10 +52,6 @@
         <translation>Open twemoji on GitHub</translation>
     </message>
     <message>
-        <source>By Sebastian J. Wolf and &lt;a href=&quot;https://github.com/Wunderfitz/harbour-fernschreiber#contributions&quot;&gt;other contributors&lt;/a&gt;</source>
-        <translation>By Sebastian J. Wolf and &lt;a href=&quot;https://github.com/Wunderfitz/harbour-fernschreiber#contributions&quot;&gt;other contributors&lt;/a&gt;</translation>
-    </message>
-    <message>
         <source>This project uses rlottie. Copyright 2020 Samsung Electronics Co., Ltd. and other contributors. Thanks for making it available under the conditions of the MIT License!</source>
         <translation>This project uses rlottie. Copyright 2020 Samsung Electronics Co., Ltd. and other contributors. Thanks for making it available under the conditions of the MIT License!</translation>
     </message>
@@ -82,6 +66,22 @@
     <message>
         <source>Open OSM Nominatim Wiki</source>
         <translation>Open OSM Nominatim Wiki</translation>
+    </message>
+    <message>
+        <source>About GTgram</source>
+        <translation>About GTgram</translation>
+    </message>
+    <message>
+        <source>By %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Based on %1, © 2020 Sebastian J. Wolf and %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>other contributors</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -428,10 +428,6 @@
         <translation>Location: Obtaining position...</translation>
     </message>
     <message>
-        <source>Copy Message to Clipboard</source>
-        <translation>Copy Message to Clipboard</translation>
-    </message>
-    <message>
         <source>Message unpinned</source>
         <translation>Message unpinned</translation>
     </message>
@@ -489,6 +485,30 @@
     </message>
     <message>
         <source>Obtaining Position...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Forward %Ln messages silently</source>
+        <comment>dialog header</comment>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Forward Silently</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No other chats with unread messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Next unread chat</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -622,7 +642,18 @@ messages</numerusform>
     </message>
 </context>
 <context>
-    <name>FernschreiberUtils</name>
+    <name>FullscreenOverlay</name>
+    <message numerus="yes">
+        <source>Forward %Ln messages</source>
+        <comment>dialog header</comment>
+        <translation>
+            <numerusform>Forward %Ln message</numerusform>
+            <numerusform>Forward %Ln messages</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>GTgramUtils</name>
     <message>
         <source>sent a picture</source>
         <comment>myself</comment>
@@ -910,17 +941,6 @@ messages</numerusform>
     </message>
 </context>
 <context>
-    <name>FullscreenOverlay</name>
-    <message numerus="yes">
-        <source>Forward %Ln messages</source>
-        <comment>dialog header</comment>
-        <translation>
-            <numerusform>Forward %Ln message</numerusform>
-            <numerusform>Forward %Ln messages</numerusform>
-        </translation>
-    </message>
-</context>
-<context>
     <name>ImagePage</name>
     <message>
         <source>Download Picture</source>
@@ -955,10 +975,6 @@ messages</numerusform>
     <message>
         <source>OK</source>
         <translation>OK</translation>
-    </message>
-    <message>
-        <source>Welcome to Fernschreiber!</source>
-        <translation>Welcome to Fernschreiber!</translation>
     </message>
     <message>
         <source>Please enter your phone number to continue.</source>
@@ -1013,8 +1029,12 @@ messages</numerusform>
         <translation>Use the international format, e.g. %1</translation>
     </message>
     <message>
-        <source>About Fernschreiber</source>
-        <translation>About Fernschreiber</translation>
+        <source>About GTgram</source>
+        <translation>About GTgram</translation>
+    </message>
+    <message>
+        <source>Welcome to GTgram!</source>
+        <translation>Welcome to GTgram!</translation>
     </message>
 </context>
 <context>
@@ -1048,16 +1068,20 @@ messages</numerusform>
         <translation>Message deleted</translation>
     </message>
     <message>
-        <source>Copy Message to Clipboard</source>
-        <translation>Copy Message to Clipboard</translation>
-    </message>
-    <message>
         <source>Forward Message</source>
         <translation>Forward Message</translation>
     </message>
     <message>
         <source>Delete Message</source>
         <translation>Delete Message</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Forward Silently</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1199,17 +1223,13 @@ messages</numerusform>
             <numerusform>%Ln unread messages</numerusform>
         </translation>
     </message>
+    <message>
+        <source>Reply</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>OverviewPage</name>
-    <message>
-        <source>About Fernschreiber</source>
-        <translation>About Fernschreiber</translation>
-    </message>
-    <message>
-        <source>Fernschreiber</source>
-        <translation>Fernschreiber</translation>
-    </message>
     <message>
         <source>Waiting for network...</source>
         <translation>Waiting for network...</translation>
@@ -1277,6 +1297,30 @@ messages</numerusform>
     <message>
         <source>Unable to open link.</source>
         <translation>Unable to open link.</translation>
+    </message>
+    <message>
+        <source>GTgram</source>
+        <translation>GTgram</translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Private</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation type="unfinished">Groups</translation>
+    </message>
+    <message>
+        <source>Channels</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>About GTgram</source>
+        <translation>About GTgram</translation>
     </message>
 </context>
 <context>
@@ -1560,16 +1604,8 @@ messages</numerusform>
         <translation>Delay before marking messages as read</translation>
     </message>
     <message>
-        <source>Fernschreiber will wait a bit before messages are marked as read</source>
-        <translation>Fernschreiber will wait a bit before messages are marked as read</translation>
-    </message>
-    <message>
         <source>Open-with menu integration</source>
         <translation>Open-with menu integration</translation>
-    </message>
-    <message>
-        <source>Integrate Fernschreiber into open-with menu of Sailfish OS</source>
-        <translation>Integrate Fernschreiber into open-with menu of Sailfish OS</translation>
     </message>
     <message>
         <source>Notification feedback</source>
@@ -1598,10 +1634,6 @@ messages</numerusform>
     <message>
         <source>Enable notification sounds</source>
         <translation>Enable notification sounds</translation>
-    </message>
-    <message>
-        <source>When sounds are enabled, Fernschreiber will use the current Sailfish OS notification sound for chats, which can be configured in the system settings.</source>
-        <translation>When sounds are enabled, Fernschreiber will use the current Sailfish OS notification sound for chats, which can be configured in the system settings.</translation>
     </message>
     <message>
         <source>Always append message preview to notifications</source>
@@ -1654,6 +1686,18 @@ messages</numerusform>
     <message>
         <source>Automatically play animated GIFs. On some devices, this has been known to cause crashes in the media subsystem; turn this off if you experience that.</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>GTgram will wait a bit before messages are marked as read</source>
+        <translation>GTgram will wait a bit before messages are marked as read</translation>
+    </message>
+    <message>
+        <source>Integrate GTgram into open-with menu of Sailfish OS</source>
+        <translation>Integrate GTgram into open-with menu of Sailfish OS</translation>
+    </message>
+    <message>
+        <source>When sounds are enabled, GTgram will use the current Sailfish OS notification sound for chats, which can be configured in the system settings.</source>
+        <translation>When sounds are enabled, GTgram will use the current Sailfish OS notification sound for chats, which can be configured in the system settings.</translation>
     </message>
 </context>
 <context>
@@ -1811,12 +1855,12 @@ messages</numerusform>
         <translation>Enable online-only mode</translation>
     </message>
     <message>
-        <source>Disables offline caching. Certain features may be limited or missing in this mode. Changes require a restart of Fernschreiber to take effect.</source>
-        <translation>Disables offline caching. Certain features may be limited or missing in this mode. Changes require a restart of Fernschreiber to take effect.</translation>
-    </message>
-    <message>
         <source>Enable storage optimizer</source>
         <translation>Enable storage optimizer</translation>
+    </message>
+    <message>
+        <source>Disables offline caching. Certain features may be limited or missing in this mode. Changes require a restart of GTgram to take effect.</source>
+        <translation>Disables offline caching. Certain features may be limited or missing in this mode. Changes require a restart of GTgram to take effect.</translation>
     </message>
 </context>
 <context>
