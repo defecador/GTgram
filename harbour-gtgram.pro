@@ -284,7 +284,8 @@ SOURCES += \
     rlottie/src/lottie/lottiekeypath.cpp \
     rlottie/src/lottie/lottieloader.cpp \
     rlottie/src/lottie/lottiemodel.cpp \
-    rlottie/src/lottie/lottieparser.cpp
+    rlottie/src/lottie/lottieparser.cpp \
+    rlottie/src/lottie/zip/zip.cpp
 
 SOURCES += \
     rlottie/src/vector/freetype/v_ft_math.cpp \
