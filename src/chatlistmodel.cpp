@@ -459,6 +459,7 @@ QHash<int,QByteArray> ChatListModel::roleNames() const
     roles.insert(ChatListModel::RoleFilter, "filter");
     roles.insert(ChatListModel::RoleDraftMessageDate, "draft_message_date");
     roles.insert(ChatListModel::RoleDraftMessageText, "draft_message_text");
+    roles.insert(ChatListModel::RoleChatCategory, "chatcategory");
     return roles;
 }
 
@@ -495,6 +496,14 @@ QVariant ChatListModel::data(const QModelIndex &index, int role) const
         case ChatListModel::RoleIsMarkedAsUnread: return data->isMarkedAsUnread();
         case ChatListModel::RoleIsPinned: return data->isPinned();
         case ChatListModel::RoleFilter: return data->title() + " " + data->senderMessageText();
+        case ChatListModel::RoleChatCategory:
+            switch (data->chatType) {
+            case TDLibWrapper::ChatTypeBasicGroup: return QStringLiteral("group");
+            case TDLibWrapper::ChatTypeSupergroup: return data->isChannel() ? QStringLiteral("channel") : QStringLiteral("group");
+            case TDLibWrapper::ChatTypePrivate:
+            case TDLibWrapper::ChatTypeSecret:
+            default: return QStringLiteral("private");
+            }
         case ChatListModel::RoleDraftMessageText: return data->draftMessageText();
         case ChatListModel::RoleDraftMessageDate: return data->draftMessageDate();
         }

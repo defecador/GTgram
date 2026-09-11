@@ -103,9 +103,18 @@ Page {
         }
     }
 
+    property string categoryFilter: ""
+
+    TextFilterModel {
+        id: chatCategoryModel
+        sourceModel: overviewPage.categoryFilter === "" ? null : chatListModel
+        filterRoleName: "chatcategory"
+        filterText: overviewPage.categoryFilter
+    }
+
     TextFilterModel {
         id: chatListProxyModel
-        sourceModel: (chatSearchField.opacity > 0) ? chatListModel : null
+        sourceModel: (chatSearchField.opacity > 0) ? (chatCategoryModel.sourceModel ? chatCategoryModel : chatListModel) : null
         filterRoleName: "filter"
         filterText: chatSearchField.text
     }
@@ -388,10 +397,52 @@ Page {
             }
         }
 
+        Row {
+            id: categoryTabs
+            anchors {
+                top: pageHeader.bottom
+                left: parent.left
+                right: parent.right
+            }
+            height: Theme.itemSizeSmall
+            visible: overviewPage.chatListCreated && !overviewPage.logoutLoading
+            opacity: visible ? 1 : 0
+            Behavior on opacity { FadeAnimation {} }
+            property var tabs: [
+                { key: "", label: qsTr("All") },
+                { key: "private", label: qsTr("Private") },
+                { key: "group", label: qsTr("Groups") },
+                { key: "channel", label: qsTr("Channels") }
+            ]
+            Repeater {
+                model: categoryTabs.tabs
+                delegate: BackgroundItem {
+                    width: categoryTabs.width / categoryTabs.tabs.length
+                    height: categoryTabs.height
+                    onClicked: overviewPage.categoryFilter = modelData.key
+                    Label {
+                        anchors.centerIn: parent
+                        text: modelData.label
+                        font.pixelSize: Theme.fontSizeSmall
+                        color: overviewPage.categoryFilter === modelData.key
+                               ? Theme.highlightColor
+                               : (highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor)
+                    }
+                    Rectangle {
+                        anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter }
+                        width: parent.width * 0.55
+                        height: 3
+                        color: Theme.highlightColor
+                        visible: overviewPage.categoryFilter === modelData.key
+                    }
+                }
+            }
+        }
+
         SilicaListView {
             id: chatListView
             anchors {
-                top: pageHeader.bottom
+                top: categoryTabs.visible ? categoryTabs.bottom : pageHeader.bottom
                 bottom: parent.bottom
                 left: parent.left
                 right: parent.right
@@ -399,7 +450,8 @@ Page {
             clip: true
             opacity: (overviewPage.chatListCreated && !overviewPage.logoutLoading) ? 1 : 0
             Behavior on opacity { FadeAnimation {} }
-            model: chatListProxyModel.sourceModel ? chatListProxyModel : chatListModel
+            model: chatListProxyModel.sourceModel ? chatListProxyModel
+                 : (chatCategoryModel.sourceModel ? chatCategoryModel : chatListModel)
             move: Transition {
                 NumberAnimation { properties: "y"; duration: 200; easing.type: Easing.InOutCubic }
             }

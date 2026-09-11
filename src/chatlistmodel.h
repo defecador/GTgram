@@ -56,7 +56,8 @@ public:
         RoleIsPinned,
         RoleFilter,
         RoleDraftMessageText,
-        RoleDraftMessageDate
+        RoleDraftMessageDate,
+        RoleChatCategory
     };
 
     ChatListModel(TDLibWrapper *tdLibWrapper, AppSettings *appSettings);
