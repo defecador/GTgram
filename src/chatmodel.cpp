@@ -55,6 +55,24 @@ namespace {
     const QString REACTIONS("reactions");
 
     const QString TYPE_SPONSORED_MESSAGE("sponsoredMessage");
+
+    // Older TDLib sent "reactions" as the list of messageReaction objects itself.
+    // Newer versions, including the bundled 1.8.62, wrap that list in an object:
+    //
+    // "reactions": {
+    //     "@type": "messageReactions",
+    //     "reactions": [ { "@type": "messageReaction", "type": { ... }, "total_count": 1, "is_chosen": true } ],
+    //     "are_tags": false
+    // }
+    const QString TYPE_MESSAGE_REACTIONS("messageReactions");
+
+    QVariantList reactionList(const QVariantMap &interactionInfo)
+    {
+        const QVariant reactions(interactionInfo.value(REACTIONS));
+        const QVariantMap wrapper(reactions.toMap());
+        return (wrapper.value(_TYPE).toString() == TYPE_MESSAGE_REACTIONS) ?
+            wrapper.value(REACTIONS).toList() : reactions.toList();
+    }
 }
 
 class ChatModel::MessageData
@@ -124,7 +142,7 @@ ChatModel::MessageData::MessageData(const QVariantMap &data, qlonglong msgid) :
     messageType(data.value(_TYPE).toString()),
     messageContentType(data.value(CONTENT).toMap().value(_TYPE).toString()),
     viewCount(data.value(INTERACTION_INFO).toMap().value(VIEW_COUNT).toInt()),
-    reactions(data.value(INTERACTION_INFO).toMap().value(REACTIONS).toList()),
+    reactions(reactionList(data.value(INTERACTION_INFO).toMap())),
     albumEntryFilter(false),
     albumMessageIds(QVariantList())
 {
@@ -259,7 +277,7 @@ uint ChatModel::MessageData::updateReactions(const QVariantMap &interactionInfo)
 {
     LOG("Updating reactions...");
     const QVariantList oldReactions = reactions;
-    reactions = interactionInfo.value(REACTIONS).toList();
+    reactions = reactionList(interactionInfo);
     return (reactions == oldReactions) ? 0 : RoleFlagMessageReactions;
 }
 
