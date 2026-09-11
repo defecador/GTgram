@@ -53,6 +53,7 @@ namespace {
     const QString INTERACTION_INFO("interaction_info");
     const QString VIEW_COUNT("view_count");
     const QString REACTIONS("reactions");
+    const QString SCHEDULING_STATE("scheduling_state");
 
     const QString TYPE_SPONSORED_MESSAGE("sponsoredMessage");
 
@@ -648,6 +649,12 @@ void ChatModel::handleNewMessageReceived(qlonglong chatId, const QVariantMap &me
 {
     const qlonglong messageId = message.value(ID).toLongLong();
     if (chatId == this->chatId && !messageIndexMap.contains(messageId)) {
+        if (!message.value(SCHEDULING_STATE).toMap().isEmpty()) {
+            // A scheduled message is announced like a new one, but only joins the chat once it
+            // is actually sent - TDLib then deletes this copy and adds the real message
+            LOG("Ignoring scheduled message" << messageId);
+            return;
+        }
         if (this->isMostRecentMessageLoaded() && !this->searchModeActive) {
             LOG("New message received for this chat");
             QList<MessageData*> messagesToBeAdded;

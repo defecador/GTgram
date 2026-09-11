@@ -160,6 +160,7 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("updateSupergroupFullInfo", &TDLibReceiver::processUpdateSupergroupFullInfo);
     handlers.insert("chatPhotos", &TDLibReceiver::processUserProfilePhotos);
     handlers.insert("updateChatPermissions", &TDLibReceiver::processUpdateChatPermissions);
+    handlers.insert("updateChatHasScheduledMessages", &TDLibReceiver::processUpdateChatHasScheduledMessages);
     handlers.insert("updateChatPhoto", &TDLibReceiver::processUpdateChatPhoto);
     handlers.insert("updateChatTitle", &TDLibReceiver::processUpdateChatTitle);
     handlers.insert("updateChatPinnedMessage", &TDLibReceiver::processUpdateChatPinnedMessage);
@@ -411,6 +412,14 @@ void TDLibReceiver::processChatOnlineMemberCountUpdated(const QVariantMap &recei
 void TDLibReceiver::processMessages(const QVariantMap &receivedInformation)
 {
     const int total_count = receivedInformation.value(TOTAL_COUNT).toInt();
+    const QString extra(receivedInformation.value(_EXTRA).toString());
+    if (extra.startsWith(QStringLiteral("getChatScheduledMessages:"))) {
+        // Same "messages" type as chat history, but these must never reach the chat model
+        const qlonglong chatId = extra.mid(extra.indexOf(':') + 1).toLongLong();
+        LOG("Received scheduled messages for chat" << chatId << ", amount: " << total_count);
+        emit scheduledMessagesReceived(chatId, cleanupList(receivedInformation.value(MESSAGES).toList()));
+        return;
+    }
     LOG("Received new messages, amount: " << total_count);
     emit messagesReceived(cleanupList(receivedInformation.value(MESSAGES).toList()), total_count);
 }
@@ -639,6 +648,11 @@ void TDLibReceiver::processUserProfilePhotos(const QVariantMap &receivedInformat
 void TDLibReceiver::processUpdateChatPermissions(const QVariantMap &receivedInformation)
 {
     emit chatPermissionsUpdated(receivedInformation.value(CHAT_ID).toString(), receivedInformation.value("permissions").toMap());
+}
+
+void TDLibReceiver::processUpdateChatHasScheduledMessages(const QVariantMap &receivedInformation)
+{
+    emit chatHasScheduledMessagesUpdated(receivedInformation.value(CHAT_ID).toString(), receivedInformation.value("has_scheduled_messages").toBool());
 }
 
 void TDLibReceiver::processUpdateChatPhoto(const QVariantMap &receivedInformation)

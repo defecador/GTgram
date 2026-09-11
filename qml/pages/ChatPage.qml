@@ -71,6 +71,18 @@ Page {
     property bool doSendBotStartMessage
     property string sendBotStartMessageParameter
     property var availableReactions
+    property int scheduledMessagesCount: 0
+    // Telegram only offers "send when online" where the other person's last seen is visible
+    readonly property bool canSendWhenOnline: {
+        var partner = chatPartnerInformation;
+        return isPrivateChat && chatInformation.id !== myUserId && !!partner && !!partner.type && !!partner.status
+            && partner.type["@type"] === "userTypeRegular"
+            && (partner.status["@type"] === "userStatusOnline" || partner.status["@type"] === "userStatusOffline");
+    }
+    readonly property bool showScheduledMessagesMenuItem: scheduledMessagesCount > 0
+    // With "send by Enter" the send button, and so its long-press, isn't there
+    readonly property bool showSendOptionsMenuItems: appSettings.sendByEnter && newMessageColumn.isNeeded
+                                                     && newMessageColumn.editMessageId === "0" && newMessageTextField.text.length > 0
     signal resetElements()
     signal elementSelected(int elementIndex)
     signal navigatedTo(int targetIndex)
@@ -196,6 +208,9 @@ Page {
         tdLibWrapper.getChatPinnedMessage(chatInformation.id);
         tdLibWrapper.toggleChatIsMarkedAsUnread(chatInformation.id, false);
         availableReactions = tdLibWrapper.getChatReactions(chatInformation.id);
+        if (!isSecretChat && canSendMessages) {
+            tdLibWrapper.getChatScheduledMessages(chatInformation.id);
+        }
     }
 
     function getMessageStatusText(message, listItemIndex, lastReadSentIndex, useElapsed) {
@@ -260,29 +275,30 @@ Page {
         }
     }
 
-    function sendMessage() {
+    function sendMessage(sendOptions) {
+        var options = sendOptions || ({});
         if (newMessageColumn.editMessageId !== "0") {
             tdLibWrapper.editMessageText(chatInformation.id, newMessageColumn.editMessageId, newMessageTextField.text);
         } else {
             if (attachmentPreviewRow.visible) {
                 if (attachmentPreviewRow.isPicture) {
-                    tdLibWrapper.sendPhotoMessage(chatInformation.id, attachmentPreviewRow.fileProperties.filePath, newMessageTextField.text, newMessageColumn.replyToMessageId);
+                    tdLibWrapper.sendPhotoMessage(chatInformation.id, attachmentPreviewRow.fileProperties.filePath, newMessageTextField.text, newMessageColumn.replyToMessageId, options);
                 }
                 if (attachmentPreviewRow.isVideo) {
-                    tdLibWrapper.sendVideoMessage(chatInformation.id, attachmentPreviewRow.fileProperties.filePath, newMessageTextField.text, newMessageColumn.replyToMessageId);
+                    tdLibWrapper.sendVideoMessage(chatInformation.id, attachmentPreviewRow.fileProperties.filePath, newMessageTextField.text, newMessageColumn.replyToMessageId, options);
                 }
                 if (attachmentPreviewRow.isDocument) {
-                    tdLibWrapper.sendDocumentMessage(chatInformation.id, attachmentPreviewRow.fileProperties.filePath, newMessageTextField.text, newMessageColumn.replyToMessageId);
+                    tdLibWrapper.sendDocumentMessage(chatInformation.id, attachmentPreviewRow.fileProperties.filePath, newMessageTextField.text, newMessageColumn.replyToMessageId, options);
                 }
                 if (attachmentPreviewRow.isVoiceNote) {
-                    tdLibWrapper.sendVoiceNoteMessage(chatInformation.id, gtgramUtils.voiceNotePath(), newMessageTextField.text, newMessageColumn.replyToMessageId);
+                    tdLibWrapper.sendVoiceNoteMessage(chatInformation.id, gtgramUtils.voiceNotePath(), newMessageTextField.text, newMessageColumn.replyToMessageId, options);
                 }
                 if (attachmentPreviewRow.isLocation) {
-                    tdLibWrapper.sendLocationMessage(chatInformation.id, attachmentPreviewRow.locationData.latitude, attachmentPreviewRow.locationData.longitude, attachmentPreviewRow.locationData.horizontalAccuracy, newMessageColumn.replyToMessageId);
+                    tdLibWrapper.sendLocationMessage(chatInformation.id, attachmentPreviewRow.locationData.latitude, attachmentPreviewRow.locationData.longitude, attachmentPreviewRow.locationData.horizontalAccuracy, newMessageColumn.replyToMessageId, options);
                 }
                 clearAttachmentPreviewRow();
             } else {
-                tdLibWrapper.sendTextMessage(chatInformation.id, newMessageTextField.text, newMessageColumn.replyToMessageId);
+                tdLibWrapper.sendTextMessage(chatInformation.id, newMessageTextField.text, newMessageColumn.replyToMessageId, options);
             }
 
             if(appSettings.focusTextAreaAfterSend) {
@@ -293,6 +309,32 @@ Page {
         newMessageInReplyToRow.inReplyToMessage = null;
         newMessageColumn.editMessageId = "0";
         gtgramUtils.stopGeoLocationUpdates();
+        sendOptionsColumn.open = false;
+    }
+
+    function sendMessageWithOptions(sendOptions) {
+        sendMessage(sendOptions);
+        newMessageTextField.text = "";
+        if(!appSettings.focusTextAreaAfterSend) {
+            newMessageTextField.focus = false;
+        }
+    }
+
+    function scheduleMessage() {
+        sendOptionsColumn.open = false;
+        var dialog = pageStack.push(Qt.resolvedUrl("ScheduleMessageDialog.qml"));
+        dialog.accepted.connect(function() {
+            var sendDate = dialog.sendTimestamp;
+            sendMessageWithOptions({ "sendDate": sendDate });
+            appNotification.show(qsTr("Message scheduled for %1").arg(Functions.getScheduledDateText(sendDate)));
+            scheduledMessagesCountTimer.restart();
+        });
+    }
+
+    function sendMessageWhenOnline() {
+        sendMessageWithOptions({ "whenOnline": true });
+        appNotification.show(qsTr("Message will be sent when %1 is online").arg(Emoji.emojify(Functions.getUserName(chatPartnerInformation), Theme.fontSizeSmall)));
+        scheduledMessagesCountTimer.restart();
     }
 
     function getWordBoundaries(text, cursorPosition) {
@@ -479,6 +521,14 @@ Page {
     }
 
     Timer {
+        id: scheduledMessagesCountTimer
+        // Telegram only reports the first scheduled message of a chat by itself, so recount
+        // shortly after scheduling another one
+        interval: 1500
+        onTriggered: tdLibWrapper.getChatScheduledMessages(chatInformation.id)
+    }
+
+    Timer {
         id: forwardMessagesTimer
         interval: 200
 
@@ -562,6 +612,16 @@ Page {
 
     Connections {
         target: tdLibWrapper
+        onScheduledMessagesReceived: {
+            if (String(chatId) === String(chatPage.chatInformation.id)) {
+                chatPage.scheduledMessagesCount = messages.length;
+            }
+        }
+        onChatHasScheduledMessagesUpdated: {
+            if (chatId === String(chatPage.chatInformation.id) && !chatPage.isSecretChat && chatPage.canSendMessages) {
+                tdLibWrapper.getChatScheduledMessages(chatPage.chatInformation.id);
+            }
+        }
         onMessagePropertiesReceived: {
             if (String(chatId) !== String(chatPage.chatInformation.id)) {
                 return;
@@ -990,11 +1050,11 @@ Page {
             contentWidth: width
 
             PullDownMenu {
-                visible: chatInformation.id !== chatPage.myUserId && !stickerPickerLoader.active && !voiceNoteOverlayLoader.active && !messageOverlayLoader.active && !stickerSetOverlayLoader.active
+                visible: (chatInformation.id !== chatPage.myUserId || chatPage.showScheduledMessagesMenuItem || chatPage.showSendOptionsMenuItems) && !stickerPickerLoader.active && !voiceNoteOverlayLoader.active && !messageOverlayLoader.active && !stickerSetOverlayLoader.active
 
                 MenuItem {
                     id: deleteChatMenuItem
-                    visible: chatPage.isPrivateChat && appSettings.showDeleteChat
+                    visible: chatPage.isPrivateChat && appSettings.showDeleteChat && chatInformation.id !== chatPage.myUserId
                     onClicked: {
                         var privateChatId = chatInformation.id;
                         var confirmationDialog = pageStack.push(deleteChatConfirmationDialog);
@@ -1038,7 +1098,7 @@ Page {
 
                 MenuItem {
                     id: muteChatMenuItem
-                    visible: chatPage.userIsMember
+                    visible: chatPage.userIsMember && chatInformation.id !== chatPage.myUserId
                     onClicked: {
                         var newNotificationSettings = chatInformation.notification_settings;
                         if (newNotificationSettings.mute_for > 0) {
@@ -1054,13 +1114,37 @@ Page {
 
                 MenuItem {
                     id: searchInChatMenuItem
-                    visible: !chatPage.isSecretChat && chatOverviewItem.visible
+                    visible: !chatPage.isSecretChat && chatOverviewItem.visible && chatInformation.id !== chatPage.myUserId
                     onClicked: {
                         // This automatically shows the search field as well
                         chatOverviewItem.visible = false;
                         searchInChatField.focus = true;
                     }
                     text: qsTr("Search in Chat")
+                }
+
+                MenuItem {
+                    visible: chatPage.showScheduledMessagesMenuItem
+                    text: qsTr("Scheduled messages (%1)").arg(chatPage.scheduledMessagesCount)
+                    onClicked: pageStack.push(Qt.resolvedUrl("ScheduledMessagesPage.qml"), { chatInformation: chatPage.chatInformation })
+                }
+
+                MenuItem {
+                    visible: chatPage.showSendOptionsMenuItems && chatPage.canSendWhenOnline
+                    text: qsTr("Send when online")
+                    onClicked: chatPage.sendMessageWhenOnline()
+                }
+
+                MenuItem {
+                    visible: chatPage.showSendOptionsMenuItems && !chatPage.isSecretChat
+                    text: qsTr("Schedule message...")
+                    onClicked: chatPage.scheduleMessage()
+                }
+
+                MenuItem {
+                    visible: chatPage.showSendOptionsMenuItems
+                    text: qsTr("Send silently")
+                    onClicked: chatPage.sendMessageWithOptions({ "silent": true })
                 }
             }
 
@@ -2213,10 +2297,17 @@ Page {
                             visible: !inlineQuery.userNameIsValid && (!appSettings.sendByEnter || attachmentPreviewRow.visible)
                             enabled: false
                             onClicked: {
-                                sendMessage();
-                                newMessageTextField.text = "";
-                                if(!appSettings.focusTextAreaAfterSend) {
-                                    newMessageTextField.focus = false;
+                                sendMessageWithOptions({});
+                            }
+                            // Send silently, schedule, send when online - not while editing a message
+                            onPressAndHold: {
+                                if (newMessageColumn.editMessageId === "0") {
+                                    sendOptionsColumn.open = !sendOptionsColumn.open;
+                                }
+                            }
+                            onEnabledChanged: {
+                                if (!enabled) {
+                                    sendOptionsColumn.open = false;
                                 }
                             }
                         }
@@ -2256,6 +2347,52 @@ Page {
                         }
 
 
+                    }
+
+                    Column {
+                        id: sendOptionsColumn
+                        width: parent.width
+                        height: open ? implicitHeight : 0
+                        visible: height > 0
+                        clip: true
+                        Behavior on height { SmoothedAnimation { duration: 200 } }
+
+                        property bool open: false
+
+                        BackgroundItem {
+                            width: parent.width
+                            height: Theme.itemSizeExtraSmall
+                            onClicked: chatPage.sendMessageWithOptions({ "silent": true })
+                            Label {
+                                anchors.centerIn: parent
+                                text: qsTr("Send silently")
+                                color: parent.highlighted ? Theme.highlightColor : Theme.primaryColor
+                            }
+                        }
+
+                        BackgroundItem {
+                            width: parent.width
+                            height: Theme.itemSizeExtraSmall
+                            visible: !chatPage.isSecretChat
+                            onClicked: chatPage.scheduleMessage()
+                            Label {
+                                anchors.centerIn: parent
+                                text: qsTr("Schedule message...")
+                                color: parent.highlighted ? Theme.highlightColor : Theme.primaryColor
+                            }
+                        }
+
+                        BackgroundItem {
+                            width: parent.width
+                            height: Theme.itemSizeExtraSmall
+                            visible: chatPage.canSendWhenOnline
+                            onClicked: chatPage.sendMessageWhenOnline()
+                            Label {
+                                anchors.centerIn: parent
+                                text: qsTr("Send when online")
+                                color: parent.highlighted ? Theme.highlightColor : Theme.primaryColor
+                            }
+                        }
                     }
                 }
             }

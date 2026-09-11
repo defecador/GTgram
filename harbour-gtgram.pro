@@ -162,6 +162,8 @@ DISTFILES += qml/harbour-gtgram.qml \
     qml/pages/AboutPage.qml \
     qml/pages/PollCreationPage.qml \
     qml/pages/PollResultsPage.qml \
+    qml/pages/ScheduleMessageDialog.qml \
+    qml/pages/ScheduledMessagesPage.qml \
     qml/pages/SearchChatsPage.qml \
     qml/pages/SettingsPage.qml \
     rpm/harbour-gtgram.changes \

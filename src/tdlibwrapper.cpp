@@ -58,6 +58,27 @@ namespace {
     const QString REPLY_TO("reply_to");
     const QString _TYPE("@type");
     const QString _EXTRA("@extra");
+
+    // Keys of the send options map QML passes to the send*Message methods
+    const QString SEND_OPTION_SILENT("silent");
+    const QString SEND_OPTION_SEND_DATE("sendDate");
+    const QString SEND_OPTION_WHEN_ONLINE("whenOnline");
+
+    // The scheduling part of those send options as a TDLib MessageSchedulingState, or an
+    // invalid QVariant - JSON null - for a message that goes out right away
+    QVariant schedulingState(const QVariantMap &sendOptions)
+    {
+        QVariantMap state;
+        if (sendOptions.value(SEND_OPTION_WHEN_ONLINE).toBool()) {
+            state.insert(_TYPE, "messageSchedulingStateSendWhenOnline");
+        } else if (sendOptions.value(SEND_OPTION_SEND_DATE).toLongLong() > 0) {
+            state.insert(_TYPE, "messageSchedulingStateSendAtDate");
+            state.insert("send_date", sendOptions.value(SEND_OPTION_SEND_DATE).toLongLong());
+        } else {
+            return QVariant();
+        }
+        return state;
+    }
     const QString CHAT_LIST_MAIN("chatListMain");
     const QString CHAT_AVAILABLE_REACTIONS("available_reactions");
     const QString CHAT_AVAILABLE_REACTIONS_ALL("chatAvailableReactionsAll");
@@ -148,6 +169,7 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(newMessageReceived(qlonglong, QVariantMap)), this, SIGNAL(newMessageReceived(qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(messageInformation(qlonglong, qlonglong, QVariantMap)), this, SLOT(handleMessageInformation(qlonglong, qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(messagePropertiesReceived(qlonglong, qlonglong, QVariantMap)), this, SIGNAL(messagePropertiesReceived(qlonglong, qlonglong, QVariantMap)));
+    connect(this->tdLibReceiver, SIGNAL(scheduledMessagesReceived(qlonglong, QVariantList)), this, SIGNAL(scheduledMessagesReceived(qlonglong, QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(messageSendSucceeded(qlonglong, qlonglong, QVariantMap)), this, SIGNAL(messageSendSucceeded(qlonglong, qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(activeNotificationsUpdated(QVariantList)), this, SIGNAL(activeNotificationsUpdated(QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(notificationGroupUpdated(QVariantMap)), this, SIGNAL(notificationGroupUpdated(QVariantMap)));
@@ -173,6 +195,7 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(supergroupFullInfoUpdated(QString, QVariantMap)), this, SIGNAL(supergroupFullInfoUpdated(QString, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(userProfilePhotos(QString, QVariantList, int)), this, SIGNAL(userProfilePhotosReceived(QString, QVariantList, int)));
     connect(this->tdLibReceiver, SIGNAL(chatPermissionsUpdated(QString, QVariantMap)), this, SIGNAL(chatPermissionsUpdated(QString, QVariantMap)));
+    connect(this->tdLibReceiver, SIGNAL(chatHasScheduledMessagesUpdated(QString, bool)), this, SIGNAL(chatHasScheduledMessagesUpdated(QString, bool)));
     connect(this->tdLibReceiver, SIGNAL(chatPhotoUpdated(qlonglong, QVariantMap)), this, SIGNAL(chatPhotoUpdated(qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(chatTitleUpdated(QString, QString)), this, SIGNAL(chatTitleUpdated(QString, QString)));
     connect(this->tdLibReceiver, SIGNAL(chatPinnedUpdated(qlonglong, bool)), this, SIGNAL(chatPinnedUpdated(qlonglong, bool)));
@@ -411,7 +434,7 @@ static bool compareReplacements(const QVariant &replacement1, const QVariant &re
     }
 }
 
-QVariantMap TDLibWrapper::newSendMessageRequest(qlonglong chatId, qlonglong replyToMessageId)
+QVariantMap TDLibWrapper::newSendMessageRequest(qlonglong chatId, qlonglong replyToMessageId, const QVariantMap &sendOptions)
 {
     QVariantMap request;
     request.insert(_TYPE, "sendMessage");
@@ -422,13 +445,23 @@ QVariantMap TDLibWrapper::newSendMessageRequest(qlonglong chatId, qlonglong repl
         replyTo.insert(MESSAGE_ID, replyToMessageId);
         request.insert(REPLY_TO, replyTo);
     }
+    if (!sendOptions.isEmpty()) {
+        QVariantMap options;
+        options.insert(_TYPE, "messageSendOptions");
+        options.insert("disable_notification", sendOptions.value(SEND_OPTION_SILENT).toBool());
+        const QVariant scheduling(schedulingState(sendOptions));
+        if (scheduling.isValid()) {
+            options.insert("scheduling_state", scheduling);
+        }
+        request.insert("options", options);
+    }
     return request;
 }
 
-void TDLibWrapper::sendTextMessage(qlonglong chatId, const QString &message, qlonglong replyToMessageId)
+void TDLibWrapper::sendTextMessage(qlonglong chatId, const QString &message, qlonglong replyToMessageId, const QVariantMap &sendOptions)
 {
     LOG("Sending text message" << chatId << message << replyToMessageId);
-    QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId));
+    QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId, sendOptions));
     QVariantMap inputMessageContent;
     inputMessageContent.insert(_TYPE, "inputMessageText");
 
@@ -481,10 +514,10 @@ void TDLibWrapper::sendTextMessage(qlonglong chatId, const QString &message, qlo
     this->sendRequest(requestObject);
 }
 
-void TDLibWrapper::sendPhotoMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId)
+void TDLibWrapper::sendPhotoMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId, const QVariantMap &sendOptions)
 {
     LOG("Sending photo message" << chatId << filePath << message << replyToMessageId);
-    QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId));
+    QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId, sendOptions));
     QVariantMap inputMessageContent;
     inputMessageContent.insert(_TYPE, "inputMessagePhoto");
 
@@ -501,10 +534,10 @@ void TDLibWrapper::sendPhotoMessage(qlonglong chatId, const QString &filePath, c
     this->sendRequest(requestObject);
 }
 
-void TDLibWrapper::sendVideoMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId)
+void TDLibWrapper::sendVideoMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId, const QVariantMap &sendOptions)
 {
     LOG("Sending video message" << chatId << filePath << message << replyToMessageId);
-    QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId));
+    QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId, sendOptions));
     QVariantMap inputMessageContent;
     inputMessageContent.insert(_TYPE, "inputMessageVideo");
 
@@ -521,10 +554,10 @@ void TDLibWrapper::sendVideoMessage(qlonglong chatId, const QString &filePath, c
     this->sendRequest(requestObject);
 }
 
-void TDLibWrapper::sendDocumentMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId)
+void TDLibWrapper::sendDocumentMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId, const QVariantMap &sendOptions)
 {
     LOG("Sending document message" << chatId << filePath << message << replyToMessageId);
-    QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId));
+    QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId, sendOptions));
     QVariantMap inputMessageContent;
     inputMessageContent.insert(_TYPE, "inputMessageDocument");
 
@@ -541,10 +574,10 @@ void TDLibWrapper::sendDocumentMessage(qlonglong chatId, const QString &filePath
     this->sendRequest(requestObject);
 }
 
-void TDLibWrapper::sendVoiceNoteMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId)
+void TDLibWrapper::sendVoiceNoteMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId, const QVariantMap &sendOptions)
 {
     LOG("Sending voice note message" << chatId << filePath << message << replyToMessageId);
-    QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId));
+    QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId, sendOptions));
     QVariantMap inputMessageContent;
     inputMessageContent.insert(_TYPE, "inputMessageVoiceNote");
 
@@ -561,10 +594,10 @@ void TDLibWrapper::sendVoiceNoteMessage(qlonglong chatId, const QString &filePat
     this->sendRequest(requestObject);
 }
 
-void TDLibWrapper::sendLocationMessage(qlonglong chatId, double latitude, double longitude, double horizontalAccuracy, qlonglong replyToMessageId)
+void TDLibWrapper::sendLocationMessage(qlonglong chatId, double latitude, double longitude, double horizontalAccuracy, qlonglong replyToMessageId, const QVariantMap &sendOptions)
 {
     LOG("Sending location message" << chatId << latitude << longitude << horizontalAccuracy << replyToMessageId);
-    QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId));
+    QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId, sendOptions));
     QVariantMap inputMessageContent;
     inputMessageContent.insert(_TYPE, "inputMessageLocation");
 
@@ -666,6 +699,30 @@ void TDLibWrapper::getMessageProperties(qlonglong chatId, qlonglong messageId)
     requestObject.insert(CHAT_ID, chatId);
     requestObject.insert(MESSAGE_ID, messageId);
     requestObject.insert(_EXTRA, QString("getMessageProperties:%1:%2").arg(chatId).arg(messageId));
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::getChatScheduledMessages(qlonglong chatId)
+{
+    LOG("Retrieving scheduled messages" << chatId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "getChatScheduledMessages");
+    requestObject.insert(CHAT_ID, chatId);
+    // TDLib answers with a plain "messages" object, just like for chat history; the extra is
+    // how the receiver tells the two apart
+    requestObject.insert(_EXTRA, QString("getChatScheduledMessages:%1").arg(chatId));
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::editMessageSchedulingState(qlonglong chatId, qlonglong messageId, const QVariantMap &sendOptions)
+{
+    LOG("Changing message scheduling state" << chatId << messageId << sendOptions);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "editMessageSchedulingState");
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert(MESSAGE_ID, messageId);
+    // Without a scheduling state (JSON null) TDLib sends the message right away
+    requestObject.insert("scheduling_state", schedulingState(sendOptions));
     this->sendRequest(requestObject);
 }
 
@@ -2042,6 +2099,12 @@ void TDLibWrapper::handleErrorReceived(int code, const QString &message, const Q
         QStringList parts(extra.split(':'));
         if (parts.size() == 3 && parts.at(0) == QStringLiteral("getMessage")) {
             emit messageNotFound(parts.at(1).toLongLong(), parts.at(2).toLongLong());
+        } else if (parts.size() == 2 && parts.at(0) == QStringLiteral("getChatScheduledMessages")) {
+            // A background lookup: treat a failure as "nothing scheduled" rather than showing
+            // TDLib's error text, and so the scheduled messages page doesn't wait forever
+            LOG("Could not get scheduled messages" << parts.at(1) << code << message);
+            emit scheduledMessagesReceived(parts.at(1).toLongLong(), QVariantList());
+            return;
         }
     }
     emit errorReceived(code, message, extra);

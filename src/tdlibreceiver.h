@@ -58,6 +58,7 @@ signals:
     void superGroupUpdated(qlonglong groupId, const QVariantMap &groupInformation);
     void chatOnlineMemberCountUpdated(const QString &chatId, int onlineMemberCount);
     void messagesReceived(const QVariantList &messages, int totalCount);
+    void scheduledMessagesReceived(qlonglong chatId, const QVariantList &messages);
     void messageLinkInfoReceived(const QString &url, const QVariantMap &messageLinkInfo, const QString &extra);
     void sponsoredMessageReceived(qlonglong chatId, const QVariantMap &message);
     void newMessageReceived(qlonglong chatId, const QVariantMap &message);
@@ -87,6 +88,7 @@ signals:
     void supergroupFullInfoUpdated(const QString &groupId, const QVariantMap &groupFullInfo);
     void userProfilePhotos(const QString &extra, const QVariantList &photos, int totalPhotos);
     void chatPermissionsUpdated(const QString &chatId, const QVariantMap &chatPermissions);
+    void chatHasScheduledMessagesUpdated(const QString &chatId, bool hasScheduledMessages);
     void chatPhotoUpdated(qlonglong chatId, const QVariantMap &photo);
     void chatTitleUpdated(const QString &chatId, const QString &title);
     void chatPinnedMessageUpdated(qlonglong chatId, qlonglong pinnedMessageId);
@@ -175,6 +177,7 @@ private:
     void processUpdateSupergroupFullInfo(const QVariantMap &receivedInformation);
     void processUserProfilePhotos(const QVariantMap &receivedInformation);
     void processUpdateChatPermissions(const QVariantMap &receivedInformation);
+    void processUpdateChatHasScheduledMessages(const QVariantMap &receivedInformation);
     void processUpdateChatPhoto(const QVariantMap &receivedInformation);
     void processUpdateChatTitle(const QVariantMap &receivedInformation);
     void processUpdateChatPinnedMessage(const QVariantMap &receivedInformation);
