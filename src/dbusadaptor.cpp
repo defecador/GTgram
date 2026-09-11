@@ -32,6 +32,18 @@ void DBusAdaptor::openMessage(const QString &chatId, const QString &messageId)
     emit pleaseOpenMessage(chatId, messageId);
 }
 
+void DBusAdaptor::replyToMessage(const QString &chatId, const QString &messageId, const QString &text)
+{
+    LOG("Reply to message" << chatId << messageId);
+    emit pleaseReplyToMessage(chatId, messageId, text);
+}
+
+void DBusAdaptor::reactToMessage(const QString &chatId, const QString &messageId)
+{
+    LOG("React to message" << chatId << messageId);
+    emit pleaseReactToMessage(chatId, messageId);
+}
+
 void DBusAdaptor::openUrl(const QStringList &arguments)
 {
     LOG("Open Url" << arguments);

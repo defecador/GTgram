@@ -55,6 +55,12 @@ namespace {
 
     const QString APP_NAME("GTgram");
 
+    // Notification remote actions are dispatched back to us over D-Bus
+    const QString DBUS_SERVICE("de.ygriega.gtgram");
+    const QString DBUS_PATH("/de/ygriega/gtgram");
+    // The emoji sent by the notification's quick-reaction button
+    const QString QUICK_REACTION(QString::fromUtf8("\xF0\x9F\x91\x8D")); // thumbs up
+
     // Notification hints
     const QString HINT_GROUP_ID("x-gtgram.group_id");        // int
     const QString HINT_CHAT_ID("x-gtgram.chat_id");          // qlonglong
@@ -317,6 +323,41 @@ void NotificationManager::handleChatTitleUpdated(const QString &chatId, const QS
     }
 }
 
+void NotificationManager::replyToMessage(const QString &chatId, const QString &messageId, const QString &text)
+{
+    if (text.trimmed().isEmpty()) {
+        LOG("Empty reply, ignoring");
+        return;
+    }
+    const qlonglong chat = chatId.toLongLong();
+    const qlonglong message = messageId.toLongLong();
+    LOG("Replying to message" << message << "in chat" << chat);
+    tdLibWrapper->sendTextMessage(chat, text, message);
+    // Having answered, we have obviously seen it
+    tdLibWrapper->viewMessage(chat, message, true);
+}
+
+void NotificationManager::reactToMessage(const QString &chatId, const QString &messageId)
+{
+    const qlonglong chat = chatId.toLongLong();
+    const qlonglong message = messageId.toLongLong();
+    // Chats can restrict reactions to a subset, and TDLib rejects anything
+    // outside it ("The reaction is not available for the message"), so don't
+    // assume the thumbs up is allowed. getChatReactions() is the same source
+    // the in-app picker uses. Note getMessageAvailableReactions() is not an
+    // option here: its parser still expects the pre-1.8 response shape and
+    // yields nothing against the bundled TDLib 1.8.62.
+    const QStringList available(tdLibWrapper->getChatReactions(chatId));
+    QString reaction(QUICK_REACTION);
+    if (!available.isEmpty() && !available.contains(QUICK_REACTION)) {
+        // Fall back to whatever this chat does allow rather than failing
+        reaction = available.first();
+    }
+    LOG("Reacting to message" << message << "in chat" << chat << "with" << reaction);
+    tdLibWrapper->addMessageReaction(chat, message, reaction);
+    tdLibWrapper->viewMessage(chat, message, true);
+}
+
 void NotificationManager::publishNotification(const NotificationGroup *notificationGroup, bool needFeedback)
 {
     QVariantMap messageMap;
@@ -334,9 +375,24 @@ void NotificationManager::publishNotification(const NotificationGroup *notificat
         QVariantList remoteActionArguments;
         remoteActionArguments.append(QString::number(notificationGroup->chatId));
         remoteActionArguments.append(messageMap.value(ID).toString());
-        nemoNotification->setRemoteAction(Notification::remoteAction("default", "openMessage",
-            "de.ygriega.gtgram", "/de/ygriega/gtgram", "de.ygriega.gtgram",
-            "openMessage", remoteActionArguments));
+
+        QVariantList remoteActions;
+        // Tapping the notification body
+        remoteActions.append(Notification::remoteAction("default", "openMessage",
+            DBUS_SERVICE, DBUS_PATH, DBUS_SERVICE, "openMessage", remoteActionArguments));
+        // Typing straight into the notification. "type": "input" makes Lipstick
+        // turn the button into a text field; it travels as its own
+        // x-nemo-remote-action-type-reply hint and the typed text is appended
+        // to our arguments, which is why replyToMessage takes a third one.
+        QVariantMap replyAction(Notification::remoteAction("reply", tr("Reply"),
+            DBUS_SERVICE, DBUS_PATH, DBUS_SERVICE, "replyToMessage", remoteActionArguments).toMap());
+        replyAction.insert("type", QStringLiteral("input"));
+        remoteActions.append(replyAction);
+        // One-tap reaction, handled without bringing the app to the foreground
+        remoteActions.append(Notification::remoteAction("react", QUICK_REACTION,
+            DBUS_SERVICE, DBUS_PATH, DBUS_SERVICE, "reactToMessage", remoteActionArguments));
+
+        nemoNotification->setRemoteActions(remoteActions);
     }
 
     QString notificationBody;

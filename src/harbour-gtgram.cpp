@@ -166,6 +166,12 @@ int main(int argc, char *argv[])
     NotificationManager notificationManager(tdLibWrapper, appSettings, mceInterface, &chatModel);
     context->setContextProperty("notificationManager", &notificationManager);
 
+    // Notification quick actions are handled in C++ so they work without the UI
+    QObject::connect(dBusAdaptor, &DBusAdaptor::pleaseReplyToMessage,
+                     &notificationManager, &NotificationManager::replyToMessage);
+    QObject::connect(dBusAdaptor, &DBusAdaptor::pleaseReactToMessage,
+                     &notificationManager, &NotificationManager::reactToMessage);
+
     ProcessLauncher processLauncher;
     context->setContextProperty("processLauncher", &processLauncher);
 

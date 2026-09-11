@@ -34,10 +34,16 @@ public:
 signals:
     void pleaseOpenMessage(const QString &chatId, const QString &messageId);
     void pleaseOpenUrl(const QString &url);
+    void pleaseReplyToMessage(const QString &chatId, const QString &messageId, const QString &text);
+    void pleaseReactToMessage(const QString &chatId, const QString &messageId);
 
 public slots:
     void openMessage(const QString &chatId, const QString &messageId);
     void openUrl(const QStringList &arguments);
+    // Invoked by Lipstick when a notification action is used. For the reply
+    // action the text typed into the notification is appended by the shell.
+    void replyToMessage(const QString &chatId, const QString &messageId, const QString &text);
+    void reactToMessage(const QString &chatId, const QString &messageId);
 
 };
 
