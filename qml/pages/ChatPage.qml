@@ -441,6 +441,43 @@ Page {
         }
     }
 
+    function findNextUnreadChat() {
+        var chatCount = chatListModel.count;
+        var currentChatId = String(chatPage.chatInformation.id);
+        var currentIndex = -1;
+        var i;
+        for (i = 0; i < chatCount; i++) {
+            if (String(chatListModel.get(i).chat_id) === currentChatId) {
+                currentIndex = i;
+                break;
+            }
+        }
+        // Walk the chat list onwards from the current chat and wrap around. This is
+        // the full list, not the overview's filtered view, so it also finds unread
+        // chats outside the category currently selected there.
+        for (i = 1; i <= chatCount; i++) {
+            var chat = chatListModel.get((currentIndex + i) % chatCount);
+            if (String(chat.chat_id) !== currentChatId
+                    && (chat.unread_count > 0 || chat.is_marked_as_unread)) {
+                return chat;
+            }
+        }
+        return null;
+    }
+
+    function openNextUnreadChat() {
+        var nextChat = findNextUnreadChat();
+        if (!nextChat) {
+            appNotification.show(qsTr("No other chats with unread messages"));
+            return;
+        }
+        // Replace rather than push, so going back still leads to the overview page
+        // instead of walking back through every chat visited this way.
+        pageStack.replace(Qt.resolvedUrl("../pages/ChatPage.qml"), {
+            "chatInformation": nextChat.display
+        });
+    }
+
     Timer {
         id: forwardMessagesTimer
         interval: 200
@@ -1341,6 +1378,13 @@ Page {
                                     chatView.scrollToIndex(chatView.count - 2)
                                     chatView.scrollToIndex(chatView.count - 1)
                                 }
+                            }
+                        }
+
+                        PushUpMenu {
+                            MenuItem {
+                                text: qsTr("Next unread chat")
+                                onClicked: chatPage.openNextUnreadChat()
                             }
                         }
 
