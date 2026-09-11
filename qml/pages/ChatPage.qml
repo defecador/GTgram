@@ -1,27 +1,27 @@
 /*
     Copyright (C) 2020 Sebastian J. Wolf and other contributors
 
-    This file is part of Fernschreiber.
+    This file is part of GTgram.
 
-    Fernschreiber is free software: you can redistribute it and/or modify
+    GTgram is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Fernschreiber is distributed in the hope that it will be useful,
+    GTgram is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Fernschreiber. If not, see <http://www.gnu.org/licenses/>.
+    along with GTgram. If not, see <http://www.gnu.org/licenses/>.
 */
 import QtQuick 2.6
 import QtGraphicalEffects 1.0
 import Sailfish.Silica 1.0
 import Sailfish.Pickers 1.0
 import Nemo.Thumbnailer 1.0
-import WerkWolf.Fernschreiber 1.0
+import WerkWolf.GTgram 1.0
 import "../components"
 import "../js/debug.js" as Debug
 import "../js/twemoji.js" as Emoji
@@ -238,7 +238,7 @@ Page {
         attachmentPreviewRow.fileProperties = null;
         attachmentPreviewRow.locationData = null;
         attachmentPreviewRow.attachmentDescription = "";
-        fernschreiberUtils.stopGeoLocationUpdates();
+        gtgramUtils.stopGeoLocationUpdates();
     }
 
     function controlSendButton() {
@@ -269,7 +269,7 @@ Page {
                     tdLibWrapper.sendDocumentMessage(chatInformation.id, attachmentPreviewRow.fileProperties.filePath, newMessageTextField.text, newMessageColumn.replyToMessageId);
                 }
                 if (attachmentPreviewRow.isVoiceNote) {
-                    tdLibWrapper.sendVoiceNoteMessage(chatInformation.id, fernschreiberUtils.voiceNotePath(), newMessageTextField.text, newMessageColumn.replyToMessageId);
+                    tdLibWrapper.sendVoiceNoteMessage(chatInformation.id, gtgramUtils.voiceNotePath(), newMessageTextField.text, newMessageColumn.replyToMessageId);
                 }
                 if (attachmentPreviewRow.isLocation) {
                     tdLibWrapper.sendLocationMessage(chatInformation.id, attachmentPreviewRow.locationData.latitude, attachmentPreviewRow.locationData.longitude, attachmentPreviewRow.locationData.horizontalAccuracy, newMessageColumn.replyToMessageId);
@@ -286,7 +286,7 @@ Page {
         controlSendButton();
         newMessageInReplyToRow.inReplyToMessage = null;
         newMessageColumn.editMessageId = "0";
-        fernschreiberUtils.stopGeoLocationUpdates();
+        gtgramUtils.stopGeoLocationUpdates();
     }
 
     function getWordBoundaries(text, cursorPosition) {
@@ -469,7 +469,7 @@ Page {
             tdLibWrapper.setChatDraftMessage(chatInformation.id, 0, newMessageColumn.replyToMessageId, newMessageTextField.text,
                 newMessageInReplyToRow.inReplyToMessage ? newMessageInReplyToRow.inReplyToMessage.id : 0);
         }
-        fernschreiberUtils.stopGeoLocationUpdates();
+        gtgramUtils.stopGeoLocationUpdates();
         tdLibWrapper.closeChat(chatInformation.id);
     }
 
@@ -1598,7 +1598,7 @@ Page {
                         source: "../components/VoiceNoteOverlay.qml"
                         onActiveChanged: {
                             if (!active) {
-                                fernschreiberUtils.stopRecordingVoiceNote();
+                                gtgramUtils.stopRecordingVoiceNote();
                             }
                         }
                     }
@@ -1788,14 +1788,14 @@ Page {
                                 }
                             }
                             IconButton {
-                                visible: fernschreiberUtils.supportsGeoLocation() && newMessageTextField.text === ""
+                                visible: gtgramUtils.supportsGeoLocation() && newMessageTextField.text === ""
                                 icon.source: "image://theme/icon-m-location"
                                 icon.sourceSize {
                                     width: Theme.iconSizeMedium
                                     height: Theme.iconSizeMedium
                                 }
                                 onClicked: {
-                                    fernschreiberUtils.startGeoLocationUpdates();
+                                    gtgramUtils.startGeoLocationUpdates();
                                     attachmentOptionsFlickable.isNeeded = false;
                                     attachmentPreviewRow.isLocation = true;
                                     attachmentPreviewRow.attachmentDescription = qsTr("Location: Obtaining position...");
@@ -1831,7 +1831,7 @@ Page {
                         }
 
                         Connections {
-                            target: fernschreiberUtils
+                            target: gtgramUtils
                             onNewPositionInformation: {
                                 attachmentPreviewRow.locationData = positionInformation;
                                 if (attachmentPreviewRow.isLocation) {

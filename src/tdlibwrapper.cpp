@@ -1,20 +1,20 @@
 /*
     Copyright (C) 2020-22 Sebastian J. Wolf and other contributors
 
-    This file is part of Fernschreiber.
+    This file is part of GTgram.
 
-    Fernschreiber is free software: you can redistribute it and/or modify
+    GTgram is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Fernschreiber is distributed in the hope that it will be useful,
+    GTgram is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Fernschreiber. If not, see <http://www.gnu.org/licenses/>.
+    along with GTgram. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "tdlibwrapper.h"
@@ -1455,7 +1455,7 @@ void TDLibWrapper::getPageSource(const QString &address)
     QUrl url = QUrl(address);
     QNetworkRequest request(url);
     request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
-    request.setHeader(QNetworkRequest::UserAgentHeader, "Fernschreiber Bot (Sailfish OS)");
+    request.setHeader(QNetworkRequest::UserAgentHeader, "GTgram Bot (Sailfish OS)");
     request.setRawHeader(QByteArray("Accept"), QByteArray("text/html,application/xhtml+xml"));
     request.setRawHeader(QByteArray("Accept-Charset"), QByteArray("utf-8"));
     request.setRawHeader(QByteArray("Connection"), QByteArray("close"));
@@ -2327,30 +2327,30 @@ void TDLibWrapper::initializeOpenWith()
         }
     }
 
-    const QString desktopFilePath(applicationsLocation + "/harbour-fernschreiber-open-url.desktop");
+    const QString desktopFilePath(applicationsLocation + "/harbour-gtgram-open-url.desktop");
     QFile desktopFile(desktopFilePath);
     if (desktopFile.exists()) {
-        LOG("Fernschreiber open-with file existing, removing...");
+        LOG("GTgram open-with file existing, removing...");
         desktopFile.remove();
         QProcess::startDetached("update-desktop-database " + applicationsLocation);
     }
-    LOG("Creating Fernschreiber open-with file at " << desktopFile.fileName());
+    LOG("Creating GTgram open-with file at " << desktopFile.fileName());
     if (desktopFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream fileOut(&desktopFile);
         fileOut.setCodec("UTF-8");
         fileOut << QString("[Desktop Entry]").toUtf8() << "\n";
         fileOut << QString("Type=Application").toUtf8() << "\n";
-        fileOut << QString("Name=Fernschreiber").toUtf8() << "\n";
-        fileOut << QString("Icon=harbour-fernschreiber").toUtf8() << "\n";
+        fileOut << QString("Name=GTgram").toUtf8() << "\n";
+        fileOut << QString("Icon=harbour-gtgram").toUtf8() << "\n";
         fileOut << QString("NotShowIn=X-MeeGo;").toUtf8() << "\n";
         if (sailfishOSMajorVersion < 4 || ( sailfishOSMajorVersion == 4 && sailfishOSMinorVersion < 1 )) {
             fileOut << QString("MimeType=text/html;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/tg;").toUtf8() << "\n";
         } else {
             fileOut << QString("MimeType=x-url-handler/t.me;x-scheme-handler/tg;").toUtf8() << "\n";
         }
-        fileOut << QString("X-Maemo-Service=de.ygriega.fernschreiber").toUtf8() << "\n";
-        fileOut << QString("X-Maemo-Object-Path=/de/ygriega/fernschreiber").toUtf8() << "\n";
-        fileOut << QString("X-Maemo-Method=de.ygriega.fernschreiber.openUrl").toUtf8() << "\n";
+        fileOut << QString("X-Maemo-Service=de.ygriega.gtgram").toUtf8() << "\n";
+        fileOut << QString("X-Maemo-Object-Path=/de/ygriega/gtgram").toUtf8() << "\n";
+        fileOut << QString("X-Maemo-Method=de.ygriega.gtgram.openUrl").toUtf8() << "\n";
         fileOut << QString("Hidden=true;").toUtf8() << "\n";
         fileOut.flush();
         desktopFile.close();
@@ -2363,7 +2363,7 @@ void TDLibWrapper::initializeOpenWith()
         LOG("Creating D-Bus directory" << dbusPathName);
         dbusPath.mkpath(dbusPathName);
     }
-    QString dbusServiceFileName = dbusPathName + "/de.ygriega.fernschreiber.service";
+    QString dbusServiceFileName = dbusPathName + "/de.ygriega.gtgram.service";
     QFile dbusServiceFile(dbusServiceFileName);
     if (dbusServiceFile.exists()) {
         LOG("D-BUS service file existing, removing to ensure proper re-creation...");
@@ -2374,8 +2374,8 @@ void TDLibWrapper::initializeOpenWith()
         QTextStream fileOut(&dbusServiceFile);
         fileOut.setCodec("UTF-8");
         fileOut << QString("[D-BUS Service]").toUtf8() << "\n";
-        fileOut << QString("Name=de.ygriega.fernschreiber").toUtf8() << "\n";
-        fileOut << QString("Exec=sailjail -- /usr/bin/harbour-fernschreiber").toUtf8() << "\n";
+        fileOut << QString("Name=de.ygriega.gtgram").toUtf8() << "\n";
+        fileOut << QString("Exec=sailjail -- /usr/bin/harbour-gtgram").toUtf8() << "\n";
         fileOut.flush();
         dbusServiceFile.close();
     }
@@ -2384,7 +2384,7 @@ void TDLibWrapper::initializeOpenWith()
 void TDLibWrapper::removeOpenWith()
 {
     LOG("Remove open-with");
-    QFile::remove(QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/harbour-fernschreiber-open-url.desktop");
+    QFile::remove(QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/harbour-gtgram-open-url.desktop");
     QProcess::startDetached("update-desktop-database " + QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation));
 }
 

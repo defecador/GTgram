@@ -1,47 +1,33 @@
-# Fernschreiber
-A Telegram client for Sailfish OS
+# GTgram
+A Telegram client for Sailfish OS.
 
-[![Fernschreiber build](https://github.com/Wunderfitz/harbour-fernschreiber/actions/workflows/main.yml/badge.svg)](https://github.com/Wunderfitz/harbour-fernschreiber/actions/workflows/main.yml)
-## Authors
-Sebastian J. Wolf [sebastian@ygriega.de](mailto:sebastian@ygriega.de) and several contributors
+By Guillermo Torres + Vibe coding.
 
-## Contributions
+GTgram installs as its own package, with its own data, launcher entry and icon. Beyond the
+client it is based on, it adds:
 
-Fernschreiber wouldn't be the same without all the people helping in making it better. Thank you very much to all contributors!
-
-### Code (Features, Bugfixes, Optimizations etc.)
-- Chat list model, chat model, notifications, TDLib receiver, animated stickers, project dependencies, qml/c++ optimizations, chatPhoto, TDLibFile, code reviews, logging categories: [Slava Monich](https://github.com/monich)
-- Chat info page, performance improvements to chat page, location support, app initialization/registration with Telegram, project dependencies, emoji handling, qml/js optimizations, multi-message actions, i18n fixes, message media UI, chat permission handling, bug fixes, code reviews, logging categories, bot support, github build: [jgibbon](https://github.com/jgibbon)
-- Copy message to clipboard: [Christian Stemmle](https://github.com/chstem)
-- Hide send message button if send-by-enter is switched on, focus text input on entering a chat: [santhoshmanikandan](https://github.com/santhoshmanikandan)
-- Integration of logout and sesison options to settings page, search results optimization, highlight unread conversations: [Peter G.](https://github.com/nephros)
-- Option to always append last message in notifications: [Johannes Bachmann](https://github.com/dscheinah)
-- Option to jump to quoted message, widescreen UI adjustments, bug fixes for message forwarding and copying: [Mikhail Barashkov](https://github.com/mbarashkov)
-- Option to to remove the chat deletion menu item: [JimKnopfIoT](https://github.com/JimKnopfIoT)
-
-This list might not be complete. In case I forgot something/somebody, please let me know or create a PR, thanks! :)
-
-### Logo/Icon
-- Designed by [Matteo](https://github.com/iamnomeutente), adjustments by [Slava Monich](https://github.com/monich)
-
-### Translations
-- Chinese: [dashinfantry](https://github.com/dashinfantry)
-- Finnish: [jorm1s](https://github.com/jorm1s)
-- French: [Patrick Hervieux](https://github.com/pherjung), [Nicolas Bourdais](https://github.com/nbourdais)
-- Hungarian: [edp17](https://github.com/edp17)
-- Italian: [Matteo](https://github.com/iamnomeutente)
-- Polish: [atlochowski](https://github.com/atlochowski)
-- Russian: [Rustem Abzalov](https://github.com/arustg) and [Slava Monich](https://github.com/monich)
-- Slovak: [okruhliak](https://github.com/okruhliak)
-- Spanish: [carlosgonz](https://github.com/GNUuser)
-- Swedish: [Åke Engelbrektson](https://github.com/eson57)
+- Chat category tabs in the overview: All, Private, Groups and Channels
+- Replying and reacting straight from notifications
+- Silent forwarding
+- Pulling up at the end of a chat to open the next unread one
+- Edit and delete menu entries that work with the bundled TDLib
 
 ## License
-Licensed under GNU GPLv3
+Licensed under the GNU GPLv3. Source files keep the copyright notices of their original authors.
 
 ## Build
-### Local build
-Simply clone this repository and ensure to have all [submodules](https://git-scm.com/docs/git-submodule) imported as well (e.g. by using `git submodule update --init`). Then use the project file `harbour-fernschreiber.pro` to import the sources in your SailfishOS IDE. To build and run Fernschreiber or an application which is based on Fernschreiber, you need to create the file `harbour-fernschreiber/src/tdlibsecrets.h` and enter the required constants in the following format:
+GTgram builds with the Sailfish OS SDK's `mb2` for Sailfish OS 5.2, for example inside the
+`coderus/sailfishos-platform-sdk` container:
+
+    mb2 -t SailfishOS-5.2.0.15-aarch64 build
+
+Before building:
+
+- Check out the submodules: `git submodule update --init`.
+- Provide a compiled [TDLib](https://github.com/tdlib/td) (GTgram currently bundles 1.8.62) in
+  `tdlib/<architecture>/lib`, containing at least `libtdjson.so` - for example `tdlib/aarch64/lib`.
+- Create `src/tdlibsecrets.h` with your own Telegram API ID and hash, which you get by
+  registering an application on [my.telegram.org](https://my.telegram.org):
 
 ```
 #ifndef TDLIBSECRETS_H
@@ -51,52 +37,29 @@ const char TDLIB_API_HASH[] = "1234567890abcdef1234567890abcdef";
 #endif // TDLIBSECRETS_H
 ```
 
-You get the Telegram API ID and hash as soon as you've registered your own application on [https://my.telegram.org](https://my.telegram.org).
-
-Moreover, you need to have a compiled version of [TDLib 1.8.21](https://github.com/tdlib/td) or higher in the sub-directory `tdlib`. This sub-directory must contain another sub-directory that fits to the target device architecture (e.g. armv7hl, i486). Within this directory, there needs to be a folder called `lib` that contains at least `libtdjson.so`. For armv7hl the relative path would consequently be `tdlib/armv7hl/lib`.
-
-You may just want to download the [tdlib.zip from our fork](https://github.com/Wunderfitz/td/releases) to just use the exact version of the latest official Fernschreiber release. To use it, you need to extract it into your local `tdlib/` folder as described above. If so, you're done and can compile Fernschreiber using the Sailfish SDK. If you want to build TDLib for yourself, please keep on reading.
-
-In case you want to use the same codebase which was used to compile the library that is shipped with Fernschreiber, please [check out the fork](https://github.com/Wunderfitz/td), be sure to use the branch `fernschreiber` and compile these sources using the following commands (be sure to have the Sailfish OS build engine running):
-
-- `alias sfdk=~/SailfishOS/bin/sfdk`
-- `sfdk config target=SailfishOS-4.4.0.58-armv7hl` (this compiles the sources on SFOS 4.4 and ARM - the target needs to be adjusted according to the running SDK engine and the platform)
-- `mkdir build`
-- `cd build`
-- `sfdk build-init`
-- `sfdk build-shell cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=../tdlib -DTD_ENABLE_LTO=ON ..` (in case of compilation issues, try removing the flag `-DTD_ENABLE_LTO=ON`)
-- `sfdk build-shell cmake --build . --target install`
-
-You'll find the compiled library in the directory `td/tdlib`.
-
-### Github Action
-Please read the "Local build" section anyway to understand what's going on before continuing. If you want to automatically build your fork on Github, you'll still need to get a Telegram API ID and hash. These are then [added as project secrets](https://docs.github.com/en/actions/reference/encrypted-secrets#creating-encrypted-secrets-for-a-repository) named `TDLIB_API_ID` and `TDLIB_API_HASH`.
-
-By default, only commits to the master branch will be built. You may [change that for your fork](https://docs.github.com/en/actions/quickstart), but please don't create a pull request to the official repository changing the github action without consulting the [Fernschreiber contributors](https://github.com/Wunderfitz/harbour-fernschreiber/issues/162) first.
-
-If you push a tag containing the letter "v" (for example "v0.99.3"), a github release will be created allowing easy download of the resulting rpms. If the tag is named for example "pre-0.99.3", the resulting release is marked as a pre-release for testing purposes.
-
+The GitHub Actions workflow in `.github/workflows` builds the RPMs too. It expects the API ID
+and hash as repository secrets named `TDLIB_API_ID` and `TDLIB_API_HASH`.
 
 ## Debug
-Fernschreiber does only output a few TDLib messages by default. To get its own debug log messages, you can either run a debug build to see all of them or use the environment variable `QT_LOGGING_RULES` to specify/filter which messages you'd like to see.
+By default GTgram only prints a few TDLib messages. To see its own debug output, run a debug
+build or filter with `QT_LOGGING_RULES`:
 
-Run `QT_LOGGING_RULES="fernschreiber.*=true" harbour-fernschreiber` to see all messages or replace the `*` with specific logging categories. You'll find the logging category inside the corresponding `.cpp` file for backend usage or you can use `JS` to only see frontend messages.
+    QT_LOGGING_RULES="gtgram.*=true" harbour-gtgram
 
-You can append ` &> fernschreiber.log` to the command to create a text file containing the debug messages. 
+Replace `*` with a specific logging category (each `.cpp` file declares its own), or use `JS`
+for frontend messages only. Append ` &> gtgram.log` to write the output to a file.
 
-**Please be aware that debug messages will most likely include personal information** including (but not limited to) chat content and user ids/names of yourself and all your chat partners. Do not share it publicly and, at your discretion, try to remove private info even from the parts you do share with a trusted person.
-
-## Contribute
-
-If you want to contribute bug fixes, improvements, new features etc. please create a pull request (PR). PRs are always welcome and will be reviewed as soon as possible, but may take some time. :)
+**Debug output will almost certainly contain personal information**, including chat content
+and the user IDs and names of you and your chat partners. Don't share it publicly.
 
 ## Credits
+GTgram is based on [Fernschreiber](https://github.com/Wunderfitz/harbour-fernschreiber) by
+Sebastian J. Wolf and [other contributors](https://github.com/Wunderfitz/harbour-fernschreiber#contributions),
+including its translators. Thank you for building it.
 
-This project uses
+It also uses:
 
-- The Telegram Database Library (TDLib) - available on [GitHub.com](https://github.com/tdlib/td). Thanks for making it available under the conditions of the Boost Software License 1.0! Details about the license of TDLib in [its license file](https://github.com/tdlib/td/blob/master/LICENSE_1_0.txt).
-- Emoji parsing and artwork by [Twitter Emoji (Twemoji)](https://github.com/jdecked/twemoji), copyright 2026 by twmoji contributors, Code licensed under the [MIT License](http://opensource.org/licenses/MIT), Graphics licensed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/)
-- Animated sticker parsing and animation by [rlottie](https://github.com/Samsung/rlottie), copyright 2020 Samsung Electronics Co., Ltd. and [other contributors](https://github.com/Samsung/rlottie/blob/master/AUTHORS), Code licensed under the [MIT License](https://github.com/Samsung/rlottie/blob/master/licenses/COPYING.MIT), some rlottie components [licensed under other licenses](https://github.com/Samsung/rlottie/blob/master/COPYING).
+- The Telegram Database Library (TDLib), available on [GitHub](https://github.com/tdlib/td) under the Boost Software License 1.0 ([license](https://github.com/tdlib/td/blob/master/LICENSE_1_0.txt)).
+- Emoji parsing and artwork by [Twemoji](https://github.com/jdecked/twemoji), copyright 2026 by Twemoji contributors; code under the [MIT License](http://opensource.org/licenses/MIT), graphics under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- Animated stickers by [rlottie](https://github.com/Samsung/rlottie), copyright 2020 Samsung Electronics Co., Ltd. and [other contributors](https://github.com/Samsung/rlottie/blob/master/AUTHORS), under the [MIT License](https://github.com/Samsung/rlottie/blob/master/licenses/COPYING.MIT), with some components under [other licenses](https://github.com/Samsung/rlottie/blob/master/COPYING).
 - Reverse geocoding for location attachments by [OpenStreetMap Nominatim](https://wiki.openstreetmap.org/wiki/Nominatim).
-
-Thanks to the maintainers of the used components and - again - all contributors to Fernschreiber!

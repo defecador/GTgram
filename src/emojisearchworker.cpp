@@ -1,20 +1,20 @@
 /*
     Copyright (C) 2020 Sebastian J. Wolf and other contributors
 
-    This file is part of Fernschreiber.
+    This file is part of GTgram.
 
-    Fernschreiber is free software: you can redistribute it and/or modify
+    GTgram is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Fernschreiber is distributed in the hope that it will be useful,
+    GTgram is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Fernschreiber. If not, see <http://www.gnu.org/licenses/>.
+    along with GTgram. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "emojisearchworker.h"
 
@@ -32,7 +32,7 @@ EmojiSearchWorker::EmojiSearchWorker(QObject *parent) : QThread(parent)
     LOG("Initializing Emoji database");
     QSqlDatabase::removeDatabase("emojis");
     database = QSqlDatabase::addDatabase("QSQLITE", "emojis");
-    database.setDatabaseName("/usr/share/harbour-fernschreiber/db/emojis.db");
+    database.setDatabaseName("/usr/share/harbour-gtgram/db/emojis.db");
 }
 
 void EmojiSearchWorker::setParameters(const QString &queryString)

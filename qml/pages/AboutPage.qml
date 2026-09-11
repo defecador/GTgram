@@ -2,24 +2,24 @@
 /*
     Copyright (C) 2020-21 Sebastian J. Wolf and other contributors
 
-    This file is part of Fernschreiber.
+    This file is part of GTgram.
 
-    Fernschreiber is free software: you can redistribute it and/or modify
+    GTgram is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Fernschreiber is distributed in the hope that it will be useful,
+    GTgram is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Fernschreiber. If not, see <http://www.gnu.org/licenses/>.
+    along with GTgram. If not, see <http://www.gnu.org/licenses/>.
 */
 import QtQuick 2.6
 import Sailfish.Silica 1.0
-import WerkWolf.Fernschreiber 1.0
+import WerkWolf.GTgram 1.0
 import "../components"
 
 Page {
@@ -37,12 +37,12 @@ Page {
             spacing: Theme.paddingLarge
 
             PageHeader {
-                title: qsTr("About Fernschreiber")
+                title: qsTr("About GTgram")
             }
 
             Image {
-                id: wunderfitzImage
-                source: "../../images/fernschreiber.svg"
+                id: logoImage
+                source: "../../images/gtgram.svg"
                 anchors {
                     horizontalCenter: parent.horizontalCenter
                 }
@@ -57,7 +57,7 @@ Page {
             }
 
             Label {
-                text: "Fernschreiber 0.18"
+                text: "GTgram " + appVersion
                 horizontalAlignment: Text.AlignHCenter
                 font.pixelSize: Theme.fontSizeExtraLarge
                 anchors {
@@ -78,27 +78,14 @@ Page {
             }
 
             Label {
-                text: qsTr("By Sebastian J. Wolf and <a href=\"https://github.com/Wunderfitz/harbour-fernschreiber#contributions\">other contributors</a>")
+                text: qsTr("By %1").arg("Guillermo Torres + Vibe coding")
                 font.pixelSize: Theme.fontSizeSmall
                 width: parent.width - ( 2 * Theme.horizontalPageMargin )
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
-                linkColor: Theme.highlightColor
-                onLinkActivated: Qt.openUrlExternally(link)
                 anchors {
                     horizontalCenter: parent.horizontalCenter
                 }
-            }
-
-            Text {
-                text: "<a href=\"mailto:sebastian@ygriega.de\">" + qsTr("Send E-Mail") + "</a>"
-                anchors {
-                    horizontalCenter: parent.horizontalCenter
-                }
-                font.pixelSize: Theme.fontSizeSmall
-                linkColor: Theme.highlightColor
-
-                onLinkActivated: Qt.openUrlExternally("mailto:sebastian@ygriega.de")
             }
 
             Separator {
@@ -115,15 +102,20 @@ Page {
                 }
             }
 
-            Text {
-                text: "<a href=\"https://github.com/Wunderfitz/harbour-fernschreiber\">" + qsTr("Sources on GitHub") + "</a>"
+            Label {
+                // GPLv3 (section 5d) keeps the original copyright notice visible in modified versions
+                text: qsTr("Based on %1, © 2020 Sebastian J. Wolf and %2")
+                        .arg("<a href=\"https://github.com/Wunderfitz/harbour-fernschreiber\">Fernschreiber</a>")
+                        .arg("<a href=\"https://github.com/Wunderfitz/harbour-fernschreiber#contributions\">" + qsTr("other contributors") + "</a>")
+                font.pixelSize: Theme.fontSizeExtraSmall
+                width: parent.width - ( 2 * Theme.horizontalPageMargin )
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
+                linkColor: Theme.highlightColor
+                onLinkActivated: Qt.openUrlExternally(link)
                 anchors {
                     horizontalCenter: parent.horizontalCenter
                 }
-                font.pixelSize: Theme.fontSizeSmall
-                linkColor: Theme.highlightColor
-
-                onLinkActivated: Qt.openUrlExternally("https://github.com/Wunderfitz/harbour-fernschreiber")
             }
 
             SectionHeader {

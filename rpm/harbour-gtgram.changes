@@ -1,0 +1,14 @@
+# Changelog for harbour-gtgram; mb2 includes this file in the RPM.
+#
+# Add newest entries to the top, separated from each other by a blank line:
+# * date Author's Name <author's email> version-release
+# - Summary of changes
+
+* Fri Sep 11 2026 Guillermo Torres <guillermo.torresbelando@mailfence.com> 0.18-53
+- First GTgram release, based on Fernschreiber 0.18
+- Installs as a separate package with its own data, launcher entry and icon
+- Chat category tabs in the overview: All, Private, Groups, Channels
+- Reply and react directly from notifications
+- Edit and delete messages work with the bundled TDLib 1.8.62
+- Forward messages silently
+- Pull up at the end of a chat to open the next unread chat

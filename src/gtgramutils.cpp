@@ -1,23 +1,23 @@
 /*
     Copyright (C) 2020-21 Sebastian J. Wolf and other contributors
 
-    This file is part of Fernschreiber.
+    This file is part of GTgram.
 
-    Fernschreiber is free software: you can redistribute it and/or modify
+    GTgram is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Fernschreiber is distributed in the hope that it will be useful,
+    GTgram is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Fernschreiber. If not, see <http://www.gnu.org/licenses/>.
+    along with GTgram. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "fernschreiberutils.h"
+#include "gtgramutils.h"
 #include <QMap>
 #include <QVariant>
 #include <QAudioEncoderSettings>
@@ -34,7 +34,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 
-#define DEBUG_MODULE FernschreiberUtils
+#define DEBUG_MODULE GTgramUtils
 #include "debuglog.h"
 
 namespace {
@@ -61,7 +61,7 @@ namespace {
     const QString MESSAGE_CONTENT_TYPE_VENUE("messageVenue");
 }
 
-FernschreiberUtils::FernschreiberUtils(QObject *parent)
+GTgramUtils::GTgramUtils(QObject *parent)
     : QObject(parent)
     , manager(new QNetworkAccessManager(this))
 {
@@ -96,12 +96,12 @@ FernschreiberUtils::FernschreiberUtils(QObject *parent)
     }
 }
 
-FernschreiberUtils::~FernschreiberUtils()
+GTgramUtils::~GTgramUtils()
 {
     this->cleanUp();
 }
 
-QString FernschreiberUtils::getMessageShortText(TDLibWrapper *tdLibWrapper, const QVariantMap &messageContent, const bool isChannel, const qlonglong currentUserId, const QVariantMap &messageSender)
+QString GTgramUtils::getMessageShortText(TDLibWrapper *tdLibWrapper, const QVariantMap &messageContent, const bool isChannel, const qlonglong currentUserId, const QVariantMap &messageSender)
 {
     if (messageContent.isEmpty()) {
         return QString();
@@ -229,14 +229,14 @@ QString FernschreiberUtils::getMessageShortText(TDLibWrapper *tdLibWrapper, cons
     return myself ? tr("sent an unsupported message: %1", "myself").arg(contentType.mid(7)) : tr("sent an unsupported message: %1").arg(contentType.mid(7));
 }
 
-QString FernschreiberUtils::getUserName(const QVariantMap &userInformation)
+QString GTgramUtils::getUserName(const QVariantMap &userInformation)
 {
     const QString firstName = userInformation.value("first_name").toString();
     const QString lastName = userInformation.value("last_name").toString();
     return QString(firstName + " " + lastName).trimmed();
 }
 
-void FernschreiberUtils::startRecordingVoiceNote()
+void GTgramUtils::startRecordingVoiceNote()
 {
     LOG("Start recording voice note...");
     QDateTime thisIsNow = QDateTime::currentDateTime();
@@ -245,47 +245,47 @@ void FernschreiberUtils::startRecordingVoiceNote()
     this->audioRecorder.record();
 }
 
-void FernschreiberUtils::stopRecordingVoiceNote()
+void GTgramUtils::stopRecordingVoiceNote()
 {
     LOG("Stop recording voice note...");
     this->audioRecorder.stop();
 }
 
-QString FernschreiberUtils::voiceNotePath()
+QString GTgramUtils::voiceNotePath()
 {
     return this->audioRecorder.outputLocation().toLocalFile();
 }
 
-FernschreiberUtils::VoiceNoteRecordingState FernschreiberUtils::getVoiceNoteRecordingState()
+GTgramUtils::VoiceNoteRecordingState GTgramUtils::getVoiceNoteRecordingState()
 {
     return this->voiceNoteRecordingState;
 }
 
-void FernschreiberUtils::startGeoLocationUpdates()
+void GTgramUtils::startGeoLocationUpdates()
 {
     if (this->geoPositionInfoSource) {
         this->geoPositionInfoSource->startUpdates();
     }
 }
 
-void FernschreiberUtils::stopGeoLocationUpdates()
+void GTgramUtils::stopGeoLocationUpdates()
 {
     if (this->geoPositionInfoSource) {
         this->geoPositionInfoSource->stopUpdates();
     }
 }
 
-bool FernschreiberUtils::supportsGeoLocation()
+bool GTgramUtils::supportsGeoLocation()
 {
     return this->geoPositionInfoSource;
 }
 
-QString FernschreiberUtils::getSailfishOSVersion()
+QString GTgramUtils::getSailfishOSVersion()
 {
     return QSysInfo::productVersion();
 }
 
-void FernschreiberUtils::initiateReverseGeocode(double latitude, double longitude)
+void GTgramUtils::initiateReverseGeocode(double latitude, double longitude)
 {
     LOG("Initiating reverse geocode:" << latitude << longitude);
     QUrl url = QUrl("https://nominatim.openstreetmap.org/reverse");
@@ -295,7 +295,7 @@ void FernschreiberUtils::initiateReverseGeocode(double latitude, double longitud
     urlQuery.addQueryItem("format", "json");
     url.setQuery(urlQuery);
     QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::UserAgentHeader, "Fernschreiber (Sailfish OS)");
+    request.setHeader(QNetworkRequest::UserAgentHeader, "GTgram (Sailfish OS)");
     request.setRawHeader(QByteArray("Accept"), QByteArray("application/json"));
     request.setRawHeader(QByteArray("Accept-Charset"), QByteArray("utf-8"));
     request.setRawHeader(QByteArray("Connection"), QByteArray("close"));
@@ -304,7 +304,7 @@ void FernschreiberUtils::initiateReverseGeocode(double latitude, double longitud
     connect(reply, SIGNAL(finished()), this, SLOT(handleReverseGeocodeFinished()));
 }
 
-void FernschreiberUtils::handleAudioRecorderStatusChanged(QMediaRecorder::Status status)
+void GTgramUtils::handleAudioRecorderStatusChanged(QMediaRecorder::Status status)
 {
     LOG("Audio recorder status changed:" << status);
     switch (status) {
@@ -330,7 +330,7 @@ void FernschreiberUtils::handleAudioRecorderStatusChanged(QMediaRecorder::Status
     emit voiceNoteRecordingStateChanged(this->voiceNoteRecordingState);
 }
 
-void FernschreiberUtils::handleGeoPositionUpdated(const QGeoPositionInfo &info)
+void GTgramUtils::handleGeoPositionUpdated(const QGeoPositionInfo &info)
 {
     LOG("Geo position was updated");
     QVariantMap positionInformation;
@@ -353,9 +353,9 @@ void FernschreiberUtils::handleGeoPositionUpdated(const QGeoPositionInfo &info)
     emit newPositionInformation(positionInformation);
 }
 
-void FernschreiberUtils::handleReverseGeocodeFinished()
+void GTgramUtils::handleReverseGeocodeFinished()
 {
-    qDebug() << "FernschreiberUtils::handleReverseGeocodeFinished";
+    qDebug() << "GTgramUtils::handleReverseGeocodeFinished";
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     reply->deleteLater();
     if (reply->error() != QNetworkReply::NoError) {
@@ -370,7 +370,7 @@ void FernschreiberUtils::handleReverseGeocodeFinished()
     }
 }
 
-void FernschreiberUtils::cleanUp()
+void GTgramUtils::cleanUp()
 {
     if (this->geoPositionInfoSource) {
         this->geoPositionInfoSource->stopUpdates();
@@ -387,7 +387,7 @@ void FernschreiberUtils::cleanUp()
     }
 }
 
-QString FernschreiberUtils::getTemporaryDirectoryPath()
+QString GTgramUtils::getTemporaryDirectoryPath()
 {
-    return QStandardPaths::writableLocation(QStandardPaths::TempLocation) +  + "/harbour-fernschreiber";
+    return QStandardPaths::writableLocation(QStandardPaths::TempLocation) +  + "/harbour-gtgram";
 }

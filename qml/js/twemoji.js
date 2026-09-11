@@ -2,7 +2,7 @@
 /*
   https://github.com/twitter/twemoji/blob/gh-pages/LICENSE
 
-  Stripped down for usage in Fernschreiber.
+  Stripped down for usage in GTgram.
 */
 .pragma library
 

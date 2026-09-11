@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>GTgram</title>
+  <circle cx="256" cy="256" r="256" fill="#ffffff"/>
+  <path fill="#4e9fd9" d="M 443 112 L 69 249 L 172 291 L 366 159 L 216 306 L 216 403 L 267 340 L 361 380 Z"/>
+</svg>

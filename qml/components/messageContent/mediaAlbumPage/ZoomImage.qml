@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import WerkWolf.Fernschreiber 1.0
+import WerkWolf.GTgram 1.0
 import "../../"
 
 ZoomArea {

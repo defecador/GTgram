@@ -10,9 +10,25 @@
 #   - translation filenames have to be changed
 
 # The name of your application
-TARGET = harbour-fernschreiber
+TARGET = harbour-gtgram
 
 CONFIG += sailfishapp sailfishapp_i18n
+
+# Version shown in the About page. Read straight from the RPM spec so the spec
+# stays the single source of truth and no build number is ever hand-edited here.
+# qmake strips quotes before handing the command to the shell, so keep every
+# argument space-free: grep returns e.g. "Version:    0.18", which qmake splits
+# into a two-element list, and $$last() picks off the value.
+VER_LINE = $$system(grep -m1 ^Version: $$PWD/rpm/harbour-gtgram.spec)
+REL_LINE = $$system(grep -m1 ^Release: $$PWD/rpm/harbour-gtgram.spec)
+APP_VERSION = $$last(VER_LINE)
+APP_RELEASE = $$last(REL_LINE)
+isEmpty(APP_VERSION): APP_VERSION = unknown
+isEmpty(APP_RELEASE): APP_RELEASE = 0
+message(Building GTgram $${APP_VERSION}-$${APP_RELEASE})
+APP_VERSION_STR = $$sprintf("\"%1-%2\"", $$APP_VERSION, $$APP_RELEASE)
+QMAKE_SUBSTITUTES += src/appversion.h.in
+INCLUDEPATH += $$OUT_PWD/src
 
 PKGCONFIG += nemonotifications-qt5 zlib
 
@@ -20,7 +36,7 @@ QT += core dbus sql multimedia positioning
 
 DEFINES += QT_STATICPLUGIN
 
-SOURCES += src/harbour-fernschreiber.cpp \
+SOURCES += src/harbour-gtgram.cpp \
     src/appsettings.cpp \
     src/boolfiltermodel.cpp \
     src/chatpermissionfiltermodel.cpp \
@@ -30,7 +46,7 @@ SOURCES += src/harbour-fernschreiber.cpp \
     src/dbusadaptor.cpp \
     src/dbusinterface.cpp \
     src/emojisearchworker.cpp \
-    src/fernschreiberutils.cpp \
+    src/gtgramutils.cpp \
     src/knownusersmodel.cpp \
     src/mceinterface.cpp \
     src/namedaction.cpp \
@@ -43,7 +59,7 @@ SOURCES += src/harbour-fernschreiber.cpp \
     src/textfiltermodel.cpp \
     src/tgsplugin.cpp
 
-DISTFILES += qml/harbour-fernschreiber.qml \
+DISTFILES += qml/harbour-gtgram.qml \
     qml/components/AudioPreview.qml \
     qml/components/BackgroundImage.qml \
     qml/components/ChatListViewItem.qml \
@@ -147,26 +163,26 @@ DISTFILES += qml/harbour-fernschreiber.qml \
     qml/pages/PollResultsPage.qml \
     qml/pages/SearchChatsPage.qml \
     qml/pages/SettingsPage.qml \
-    rpm/harbour-fernschreiber.changes \
-    rpm/harbour-fernschreiber.spec \
-    rpm/harbour-fernschreiber.yaml \
+    rpm/harbour-gtgram.changes \
+    rpm/harbour-gtgram.spec \
+    rpm/harbour-gtgram.yaml \
     translations/*.ts \
-    harbour-fernschreiber.desktop
+    harbour-gtgram.desktop
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172 256x256
 
-TRANSLATIONS += translations/harbour-fernschreiber-de.ts \
-                translations/harbour-fernschreiber-es.ts \
-                translations/harbour-fernschreiber-fi.ts \
-                translations/harbour-fernschreiber-fr.ts \
-                translations/harbour-fernschreiber-hu.ts \
-                translations/harbour-fernschreiber-it.ts \
-                translations/harbour-fernschreiber-pl.ts \
-                translations/harbour-fernschreiber-ru.ts \
-                translations/harbour-fernschreiber-sv.ts \
-                translations/harbour-fernschreiber-sk.ts \
-                translations/harbour-fernschreiber-en.ts \
-                translations/harbour-fernschreiber-zh_CN.ts
+TRANSLATIONS += translations/harbour-gtgram-de.ts \
+                translations/harbour-gtgram-es.ts \
+                translations/harbour-gtgram-fi.ts \
+                translations/harbour-gtgram-fr.ts \
+                translations/harbour-gtgram-hu.ts \
+                translations/harbour-gtgram-it.ts \
+                translations/harbour-gtgram-pl.ts \
+                translations/harbour-gtgram-ru.ts \
+                translations/harbour-gtgram-sv.ts \
+                translations/harbour-gtgram-sk.ts \
+                translations/harbour-gtgram-en.ts \
+                translations/harbour-gtgram-zh_CN.ts
 
 equals(QT_ARCH, arm) {
     message(Building ARM)
@@ -196,28 +212,28 @@ images.path = /usr/share/$${TARGET}
 ICONPATH = /usr/share/icons/hicolor
 
 86.png.path = $${ICONPATH}/86x86/apps/
-86.png.files += icons/86x86/harbour-fernschreiber.png
+86.png.files += icons/86x86/harbour-gtgram.png
 
 108.png.path = $${ICONPATH}/108x108/apps/
-108.png.files += icons/108x108/harbour-fernschreiber.png
+108.png.files += icons/108x108/harbour-gtgram.png
 
 128.png.path = $${ICONPATH}/128x128/apps/
-128.png.files += icons/128x128/harbour-fernschreiber.png
+128.png.files += icons/128x128/harbour-gtgram.png
 
 172.png.path = $${ICONPATH}/172x172/apps/
-172.png.files += icons/172x172/harbour-fernschreiber.png
+172.png.files += icons/172x172/harbour-gtgram.png
 
 256.png.path = $${ICONPATH}/256x256/apps/
-256.png.files += icons/256x256/harbour-fernschreiber.png
+256.png.files += icons/256x256/harbour-gtgram.png
 
-fernschreiber.desktop.path = /usr/share/applications/
-fernschreiber.desktop.files = harbour-fernschreiber.desktop
+gtgram.desktop.path = /usr/share/applications/
+gtgram.desktop.files = harbour-gtgram.desktop
 
 database.files = db
 database.path = /usr/share/$${TARGET}
 
 INSTALLS += telegram 86.png 108.png 128.png 172.png 256.png \
-            fernschreiber.desktop gui images database
+            gtgram.desktop gui images database
 
 HEADERS += \
     src/appsettings.h \
@@ -231,7 +247,7 @@ HEADERS += \
     src/debuglog.h \
     src/debuglogjs.h \
     src/emojisearchworker.h \
-    src/fernschreiberutils.h \
+    src/gtgramutils.h \
     src/knownusersmodel.h \
     src/mceinterface.h \
     src/namedaction.h \

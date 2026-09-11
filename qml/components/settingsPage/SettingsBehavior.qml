@@ -1,25 +1,25 @@
 /*
     Copyright (C) 2021 Sebastian J. Wolf and other contributors
 
-    This file is part of Fernschreiber.
+    This file is part of GTgram.
 
-    Fernschreiber is free software: you can redistribute it and/or modify
+    GTgram is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Fernschreiber is distributed in the hope that it will be useful,
+    GTgram is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Fernschreiber. If not, see <http://www.gnu.org/licenses/>.
+    along with GTgram. If not, see <http://www.gnu.org/licenses/>.
 */
 
 import QtQuick 2.6
 import Sailfish.Silica 1.0
-import WerkWolf.Fernschreiber 1.0
+import WerkWolf.GTgram 1.0
 
 import ".."
 
@@ -65,7 +65,7 @@ AccordionItem {
                 width: parent.columnWidth
                 checked: appSettings.delayMessageRead
                 text: qsTr("Delay before marking messages as read")
-                description: qsTr("Fernschreiber will wait a bit before messages are marked as read")
+                description: qsTr("GTgram will wait a bit before messages are marked as read")
                 automaticCheck: false
                 onClicked: {
                     appSettings.delayMessageRead = !checked
@@ -87,7 +87,7 @@ AccordionItem {
                 width: parent.columnWidth
                 checked: appSettings.useOpenWith
                 text: qsTr("Open-with menu integration")
-                description: qsTr("Integrate Fernschreiber into open-with menu of Sailfish OS")
+                description: qsTr("Integrate GTgram into open-with menu of Sailfish OS")
                 automaticCheck: false
                 onClicked: {
                     appSettings.useOpenWith = !checked
@@ -257,7 +257,7 @@ AccordionItem {
                 TextSwitch {
                     checked: appSettings.notificationSoundsEnabled && enabled
                     text: qsTr("Enable notification sounds")
-                    description: qsTr("When sounds are enabled, Fernschreiber will use the current Sailfish OS notification sound for chats, which can be configured in the system settings.")
+                    description: qsTr("When sounds are enabled, GTgram will use the current Sailfish OS notification sound for chats, which can be configured in the system settings.")
                     enabled: parent.enabled
                     automaticCheck: false
                     onClicked: {

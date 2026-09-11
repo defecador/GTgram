@@ -59,3 +59,11 @@ tdlibsecrets.h
 
 # AI generated files
 CLAUDE.md
+# Generated at build time from appversion.h.in
+src/appversion.h
+
+# Build output
+/harbour-gtgram
+/documentation.list
+/RPMS/
+/.mb2/

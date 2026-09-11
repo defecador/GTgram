@@ -1,20 +1,20 @@
 /*
     Copyright (C) 2020 Sebastian J. Wolf and other contributors
 
-    This file is part of Fernschreiber.
+    This file is part of GTgram.
 
-    Fernschreiber is free software: you can redistribute it and/or modify
+    GTgram is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Fernschreiber is distributed in the hope that it will be useful,
+    GTgram is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Fernschreiber. If not, see <http://www.gnu.org/licenses/>.
+    along with GTgram. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifdef QT_QML_DEBUG
@@ -53,16 +53,21 @@
 #include "textfiltermodel.h"
 #include "boolfiltermodel.h"
 #include "tgsplugin.h"
-#include "fernschreiberutils.h"
+#include "gtgramutils.h"
 #include "knownusersmodel.h"
 #include "contactsmodel.h"
 
 // The default filter can be overridden by QT_LOGGING_RULES envinronment variable, e.g.
-// QT_LOGGING_RULES="fernschreiber.*=true" harbour-fernschreiber
+// QT_LOGGING_RULES="gtgram.*=true" harbour-gtgram
 #if defined (QT_DEBUG) || defined(DEBUG)
-#  define DEFAULT_LOG_FILTER "fernschreiber.*=true"
+#  define DEFAULT_LOG_FILTER "gtgram.*=true"
 #else
-#  define DEFAULT_LOG_FILTER "fernschreiber.*=false"
+#  define DEFAULT_LOG_FILTER "gtgram.*=false"
+#endif
+
+#include "appversion.h"
+#ifndef APP_VERSION
+#  define APP_VERSION "unknown"
 #endif
 
 Q_IMPORT_PLUGIN(TgsIOPlugin)
@@ -73,11 +78,11 @@ void migrateSettings() {
     int sailfishOSMinorVersion = sailfishOSVersion.value(1).toInt();
     if ((sailfishOSMajorVersion == 4 && sailfishOSMinorVersion >= 4) || sailfishOSMajorVersion > 4) {
         LOG("Checking if we need to migrate settings...");
-        QSettings settings(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/de.ygriega/fernschreiber/settings.conf", QSettings::NativeFormat);
+        QSettings settings(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/de.ygriega/gtgram/settings.conf", QSettings::NativeFormat);
         if (settings.contains("migrated")) {
             return;
         }
-        QSettings oldSettings(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/harbour-fernschreiber/settings.conf", QSettings::NativeFormat);
+        QSettings oldSettings(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/harbour-gtgram/settings.conf", QSettings::NativeFormat);
         const QStringList oldKeys = oldSettings.allKeys();
         if (oldKeys.isEmpty()) {
             return;
@@ -87,7 +92,7 @@ void migrateSettings() {
             settings.setValue(key, oldSettings.value(key));
         }
 
-        QDir oldDataLocation(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/harbour-fernschreiber/harbour-fernschreiber");
+        QDir oldDataLocation(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/harbour-gtgram/harbour-gtgram");
         LOG("Old data directory: " + oldDataLocation.path());
         if (oldDataLocation.exists()) {
             LOG("Old data files detected, migrating files to new location...");
@@ -127,7 +132,7 @@ int main(int argc, char *argv[])
 
     migrateSettings();
 
-    const char *uri = "WerkWolf.Fernschreiber";
+    const char *uri = "WerkWolf.GTgram";
     qmlRegisterType<TDLibFile>(uri, 1, 0, "TDLibFile");
     qmlRegisterType<NamedAction>(uri, 1, 0, "NamedAction");
     qmlRegisterType<TextFilterModel>(uri, 1, 0, "TextFilterModel");
@@ -136,6 +141,7 @@ int main(int argc, char *argv[])
     qmlRegisterSingletonType<DebugLogJS>(uri, 1, 0, "DebugLog", DebugLogJS::createSingleton);
 
     AppSettings *appSettings = new AppSettings(view.data());
+    context->setContextProperty("appVersion", QStringLiteral(APP_VERSION));
     context->setContextProperty("appSettings", appSettings);
     qmlRegisterUncreatableType<AppSettings>(uri, 1, 0, "AppSettings", QString());
 
@@ -144,9 +150,9 @@ int main(int argc, char *argv[])
     context->setContextProperty("tdLibWrapper", tdLibWrapper);
     qmlRegisterUncreatableType<TDLibWrapper>(uri, 1, 0, "TelegramAPI", QString());
 
-    FernschreiberUtils *fernschreiberUtils = new FernschreiberUtils(view.data());
-    context->setContextProperty("fernschreiberUtils", fernschreiberUtils);
-    qmlRegisterUncreatableType<FernschreiberUtils>(uri, 1, 0, "FernschreiberUtilities", QString());
+    GTgramUtils *gtgramUtils = new GTgramUtils(view.data());
+    context->setContextProperty("gtgramUtils", gtgramUtils);
+    qmlRegisterUncreatableType<GTgramUtils>(uri, 1, 0, "GTgramUtilities", QString());
 
     DBusAdaptor *dBusAdaptor = tdLibWrapper->getDBusAdaptor();
     context->setContextProperty("dBusAdaptor", dBusAdaptor);
@@ -182,7 +188,7 @@ int main(int argc, char *argv[])
     contactsProxyModel.setFilterCaseSensitivity(Qt::CaseInsensitive);
     context->setContextProperty("contactsProxyModel", &contactsProxyModel);
 
-    view->setSource(SailfishApp::pathTo("qml/harbour-fernschreiber.qml"));
+    view->setSource(SailfishApp::pathTo("qml/harbour-gtgram.qml"));
     view->show();
     return app->exec();
 }

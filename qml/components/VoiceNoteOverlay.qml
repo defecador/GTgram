@@ -1,24 +1,24 @@
 /*
     Copyright (C) 2020-21 Sebastian J. Wolf and other contributors
 
-    This file is part of Fernschreiber.
+    This file is part of GTgram.
 
-    Fernschreiber is free software: you can redistribute it and/or modify
+    GTgram is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Fernschreiber is distributed in the hope that it will be useful,
+    GTgram is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Fernschreiber. If not, see <http://www.gnu.org/licenses/>.
+    along with GTgram. If not, see <http://www.gnu.org/licenses/>.
 */
 import QtQuick 2.6
 import Sailfish.Silica 1.0
-import WerkWolf.Fernschreiber 1.0
+import WerkWolf.GTgram 1.0
 import "../components"
 import "../js/twemoji.js" as Emoji
 import "../js/debug.js" as Debug
@@ -27,25 +27,25 @@ Item {
     id: voiceNoteOverlayItem
     anchors.fill: parent
 
-    property int recordingState: fernschreiberUtils.getVoiceNoteRecordingState();
+    property int recordingState: gtgramUtils.getVoiceNoteRecordingState();
     property int recordingDuration: 0;
     property bool recordingDone: false;
 
     function handleRecordingState() {
         switch (recordingState) {
-        case FernschreiberUtilities.Unavailable:
+        case GTgramUtilities.Unavailable:
             recordingStateLabel.text = qsTr("Unavailable");
             break;
-        case FernschreiberUtilities.Ready:
+        case GTgramUtilities.Ready:
             recordingStateLabel.text = qsTr("Ready");
             break;
-        case FernschreiberUtilities.Starting:
+        case GTgramUtilities.Starting:
             recordingStateLabel.text = qsTr("Starting");
             break;
-        case FernschreiberUtilities.Recording:
+        case GTgramUtilities.Recording:
             recordingStateLabel.text = qsTr("Recording");
             break;
-        case FernschreiberUtilities.Stopping:
+        case GTgramUtilities.Stopping:
             recordingStateLabel.text = qsTr("Stopping");
             break;
         }
@@ -74,7 +74,7 @@ Item {
     }
 
     Connections {
-        target: fernschreiberUtils
+        target: gtgramUtils
         onVoiceNoteDurationChanged: {
             Debug.log("New duration received: " + duration);
             recordingDuration = Math.round(duration / 1000);
@@ -154,7 +154,7 @@ Item {
                             recordingDone = false;
                             recordingDuration = 0;
                             handleRecordingDuration();
-                            fernschreiberUtils.startRecordingVoiceNote();
+                            gtgramUtils.startRecordingVoiceNote();
                         }
                     }
                 }
@@ -170,7 +170,7 @@ Item {
                         anchors.fill: parent
                         onClicked: {
                             recordButton.visible = true;
-                            fernschreiberUtils.stopRecordingVoiceNote();
+                            gtgramUtils.stopRecordingVoiceNote();
                             recordingDone = true;
                         }
                     }

@@ -1,24 +1,24 @@
 /*
     Copyright (C) 2020 Sebastian J. Wolf and other contributors
 
-    This file is part of Fernschreiber.
+    This file is part of GTgram.
 
-    Fernschreiber is free software: you can redistribute it and/or modify
+    GTgram is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Fernschreiber is distributed in the hope that it will be useful,
+    GTgram is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Fernschreiber. If not, see <http://www.gnu.org/licenses/>.
+    along with GTgram. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "notificationmanager.h"
-#include "fernschreiberutils.h"
+#include "gtgramutils.h"
 #include "chatmodel.h"
 #include <sailfishapp.h>
 #include <QListIterator>
@@ -53,12 +53,12 @@ namespace {
     const QString CHAT_TYPE_BASIC_GROUP("chatTypeBasicGroup");
     const QString CHAT_TYPE_SUPERGROUP("chatTypeSupergroup");
 
-    const QString APP_NAME("Fernschreiber");
+    const QString APP_NAME("GTgram");
 
     // Notification hints
-    const QString HINT_GROUP_ID("x-fernschreiber.group_id");        // int
-    const QString HINT_CHAT_ID("x-fernschreiber.chat_id");          // qlonglong
-    const QString HINT_TOTAL_COUNT("x-fernschreiber.total_count");  // int
+    const QString HINT_GROUP_ID("x-gtgram.group_id");        // int
+    const QString HINT_CHAT_ID("x-gtgram.chat_id");          // qlonglong
+    const QString HINT_TOTAL_COUNT("x-gtgram.total_count");  // int
 
     const QString HINT_IMAGE_PATH("image-path");                    // QString
     const QString HINT_VIBRA("x-nemo-vibrate");                     // bool
@@ -126,7 +126,7 @@ NotificationManager::NotificationGroup::~NotificationGroup()
 }
 
 NotificationManager::NotificationManager(TDLibWrapper *tdLibWrapper, AppSettings *appSettings, MceInterface *mceInterface, ChatModel *chatModel) :
-    appIconFile(SailfishApp::pathTo("images/fernschreiber-notification.png").toLocalFile())
+    appIconFile(SailfishApp::pathTo("images/gtgram-notification.png").toLocalFile())
 {
     LOG("Initializing...");
     this->tdLibWrapper = tdLibWrapper;
@@ -335,7 +335,7 @@ void NotificationManager::publishNotification(const NotificationGroup *notificat
         remoteActionArguments.append(QString::number(notificationGroup->chatId));
         remoteActionArguments.append(messageMap.value(ID).toString());
         nemoNotification->setRemoteAction(Notification::remoteAction("default", "openMessage",
-            "de.ygriega.fernschreiber", "/de/ygriega/fernschreiber", "de.ygriega.fernschreiber",
+            "de.ygriega.gtgram", "/de/ygriega/gtgram", "de.ygriega.gtgram",
             "openMessage", remoteActionArguments));
     }
 
@@ -360,11 +360,11 @@ void NotificationManager::publishNotification(const NotificationGroup *notificat
             if (senderInformation.value(_TYPE).toString() == "messageSenderChat") {
                 fullName = tdLibWrapper->getChat(senderInformation.value(CHAT_ID).toString()).value(TITLE).toString();
             } else {
-                fullName = FernschreiberUtils::getUserName(tdLibWrapper->getUserInformation(senderInformation.value(USER_ID).toString()));
+                fullName = GTgramUtils::getUserName(tdLibWrapper->getUserInformation(senderInformation.value(USER_ID).toString()));
             }
             notificationBody += fullName.trimmed() + ": ";
         }
-        notificationBody += FernschreiberUtils::getMessageShortText(tdLibWrapper, messageMap.value(CONTENT).toMap(), (chatInformation ? chatInformation->isChannel : false), tdLibWrapper->getUserInformation().value(ID).toLongLong(), senderInformation );
+        notificationBody += GTgramUtils::getMessageShortText(tdLibWrapper, messageMap.value(CONTENT).toMap(), (chatInformation ? chatInformation->isChannel : false), tdLibWrapper->getUserInformation().value(ID).toLongLong(), senderInformation );
     }
 
     const QString summary(chatInformation ? chatInformation->title : QString());

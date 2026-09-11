@@ -1,4 +1,4 @@
-name: Fernschreiber build
+name: GTgram build
 
 on:
   push:
