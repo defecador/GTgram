@@ -629,9 +629,9 @@ void TDLibWrapper::sendPollMessage(qlonglong chatId, const QString &question, co
     this->sendRequest(requestObject);
 }
 
-void TDLibWrapper::forwardMessages(const QString &chatId, const QString &fromChatId, const QVariantList &messageIds, bool sendCopy, bool removeCaption)
+void TDLibWrapper::forwardMessages(const QString &chatId, const QString &fromChatId, const QVariantList &messageIds, bool sendCopy, bool removeCaption, bool disableNotification)
 {
-    LOG("Forwarding messages" << chatId << fromChatId << messageIds);
+    LOG("Forwarding messages" << chatId << fromChatId << messageIds << disableNotification);
     QVariantMap requestObject;
     requestObject.insert(_TYPE, "forwardMessages");
     requestObject.insert(CHAT_ID, chatId);
@@ -639,6 +639,10 @@ void TDLibWrapper::forwardMessages(const QString &chatId, const QString &fromCha
     requestObject.insert("message_ids", messageIds);
     requestObject.insert("send_copy", sendCopy);
     requestObject.insert("remove_caption", removeCaption);
+    QVariantMap options;
+    options.insert(_TYPE, "messageSendOptions");
+    options.insert("disable_notification", disableNotification);
+    requestObject.insert("options", options);
 
     this->sendRequest(requestObject);
 }

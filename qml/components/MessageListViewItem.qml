@@ -61,6 +61,7 @@ ListItem {
     readonly property int numberOfExtraOptionsOtherThanDeleteMessage:
         (showCopyMessageToClipboardMenuItem ? 0 : 1) +
         (showForwardMessageMenuItem ? 0 : 1) +
+        (showForwardMessageSilentlyMenuItem ? 0 : 1) +
         (page.canPinMessages() ? 1 : 0) +
         (additionalItemsModel ? additionalItemsModel.length : 0)
     readonly property bool deleteMessageIsOnlyExtraOption: canDeleteMessage && !numberOfExtraOptionsOtherThanDeleteMessage
@@ -70,8 +71,9 @@ ListItem {
         (canEditMessage ? 1 : 0) + 2 /* "Select Message" and "More Options..." */
     readonly property bool showCopyMessageToClipboardMenuItem: (baseContextMenuItemCount + 1) <= maxContextMenuItemCount
     readonly property bool showForwardMessageMenuItem: (baseContextMenuItemCount + 2) <= maxContextMenuItemCount
+    readonly property bool showForwardMessageSilentlyMenuItem: (baseContextMenuItemCount + 3) <= maxContextMenuItemCount
     // And don't count "More Options..." for "Delete Message" if "Delete Message" is the only extra option
-    readonly property bool haveSpaceForDeleteMessageMenuItem: (baseContextMenuItemCount + 3 - (deleteMessageIsOnlyExtraOption ? 1 : 0)) <= maxContextMenuItemCount
+    readonly property bool haveSpaceForDeleteMessageMenuItem: (baseContextMenuItemCount + 4 - (deleteMessageIsOnlyExtraOption ? 1 : 0)) <= maxContextMenuItemCount
     property var chatReactions
     property var messageReactions
 
@@ -81,6 +83,7 @@ ListItem {
     signal replyToMessage()
     signal editMessage()
     signal forwardMessage()
+    signal forwardMessageSilently()
 
     function deleteMessage() {
         var chatId = page.chatInformation.id
@@ -259,12 +262,17 @@ ListItem {
                 MenuItem {
                     visible: showCopyMessageToClipboardMenuItem
                     onClicked: copyMessageToClipboard()
-                    text: qsTr("Copy Message to Clipboard")
+                    text: qsTr("Copy")
                 }
                 MenuItem {
                     visible: showForwardMessageMenuItem && canForwardMessage
                     onClicked: forwardMessage()
                     text: qsTr("Forward Message")
+                }
+                MenuItem {
+                    visible: showForwardMessageSilentlyMenuItem && canForwardMessage
+                    onClicked: forwardMessageSilently()
+                    text: qsTr("Forward Silently")
                 }
                 MenuItem {
                     visible: canDeleteMessage && haveSpaceForDeleteMessageMenuItem
@@ -282,6 +290,7 @@ ListItem {
                         messageOptionsDrawer.messageProperties = messageListItem.messageProperties
                         messageOptionsDrawer.showCopyMessageToClipboardMenuItem = !showCopyMessageToClipboardMenuItem
                         messageOptionsDrawer.showForwardMessageMenuItem = !showForwardMessageMenuItem
+                        messageOptionsDrawer.showForwardMessageSilentlyMenuItem = !showForwardMessageSilentlyMenuItem
                         messageOptionsDrawer.showDeleteMessageMenuItem = canDeleteMessage && !haveSpaceForDeleteMessageMenuItem
                         messageListItem.additionalOptionsOpened = true;
                         messageOptionsDrawer.open = true;

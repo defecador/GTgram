@@ -356,21 +356,23 @@ Page {
 
     }
 
-    function startForwardingMessages(messages) {
+    function startForwardingMessages(messages, silently) {
         var ids = Functions.getMessagesArrayIds(messages);
         var neededPermissions = Functions.getMessagesNeededForwardPermissions(messages);
         var chatId = chatInformation.id;
         pageStack.push(Qt.resolvedUrl("../pages/ChatSelectionPage.qml"), {
             myUserId: chatPage.myUserId,
-            headerDescription: qsTr("Forward %Ln messages", "dialog header", ids.length),
-            payload: {fromChatId: chatId, messageIds:ids, neededPermissions: neededPermissions},
+            headerDescription: silently ? qsTr("Forward %Ln messages silently", "dialog header", ids.length)
+                                        : qsTr("Forward %Ln messages", "dialog header", ids.length),
+            payload: {fromChatId: chatId, messageIds:ids, neededPermissions: neededPermissions, silently: !!silently},
             state: "forwardMessages"
         });
     }
 
-    function forwardMessages(fromChatId, messageIds) {
+    function forwardMessages(fromChatId, messageIds, silently) {
         forwardMessagesTimer.fromChatId = fromChatId;
         forwardMessagesTimer.messageIds = messageIds;
+        forwardMessagesTimer.silently = !!silently;
         forwardMessagesTimer.start();
     }
     function hasSendPrivilege(privilege) {
@@ -445,12 +447,13 @@ Page {
 
         property string fromChatId
         property var messageIds
+        property bool silently
         onTriggered: {
             if(chatPage.loading) {
                 forwardMessagesTimer.start()
             } else {
                 var forwardedToSecretChat = chatInformation.type["@type"] === "chatTypeSecret";
-                tdLibWrapper.forwardMessages(chatInformation.id, fromChatId, messageIds, forwardedToSecretChat, false);
+                tdLibWrapper.forwardMessages(chatInformation.id, fromChatId, messageIds, forwardedToSecretChat, false, silently);
             }
         }
     }
@@ -813,12 +816,13 @@ Page {
         property var sourceItem
         property bool showCopyMessageToClipboardMenuItem
         property bool showForwardMessageMenuItem
+        property bool showForwardMessageSilentlyMenuItem
         property bool showDeleteMessageMenuItem
 
         property list<NamedAction> messageOptionsModel: [
             NamedAction {
                 visible: messageOptionsDrawer.showCopyMessageToClipboardMenuItem
-                name: qsTr("Copy Message to Clipboard")
+                name: qsTr("Copy")
                 action: function () {
                     if(messageOptionsDrawer.sourceItem) {
                         messageOptionsDrawer.sourceItem.copyMessageToClipboard()
@@ -830,6 +834,13 @@ Page {
                 name: qsTr("Forward Message")
                 action: function () {
                     startForwardingMessages([messageOptionsDrawer.myMessage])
+                }
+            },
+            NamedAction {
+                visible: messageOptionsDrawer.showForwardMessageSilentlyMenuItem && messageOptionsDrawer.messageProperties.can_be_forwarded !== false
+                name: qsTr("Forward Silently")
+                action: function () {
+                    startForwardingMessages([messageOptionsDrawer.myMessage], true)
                 }
             },
             NamedAction {
@@ -1478,6 +1489,9 @@ Page {
                                     }
                                     onForwardMessage: {
                                         startForwardingMessages([myMessage])
+                                    }
+                                    onForwardMessageSilently: {
+                                        startForwardingMessages([myMessage], true)
                                     }
                                 }
                             }

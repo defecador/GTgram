@@ -43,14 +43,14 @@ Dialog {
 
     /*
         payload dependent on chatSelectionPage.state
-         - forwardMessages: {fromChatId, messageIds, neededPermissions}
+         - forwardMessages: {fromChatId, messageIds, neededPermissions, silently}
     */
     property var payload: ({})
 
     onAccepted: {
         switch(chatSelectionPage.state) {
         case "forwardMessages":
-            acceptDestinationInstance.forwardMessages(payload.fromChatId, payload.messageIds)
+            acceptDestinationInstance.forwardMessages(payload.fromChatId, payload.messageIds, payload.silently)
             break;
         case "fillTextArea": // ReplyMarkupButtons: inlineKeyboardButtonTypeSwitchInline
             acceptDestinationInstance.setMessageText(payload.text)
