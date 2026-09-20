@@ -89,6 +89,32 @@ namespace {
     const QString EMOJI("emoji");
     const QString TYPE_MESSAGE_REPLY_TO_MESSAGE("messageReplyToMessage");
     const QString TYPE_INPUT_MESSAGE_REPLY_TO_MESSAGE("inputMessageReplyToMessage");
+
+    QVariantMap buildCallProtocol()
+    {
+        // Must mirror the versions the bundled tgcalls actually implements
+        // (tgcalls::Meta::Versions()), newest first. Advertising versions the
+        // runtime cannot instantiate makes TDLib negotiate a protocol we then
+        // fail to speak: the call reaches callStateReady and then drops as
+        // "disconnected" after ~20s because no compatible instance connects.
+        // Capped at 9.0.0 to force the native InstanceV2Impl path (7/8/9)
+        // rather than the libwebrtc-based reference impl (10/11).
+        QVariantList supportedLibraryVersions;
+        supportedLibraryVersions.append(QStringLiteral("9.0.0"));
+        supportedLibraryVersions.append(QStringLiteral("8.0.0"));
+        supportedLibraryVersions.append(QStringLiteral("7.0.0"));
+        supportedLibraryVersions.append(QStringLiteral("5.0.0"));
+        supportedLibraryVersions.append(QStringLiteral("2.7.7"));
+
+        QVariantMap callProtocol;
+        callProtocol.insert(_TYPE, "callProtocol");
+        callProtocol.insert("udp_p2p", true);
+        callProtocol.insert("udp_reflector", true);
+        callProtocol.insert("min_layer", 65);
+        callProtocol.insert("max_layer", 92);
+        callProtocol.insert("library_versions", supportedLibraryVersions);
+        return callProtocol;
+    }
 }
 
 TDLibWrapper::TDLibWrapper(AppSettings *settings, MceInterface *mce, QObject *parent)
@@ -220,6 +246,8 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(chatUnreadMentionCountUpdated(qlonglong, int)), this, SIGNAL(chatUnreadMentionCountUpdated(qlonglong, int)));
     connect(this->tdLibReceiver, SIGNAL(chatUnreadReactionCountUpdated(qlonglong, int)), this, SIGNAL(chatUnreadReactionCountUpdated(qlonglong, int)));
     connect(this->tdLibReceiver, SIGNAL(activeEmojiReactionsUpdated(QStringList)), this, SLOT(handleActiveEmojiReactionsUpdated(QStringList)));
+    connect(this->tdLibReceiver, SIGNAL(callUpdated(QVariantMap)), this, SIGNAL(callUpdated(QVariantMap)));
+    connect(this->tdLibReceiver, SIGNAL(callSignalingDataReceived(qlonglong, QByteArray)), this, SIGNAL(callSignalingDataReceived(qlonglong, QByteArray)));
 
     this->tdLibReceiver->start();
 }
@@ -1650,6 +1678,77 @@ void TDLibWrapper::setInactiveSessionTtl(int days)
     QVariantMap requestObject;
     requestObject.insert(_TYPE, "setInactiveSessionTtl");
     requestObject.insert("inactive_session_ttl_days", days);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::createVoiceCall(const QString &userId, bool isVideo)
+{
+    const qlonglong callUserId = userId.toLongLong();
+    if (callUserId <= 0) {
+        LOG("Skipping call creation because user ID is invalid:" << userId);
+        return;
+    }
+
+    LOG("Creating call for user" << callUserId << "is video call:" << isVideo);
+
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "createCall");
+    requestObject.insert(_EXTRA, QStringLiteral("createCall:%1").arg(callUserId));
+    requestObject.insert("user_id", callUserId);
+    requestObject.insert("is_video", isVideo);
+    requestObject.insert("protocol", buildCallProtocol());
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::acceptVoiceCall(qlonglong callId, bool isVideo)
+{
+    if (callId <= 0) {
+        LOG("Skipping acceptCall because call ID is invalid:" << callId);
+        return;
+    }
+
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "acceptCall");
+    requestObject.insert(_EXTRA, QStringLiteral("acceptCall:%1").arg(callId));
+    requestObject.insert("call_id", callId);
+    requestObject.insert("is_video", isVideo);
+    requestObject.insert("protocol", buildCallProtocol());
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::discardVoiceCall(qlonglong callId, bool isDisconnected, int duration, bool isVideo, qlonglong connectionId)
+{
+    if (callId <= 0) {
+        LOG("Skipping discardCall because call ID is invalid:" << callId);
+        return;
+    }
+
+    QVariantMap discardReason;
+    discardReason.insert(_TYPE, isDisconnected ? "callDiscardReasonDisconnected" : "callDiscardReasonHungUp");
+
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "discardCall");
+    requestObject.insert(_EXTRA, QStringLiteral("discardCall:%1").arg(callId));
+    requestObject.insert("call_id", callId);
+    requestObject.insert("is_disconnected", isDisconnected);
+    requestObject.insert("duration", duration < 0 ? 0 : duration);
+    requestObject.insert("is_video", isVideo);
+    requestObject.insert("connection_id", connectionId < 0 ? 0 : connectionId);
+    requestObject.insert("reason", discardReason);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::sendCallSignalingData(qlonglong callId, const QByteArray &data)
+{
+    if (callId <= 0 || data.isEmpty()) {
+        LOG("Skipping signaling data send due to invalid payload for call:" << callId);
+        return;
+    }
+
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "sendCallSignalingData");
+    requestObject.insert("call_id", callId);
+    requestObject.insert("data", QString::fromUtf8(data.toBase64()));
     this->sendRequest(requestObject);
 }
 

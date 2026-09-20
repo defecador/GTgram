@@ -47,6 +47,9 @@
 #include "namedaction.h"
 #include "notificationmanager.h"
 #include "mceinterface.h"
+#ifdef GTGRAM_VOICE_CALLS
+#include "callmanager.h"
+#endif
 #include "dbusadaptor.h"
 #include "processlauncher.h"
 #include "stickermanager.h"
@@ -153,6 +156,19 @@ int main(int argc, char *argv[])
     GTgramUtils *gtgramUtils = new GTgramUtils(view.data());
     context->setContextProperty("gtgramUtils", gtgramUtils);
     qmlRegisterUncreatableType<GTgramUtils>(uri, 1, 0, "GTgramUtilities", QString());
+
+#ifdef GTGRAM_VOICE_CALLS
+    CallManager *callManager = new CallManager(tdLibWrapper, mceInterface, view.data());
+    context->setContextProperty("callManager", callManager);
+    qmlRegisterUncreatableType<CallManager>(uri, 1, 0, "CallManager", QString());
+#endif
+    context->setContextProperty("voiceCallsAvailable",
+#ifdef GTGRAM_VOICE_CALLS
+        true
+#else
+        false
+#endif
+    );
 
     DBusAdaptor *dBusAdaptor = tdLibWrapper->getDBusAdaptor();
     context->setContextProperty("dBusAdaptor", dBusAdaptor);

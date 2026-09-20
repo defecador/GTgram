@@ -169,4 +169,79 @@ ApplicationWindow
             appNotification: appNotification
         });
     }
+
+    // Guards against a build without voice calls (voiceCallsAvailable is only
+    // ever true when CallManager actually exists) and lets onCallUpdated
+    // below be a no-op rather than error out on the missing property.
+    readonly property bool voiceCallsEnabled: (typeof voiceCallsAvailable !== 'undefined') && voiceCallsAvailable === true
+
+    Connections {
+        target: tdLibWrapper
+        onCallUpdated: {
+            if (!appWindow.voiceCallsEnabled) {
+                return;
+            }
+            var state = (call && call.state && call.state["@type"]) ? call.state["@type"] : "";
+            var callId = call.id;
+            var outgoing = call.is_outgoing === true;
+            var ongoing = (state === "callStatePending" || state === "callStateExchangingKeys" || state === "callStateReady");
+            if (ongoing) {
+                if (callOverlay.callId !== callId) {
+                    var userInfo = tdLibWrapper.getUserInformation(call.user_id.toString());
+                    var name = userInfo ? Functions.getUserName(userInfo) : "";
+                    callOverlay.callerName = name !== "" ? name : qsTr("Unknown caller");
+                    callOverlay.callerPhoto = (userInfo && userInfo.profile_photo) ? userInfo.profile_photo.small : ({});
+                    callOverlay.callId = callId;
+                    callOverlay.outgoing = outgoing;
+                    callOverlay.muted = false;
+                    callOverlay.speakerOn = false;
+                    callOverlay.connectedAt = 0;
+                    callOverlay.elapsed = 0;
+                    callOverlay.verifyEmojis = [];
+                }
+                callOverlay.callState = state;
+                if (state === "callStateReady" && callOverlay.connectedAt === 0) {
+                    callOverlay.connectedAt = Date.now();
+                    if (typeof callManager !== 'undefined') {
+                        callManager.setSpeakerphoneOn(callOverlay.speakerOn);
+                    }
+                }
+                if (state === "callStateReady" && call.state && call.state.emojis
+                        && callOverlay.verifyEmojis.length === 0) {
+                    callOverlay.verifyEmojis = call.state.emojis;
+                }
+                callOverlay.visible = true;
+                appWindow.activate();
+                if (callOverlay.savedOrientations === undefined && pageStack.currentPage) {
+                    callOverlay.savedOrientations = pageStack.currentPage.allowedOrientations;
+                    pageStack.currentPage.allowedOrientations = Orientation.Portrait;
+                }
+            } else if (callId === callOverlay.callId) {
+                if (state === "callStateDiscarded" || state === "callStateError") {
+                    var reason = (call.state && call.state.reason && call.state.reason["@type"]) ? call.state.reason["@type"] : "";
+                    if (reason === "callDiscardReasonDeclined") {
+                        appNotification.show(qsTr("Call declined"));
+                    } else if (reason === "callDiscardReasonMissed") {
+                        appNotification.show(callOverlay.outgoing ? qsTr("No answer") : qsTr("Missed call"));
+                    } else if (reason === "callDiscardReasonDisconnected" || state === "callStateError") {
+                        appNotification.show(qsTr("Call failed"));
+                    }
+                    callOverlay.visible = false;
+                    callOverlay.callId = 0;
+                    callOverlay.callState = "";
+                    callOverlay.verifyEmojis = [];
+                    if (callOverlay.savedOrientations !== undefined && pageStack.currentPage) {
+                        pageStack.currentPage.allowedOrientations = callOverlay.savedOrientations;
+                    }
+                    callOverlay.savedOrientations = undefined;
+                } else {
+                    callOverlay.callState = state;
+                }
+            }
+        }
+    }
+
+    CallOverlay {
+        id: callOverlay
+    }
 }

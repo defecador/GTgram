@@ -1,7 +1,7 @@
 Name: harbour-gtgram
 Summary: GTgram is a Telegram client for Sailfish OS
 Version: 0.18
-Release: 56
+Release: 57
 # The contents of the Group field should be one of the groups listed here:
 # https://github.com/mer-tools/spectacle/blob/master/data/GROUPS
 Group: Qt/Qt
@@ -33,12 +33,17 @@ PkgConfigBR:
 # NB: spectacle has a bug where it will remove custom "#<< macros" lines, so define them here:
 Macros:
   - '__provides_exclude_from;^%{_datadir}/.*$'
-  - '__requires_exclude;^libtdjson.*$'
+  # libtdjson and the bundledlibs/ codec libs (needed by the optional voice-call
+  # feature) are all app-private, not resolved against system packages - see
+  # README.md's "Voice calls" section.
+  - '__requires_exclude;^(libtdjson|libavcodec|libavutil|libswresample|libvpx|libopus|libvorbisenc|libvorbis|libtheoradec|libtheoraenc|libwebpmux|libwebp|libopenjp2|libspeex|libogg|libsharpyuv)\..*$'
   - '_binary_payload;w6.xzdio'
 
 # Build dependencies without a pkgconfig setup can be listed here
 PkgBR:
    - gperf
+   - pulseaudio-devel
+   - voicecall-qt5-devel
 
 # Runtime dependencies which are not automatically detected
 Requires:
@@ -50,11 +55,20 @@ Requires:
   - nemo-qml-plugin-dbus-qt5
 
 # All installed files
+#
+# NB: the voicecallplugin/ second-project build/install (%build post,
+# %install post ifarch blocks below) and the %posttrans restart-voicecall.sh
+# call are hand-maintained directly in harbour-gtgram.spec, since this
+# simple yaml schema can't express a second qmake project - regenerating
+# the spec from this file with spectacle would need those re-added by hand.
 Files:
   - '%{_bindir}/%{name}'
   - '%{_datadir}/%{name}'
   - '%{_datadir}/applications/%{name}.desktop'
   - '%{_datadir}/icons/hicolor/*/apps/%{name}.png'
+  - '%ifarch aarch64'
+  - '/usr/lib64/voicecall/plugins/libgtgram-voicecall-plugin.so'
+  - '%endif'
 
 # For more information about yaml and what's supported in Sailfish OS
 # build system, please see https://wiki.merproject.org/wiki/Spectacle

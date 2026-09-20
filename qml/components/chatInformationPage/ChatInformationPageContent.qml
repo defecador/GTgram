@@ -244,6 +244,14 @@ SilicaFlickable {
             }
             text: qsTr("New Secret Chat")
         }
+        MenuItem {
+            visible: chatInformationPage.isPrivateChat
+                     && typeof voiceCallsAvailable !== 'undefined' && voiceCallsAvailable === true
+            onClicked: {
+                tdLibWrapper.createVoiceCall(chatInformationPage.chatPartnerGroupId, false);
+            }
+            text: qsTr("Voice Call")
+        }
     }
     // header
     PageHeader {

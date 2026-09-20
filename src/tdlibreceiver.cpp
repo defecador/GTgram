@@ -63,6 +63,9 @@ namespace {
     const QString SETS("sets");
     const QString EMOJIS("emojis");
     const QString REPLY_TO("reply_to");
+    const QString CALL("call");
+    const QString CALL_ID("call_id");
+    const QString DATA("data");
     const QString REPLY_IN_CHAT_ID("reply_in_chat_id");
     const QString REPLY_TO_MESSAGE_ID("reply_to_message_id");
     const QString DRAFT_MESSAGE("draft_message");
@@ -186,6 +189,8 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("updateChatUnreadMentionCount", &TDLibReceiver::processUpdateChatUnreadMentionCount);
     handlers.insert("updateChatUnreadReactionCount", &TDLibReceiver::processUpdateChatUnreadReactionCount);
     handlers.insert("updateActiveEmojiReactions", &TDLibReceiver::processUpdateActiveEmojiReactions);
+    handlers.insert("updateCall", &TDLibReceiver::processUpdateCall);
+    handlers.insert("updateNewCallSignalingData", &TDLibReceiver::processUpdateNewCallSignalingData);
 }
 
 void TDLibReceiver::setActive(bool active)
@@ -826,6 +831,28 @@ void TDLibReceiver::processUpdateActiveEmojiReactions(const QVariantMap &receive
     // updateActiveEmojiReactions was introduced between 1.8.5 and 1.8.6
     // See https://github.com/tdlib/td/commit/d29d367
     emit activeEmojiReactionsUpdated(receivedInformation.value(EMOJIS).toStringList());
+}
+
+void TDLibReceiver::processUpdateCall(const QVariantMap &receivedInformation)
+{
+    const QVariantMap callInformation = cleanupMap(receivedInformation.value(CALL).toMap());
+    if (callInformation.isEmpty()) {
+        LOG("Call update received without call payload");
+        return;
+    }
+    emit callUpdated(callInformation);
+}
+
+void TDLibReceiver::processUpdateNewCallSignalingData(const QVariantMap &receivedInformation)
+{
+    const qlonglong callId = receivedInformation.value(CALL_ID).toLongLong();
+    const QString signalingData = receivedInformation.value(DATA).toString();
+    QByteArray decodedSignalingData = QByteArray::fromBase64(signalingData.toUtf8());
+    if (decodedSignalingData.isEmpty() && !signalingData.isEmpty()) {
+        // TDLib has been observed to send raw (non-base64) bytes here in some builds.
+        decodedSignalingData = signalingData.toUtf8();
+    }
+    emit callSignalingDataReceived(callId, decodedSignalingData);
 }
 
 // Recursively removes (some) unused entries from QVariantMaps to reduce

@@ -19,6 +19,9 @@
 
 #include "mceinterface.h"
 #include <QDBusConnection>
+#include <QDBusMessage>
+#include <QDBusReply>
+#include <QTimer>
 
 #define DEBUG_MODULE MceInterface
 #include "debuglog.h"
@@ -51,4 +54,56 @@ void MceInterface::displayBlankingPause()
 {
     LOG("Disabling display blanking");
     call(QStringLiteral("req_display_blanking_pause"));
+}
+
+void MceInterface::displayOn()
+{
+    LOG("Turning display on");
+    call(QStringLiteral("req_display_state_on"));
+}
+
+void MceInterface::tklockUnlock()
+{
+    LOG("Unlocking touchscreen lock");
+    call(QStringLiteral("req_tklock_mode_change"), QStringLiteral("unlocked"));
+}
+
+void MceInterface::tklockUnlockWhenDisplayOn(int maxWaitMs)
+{
+    // Try right away - if the display is already on this is all that's needed.
+    QDBusReply<QString> now = call(QStringLiteral("get_display_status"));
+    if (now.isValid() && (now.value() == QLatin1String("on") || now.value() == QLatin1String("dimmed"))) {
+        tklockUnlock();
+        return;
+    }
+
+    QTimer *timer = new QTimer(this);
+    timer->setInterval(200);
+    connect(timer, &QTimer::timeout, this, [this, timer, maxWaitMs, elapsed = 0]() mutable {
+        elapsed += timer->interval();
+        QDBusReply<QString> reply = call(QStringLiteral("get_display_status"));
+        const QString status = reply.isValid() ? reply.value() : QString();
+        if (status == QLatin1String("on") || status == QLatin1String("dimmed")) {
+            LOG("Display on after" << elapsed << "ms, lifting tklock");
+            tklockUnlock();
+            timer->stop();
+            timer->deleteLater();
+        } else if (elapsed >= maxWaitMs) {
+            LOG("Display still" << status << "after" << elapsed << "ms, giving up on tklock");
+            timer->stop();
+            timer->deleteLater();
+        }
+    });
+    timer->start();
+}
+
+void MceInterface::callStateChange(const QString &state, const QString &type)
+{
+    QDBusMessage reply = call(QStringLiteral("req_call_state_change"), state, type);
+    bool accepted = false;
+    if (reply.type() == QDBusMessage::ReplyMessage && !reply.arguments().isEmpty()) {
+        accepted = reply.arguments().first().toBool();
+    }
+    LOG("Call state change requested:" << state << type << "accepted:" << accepted
+        << (reply.type() == QDBusMessage::ErrorMessage ? reply.errorMessage() : QString()));
 }

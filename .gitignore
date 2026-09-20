@@ -67,3 +67,9 @@ src/appversion.h
 /documentation.list
 /RPMS/
 /.mb2/
+
+# Voice calls: tgcalls + tg_owt (see NOTICE.md for where to get them). The
+# per-arch codec libs in bundledlibs/ are already covered by *.so/*.so.*
+# above; this covers the rest of the multi-hundred-MB tg_owt source/prebuild
+# tree, provisioned the same way /tdlib/ is (see README.md's Build section).
+/vendor/

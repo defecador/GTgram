@@ -104,6 +104,8 @@ signals:
     void chatDraftMessageUpdated(qlonglong chatId, const QVariantMap &draftMessage, const QString &order);
     void inlineQueryResults(const QString &inlineQueryId, const QString &nextOffset, const QVariantList &results, const QString &switchPmText, const QString &switchPmParameter, const QString &extra);
     void callbackQueryAnswer(const QString &text, bool alert, const QString &url);
+    void callUpdated(const QVariantMap &call);
+    void callSignalingDataReceived(qlonglong callId, const QByteArray &data);
     void userPrivacySettingRules(const QVariantMap &rules);
     void userPrivacySettingRulesUpdated(const QVariantMap &updatedRules);
     void messageInteractionInfoUpdated(qlonglong chatId, qlonglong messageId, const QVariantMap &updatedInfo);
@@ -202,6 +204,8 @@ private:
     void processUpdateChatUnreadMentionCount(const QVariantMap &receivedInformation);
     void processUpdateChatUnreadReactionCount(const QVariantMap &receivedInformation);
     void processUpdateActiveEmojiReactions(const QVariantMap &receivedInformation);
+    void processUpdateCall(const QVariantMap &receivedInformation);
+    void processUpdateNewCallSignalingData(const QVariantMap &receivedInformation);
 };
 
 #endif // TDLIBRECEIVER_H

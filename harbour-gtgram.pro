@@ -62,6 +62,7 @@ SOURCES += src/harbour-gtgram.cpp \
 DISTFILES += qml/harbour-gtgram.qml \
     qml/components/AudioPreview.qml \
     qml/components/BackgroundImage.qml \
+    qml/components/CallOverlay.qml \
     qml/components/ChatListViewItem.qml \
     qml/components/ContactSync.qml \
     qml/components/DocumentPreview.qml \
@@ -171,6 +172,16 @@ DISTFILES += qml/harbour-gtgram.qml \
     rpm/harbour-gtgram.spec \
     rpm/harbour-gtgram.yaml \
     translations/*.ts \
+    bin/restart-voicecall.sh \
+    voicecallplugin/harbour-gtgram-voicecall-plugin.pro \
+    voicecallplugin/gtgramcallsadaptor.h \
+    voicecallplugin/gtgramcallsadaptor.cpp \
+    voicecallplugin/gtgramvoicecallhandler.h \
+    voicecallplugin/gtgramvoicecallhandler.cpp \
+    voicecallplugin/gtgramvoicecallprovider.h \
+    voicecallplugin/gtgramvoicecallprovider.cpp \
+    voicecallplugin/gtgramvoicecallproviderfactory.h \
+    voicecallplugin/gtgramvoicecallproviderfactory.cpp \
     harbour-gtgram.desktop
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172 256x256
@@ -201,11 +212,78 @@ equals(QT_ARCH, arm64){
     TARGET_ARCHITECTURE = aarch64
 }
 
+# Voice calls (tgcalls + tg_owt), opt-in: qmake CONFIG+=gtgram_voicecalls
+#
+# TDLib only handles call *signaling* - the actual audio needs a WebRTC media
+# stack, which for Telegram means tgcalls on top of tg_owt (Telegram's WebRTC
+# fork). Both are vendored under vendor/ (NOT committed to git - see
+# NOTICE.md for where to get them) rather than built from this .pro, because
+# tg_owt is a multi-hundred-MB prebuilt static lib per architecture; only
+# aarch64 has a prebuild, so this is aarch64-only for now.
+CONFIG += gtgram_voicecalls
+gtgram_voicecalls {
+    equals(QT_ARCH, arm64) {
+        message(Voice calls: tgcalls + tg_owt enabled)
+        DEFINES += GTGRAM_VOICE_CALLS
+        # tg_owt/tgcalls need C++17 (std::optional); force gnu++17 specifically
+        # (not gnu++2a/20) since Qt 5.6's <QtCore/qfutureinterface.h> uses the
+        # injected-class-name as a constructor name in a way C++20 rejects.
+        QMAKE_CXXFLAGS += -std=gnu++17
+        HEADERS += src/callmanager.h src/systemcallbridge.h
+        SOURCES += src/callmanager.cpp src/systemcallbridge.cpp
+        # Voice-only build: no camera/video capture, so use tgcalls' own no-op
+        # PlatformInterface (only the desktop/mobile platforms it ships one
+        # for need a real one - Sailfish isn't among them).
+        SOURCES += vendor/tgcalls/upstream/tgcalls/platform/fake/FakeInterface.cpp
+        HEADERS += vendor/tgcalls/upstream/tgcalls/platform/fake/FakeInterface.h
+        # libtg_owt.a was built with H264 support (references openh264's
+        # encoder), which the SDK target doesn't provide - it's only reached
+        # by video calls, so stub it out rather than bundling openh264.
+        SOURCES += src/openh264_stub.cpp
+        include(vendor/tg_owt/abseil-cpp.pri)
+        include(vendor/tg_owt/tg_owt.pri)
+        include(vendor/tgcalls/tgcalls.pri)
+        # libtg_owt.a was built against OpenSSL 1.1 (references versioned
+        # symbols like SSL_get_peer_certificate@@OPENSSL_1_1_0), so it must
+        # link that exact soname rather than the SDK's default OpenSSL 3.x.
+        # bundledlibs/<arch>/ ships app-private copies of the codec libs
+        # because SFOS target sonames drift across OS versions (e.g. SFOS 5.2
+        # ships libvpx.so.12, not the .so.9 this was built against);
+        # -rpath-link resolves their further transitive deps (theora/vorbis/
+        # webp) without adding them as direct link dependencies.
+        LIBS += -L$$PWD/bundledlibs/$${TARGET_ARCHITECTURE} \
+                -Wl,-rpath-link,$$PWD/bundledlibs/$${TARGET_ARCHITECTURE} \
+                -l:libssl.so.1.1 -l:libcrypto.so.1.1 -lz -lpulse \
+                -l:libopus.so.0 \
+                -l:libvpx.so.9 \
+                -l:libavcodec.so.59 \
+                -l:libavutil.so.57
+    } else {
+        warning(gtgram_voicecalls requested but QT_ARCH is not arm64: scope ignored)
+    }
+}
+
 INCLUDEPATH += $$PWD/tdlib/include
 DEPENDPATH += $$PWD/tdlib/include
 LIBS += -L$$PWD/tdlib/$${TARGET_ARCHITECTURE}/lib/ -ltdjson
 telegram.files = $$PWD/tdlib/$${TARGET_ARCHITECTURE}/lib
 telegram.path = /usr/share/$${TARGET}
+
+gtgram_voicecalls {
+    equals(QT_ARCH, arm64) {
+        # Ships alongside libtdjson.so in the same directory, which the
+        # sailfishapp CONFIG already puts on the binary's rpath.
+        bundledlibs.files = $$files($$PWD/bundledlibs/$${TARGET_ARCHITECTURE}/*.so.*)
+        bundledlibs.path = /usr/share/$${TARGET}/lib
+        INSTALLS += bundledlibs
+
+        # Restarts voicecall-manager after install so it picks up
+        # voicecallplugin/ (built and packaged separately - see rpm/*.spec).
+        voicecallrestart.files = $$PWD/bin/restart-voicecall.sh
+        voicecallrestart.path = /usr/share/$${TARGET}/bin
+        INSTALLS += voicecallrestart
+    }
+}
 
 gui.files = qml
 gui.path = /usr/share/$${TARGET}

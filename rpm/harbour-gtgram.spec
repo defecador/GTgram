@@ -8,12 +8,12 @@ Name:       harbour-gtgram
 # >> macros
 # << macros
 %define __provides_exclude_from ^%{_datadir}/.*$
-%define __requires_exclude ^libtdjson.*$
+%define __requires_exclude ^(libtdjson|libavcodec|libavutil|libswresample|libvpx|libopus|libvorbisenc|libvorbis|libtheoradec|libtheoraenc|libwebpmux|libwebp|libopenjp2|libspeex|libogg|libsharpyuv)\..*$
 %define _binary_payload w6.xzdio
 
 Summary:    GTgram is a Telegram client for Sailfish OS
 Version:    0.18
-Release:    56
+Release:    57
 Group:      Qt/Qt
 License:    LICENSE
 URL:        http://werkwolf.eu/
@@ -33,6 +33,8 @@ BuildRequires:  pkgconfig(Qt5Positioning)
 BuildRequires:  pkgconfig(nemonotifications-qt5)
 BuildRequires:  pkgconfig(openssl)
 BuildRequires:  gperf
+BuildRequires:  pulseaudio-devel
+BuildRequires:  voicecall-qt5-devel
 BuildRequires:  desktop-file-utils
 
 %description
@@ -54,6 +56,20 @@ GTgram is a Telegram client for Sailfish OS
 make %{?_smp_mflags}
 
 # >> build post
+# voicecallplugin/ lives in the same project and the same RPM as the app, but
+# its .so MUST end up in /usr/lib64/voicecall/plugins because voicecall-manager
+# loads providers inside its own process (there's no way to register from
+# outside - its D-Bus is read-only for that).
+%ifarch aarch64
+cd voicecallplugin
+# Mandatory cleanup: leftover objects from a previous build (possibly a
+# different architecture) would otherwise be reused by make, and the link
+# would fail with wrong-arch symbols.
+rm -f *.o moc_* Makefile *.so
+%qmake5
+make %{?_smp_mflags}
+cd ..
+%endif
 # << build post
 
 %install
@@ -63,6 +79,11 @@ rm -rf %{buildroot}
 %qmake5_install
 
 # >> install post
+%ifarch aarch64
+mkdir -p %{buildroot}/usr/lib64/voicecall/plugins
+install -m 644 voicecallplugin/libgtgram-voicecall-plugin.so \
+%{buildroot}/usr/lib64/voicecall/plugins/libgtgram-voicecall-plugin.so
+%endif
 # << install post
 
 desktop-file-install --delete-original       \
@@ -75,5 +96,19 @@ desktop-file-install --delete-original       \
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
+%ifarch aarch64
+/usr/lib64/voicecall/plugins/libgtgram-voicecall-plugin.so
+%endif
 # >> files
+%ifarch aarch64
+/usr/lib64/voicecall/plugins/libgtgram-voicecall-plugin.so
+%endif
 # << files
+
+%posttrans
+# Restarts voicecall-manager so it picks up voicecallplugin/ (installed
+# above) right away instead of waiting for a reboot - see
+# bin/restart-voicecall.sh.
+%ifarch aarch64
+%{_datadir}/%{name}/bin/restart-voicecall.sh
+%endif

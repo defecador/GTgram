@@ -40,6 +40,23 @@ const char TDLIB_API_HASH[] = "1234567890abcdef1234567890abcdef";
 The GitHub Actions workflow in `.github/workflows` builds the RPMs too. It expects the API ID
 and hash as repository secrets named `TDLIB_API_ID` and `TDLIB_API_HASH`.
 
+### Voice calls (optional, aarch64 only)
+Voice calls are built with `qmake CONFIG+=gtgram_voicecalls` (on by default). They need
+[tgcalls](https://github.com/TelegramMessenger/tgcalls) and
+[tg_owt](https://github.com/desktop-app/tg_owt) (Telegram's WebRTC fork) provided the same way
+TDLib is - not checked into this repository, because tg_owt alone is several hundred MB of
+source plus a per-architecture prebuilt static library:
+
+- `vendor/tgcalls/` - tgcalls' own source tree plus a `tgcalls.pri` (compiled from source).
+- `vendor/tg_owt/` - tg_owt's source tree (for headers) plus `tg_owt.pri`/`abseil-cpp.pri`, and
+  `prebuilds/aarch64/libtg_owt.a` (only aarch64 has a prebuild, so voice calls are aarch64-only).
+- `bundledlibs/aarch64/` - the codec `.so`s (`libopus`, `libvpx`, ffmpeg's `libavcodec`/
+  `libavutil`, and their transitive deps) that `libtg_owt.a` was linked against, shipped
+  alongside `libtdjson.so` since Sailfish OS target sonames drift across releases.
+
+To build without voice calls (any architecture, no extra dependencies), pass
+`CONFIG-=gtgram_voicecalls` to `mb2`/`qmake`.
+
 ## Debug
 By default GTgram only prints a few TDLib messages. To see its own debug output, run a debug
 build or filter with `QT_LOGGING_RULES`:
@@ -63,3 +80,8 @@ It also uses:
 - Emoji parsing and artwork by [Twemoji](https://github.com/jdecked/twemoji), copyright 2026 by Twemoji contributors; code under the [MIT License](http://opensource.org/licenses/MIT), graphics under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 - Animated stickers by [rlottie](https://github.com/Samsung/rlottie), copyright 2020 Samsung Electronics Co., Ltd. and [other contributors](https://github.com/Samsung/rlottie/blob/master/AUTHORS), under the [MIT License](https://github.com/Samsung/rlottie/blob/master/licenses/COPYING.MIT), with some components under [other licenses](https://github.com/Samsung/rlottie/blob/master/COPYING).
 - Reverse geocoding for location attachments by [OpenStreetMap Nominatim](https://wiki.openstreetmap.org/wiki/Nominatim).
+- Voice calls, ported from [RooTelegram-SailfishOS](https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS)
+  (GPLv3) by RootGPT, another Fernschreiber-derived Sailfish OS Telegram client. It in turn
+  built this on [tgcalls](https://github.com/TelegramMessenger/tgcalls) (LGPLv3) and
+  [tg_owt](https://github.com/desktop-app/tg_owt) (Telegram's WebRTC fork; BSD-style,
+  GPL-compatible), both by Telegram Messenger LLP.

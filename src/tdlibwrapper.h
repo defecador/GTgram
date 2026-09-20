@@ -257,6 +257,10 @@ public:
     Q_INVOKABLE void removeMessageReaction(qlonglong chatId, qlonglong messageId, const QString &reaction);
     Q_INVOKABLE void setNetworkType(NetworkType networkType);
     Q_INVOKABLE void setInactiveSessionTtl(int days);
+    Q_INVOKABLE void createVoiceCall(const QString &userId, bool isVideo = false);
+    Q_INVOKABLE void acceptVoiceCall(qlonglong callId, bool isVideo = false);
+    Q_INVOKABLE void discardVoiceCall(qlonglong callId, bool isDisconnected = false, int duration = 0, bool isVideo = false, qlonglong connectionId = 0);
+    Q_INVOKABLE void sendCallSignalingData(qlonglong callId, const QByteArray &data);
 
     // Others (candidates for extraction ;))
     Q_INVOKABLE void searchEmoji(const QString &queryString);
@@ -340,6 +344,8 @@ signals:
     void chatDraftMessageUpdated(qlonglong chatId, const QVariantMap &draftMessage, const QString &order);
     void inlineQueryResults(const QString &inlineQueryId, const QString &nextOffset, const QVariantList &results, const QString &switchPmText, const QString &switchPmParameter, const QString &extra);
     void callbackQueryAnswer(const QString &text, bool alert, const QString &url);
+    void callUpdated(const QVariantMap &call);
+    void callSignalingDataReceived(qlonglong callId, const QByteArray &data);
     void userPrivacySettingUpdated(UserPrivacySetting setting, UserPrivacySettingRule rule);
     void messageInteractionInfoUpdated(qlonglong chatId, qlonglong messageId, const QVariantMap &updatedInfo);
     void okReceived(const QString &request);
