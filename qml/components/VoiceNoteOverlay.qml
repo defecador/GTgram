@@ -208,6 +208,7 @@ Item {
                 onClicked: {
                     attachmentOptionsFlickable.isNeeded = false;
                     attachmentPreviewRow.isVoiceNote = true;
+                    attachmentPreviewRow.voiceNoteDurationSeconds = recordingDuration;
                     attachmentPreviewRow.attachmentDescription = qsTr("Voice Note (%1)").arg(recordingDurationLabel.text);
                     controlSendButton();
                     voiceNoteOverlayLoader.active = false;

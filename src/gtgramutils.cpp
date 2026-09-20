@@ -73,10 +73,18 @@ GTgramUtils::GTgramUtils(QObject *parent)
         temporaryDirectory.mkpath(temporaryDirectoryPath);
     }
 
+    // TDLib requires voice notes to be "encoded with the Opus codec and
+    // stored inside an OGG container with a single audio channel" - recording
+    // in OGG/Vorbis (as before) produces a file strict clients like Telegram
+    // iOS show as an empty message. setQuality() has no defined mapping for
+    // opusenc (SailfishOS's Qt Multimedia backend), so the bitrate is set
+    // explicitly instead - 32kbps mono matches what RooTelegram-SailfishOS
+    // (GPLv3) already verified working on-device for this same bug.
     QAudioEncoderSettings encoderSettings;
-    encoderSettings.setCodec("audio/vorbis");
+    encoderSettings.setCodec("audio/opus");
     encoderSettings.setChannelCount(1);
-    encoderSettings.setQuality(QMultimedia::LowQuality);
+    encoderSettings.setEncodingMode(QMultimedia::AverageBitRateEncoding);
+    encoderSettings.setBitRate(32000);
     this->audioRecorder.setEncodingSettings(encoderSettings);
     this->audioRecorder.setContainerFormat("ogg");
 

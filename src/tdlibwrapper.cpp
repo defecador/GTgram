@@ -603,9 +603,9 @@ void TDLibWrapper::sendDocumentMessage(qlonglong chatId, const QString &filePath
     this->sendRequest(requestObject);
 }
 
-void TDLibWrapper::sendVoiceNoteMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId, const QVariantMap &sendOptions)
+void TDLibWrapper::sendVoiceNoteMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId, const QVariantMap &sendOptions, int durationSeconds)
 {
-    LOG("Sending voice note message" << chatId << filePath << message << replyToMessageId);
+    LOG("Sending voice note message" << chatId << filePath << message << replyToMessageId << durationSeconds);
     QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId, sendOptions));
     QVariantMap inputMessageContent;
     inputMessageContent.insert(_TYPE, "inputMessageVoiceNote");
@@ -618,6 +618,7 @@ void TDLibWrapper::sendVoiceNoteMessage(qlonglong chatId, const QString &filePat
     documentInputFile.insert(_TYPE, "inputFileLocal");
     documentInputFile.insert("path", filePath);
     inputMessageContent.insert("voice_note", documentInputFile);
+    inputMessageContent.insert("duration", durationSeconds);
 
     requestObject.insert("input_message_content", inputMessageContent);
     this->sendRequest(requestObject);

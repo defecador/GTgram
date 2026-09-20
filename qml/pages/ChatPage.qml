@@ -259,6 +259,7 @@ Page {
         attachmentPreviewRow.isVideo = false;
         attachmentPreviewRow.isDocument = false;
         attachmentPreviewRow.isVoiceNote = false;
+        attachmentPreviewRow.voiceNoteDurationSeconds = 0;
         attachmentPreviewRow.isLocation = false;
         attachmentPreviewRow.fileProperties = null;
         attachmentPreviewRow.locationData = null;
@@ -397,7 +398,7 @@ Page {
                     tdLibWrapper.sendDocumentMessage(chatInformation.id, attachmentPreviewRow.fileProperties.filePath, newMessageTextField.text, newMessageColumn.replyToMessageId, options);
                 }
                 if (attachmentPreviewRow.isVoiceNote) {
-                    tdLibWrapper.sendVoiceNoteMessage(chatInformation.id, gtgramUtils.voiceNotePath(), newMessageTextField.text, newMessageColumn.replyToMessageId, options);
+                    tdLibWrapper.sendVoiceNoteMessage(chatInformation.id, gtgramUtils.voiceNotePath(), newMessageTextField.text, newMessageColumn.replyToMessageId, options, attachmentPreviewRow.voiceNoteDurationSeconds);
                 }
                 if (attachmentPreviewRow.isLocation) {
                     tdLibWrapper.sendLocationMessage(chatInformation.id, attachmentPreviewRow.locationData.latitude, attachmentPreviewRow.locationData.longitude, attachmentPreviewRow.locationData.horizontalAccuracy, newMessageColumn.replyToMessageId, options);
@@ -2100,6 +2101,7 @@ Page {
                         property bool isVideo: false;
                         property bool isDocument: false;
                         property bool isVoiceNote: false;
+                        property int voiceNoteDurationSeconds: 0;
                         property bool isLocation: false;
                         property var locationData: null;
                         property var geocodedAddress: qsTr("Unknown address")
