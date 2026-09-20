@@ -46,6 +46,8 @@ public slots:
     void handleUpdateNotification(const QVariantMap &updatedNotification);
     void handleChatDiscovered(const QString &chatId, const QVariantMap &chatInformation);
     void handleChatTitleUpdated(const QString &chatId, const QString &title);
+    void handleChatPhotoUpdated(qlonglong chatId, const QVariantMap &photo);
+    void handleFileUpdated(int fileId, const QVariantMap &fileInformation);
     void replyToMessage(const QString &chatId, const QString &messageId, const QString &text);
     void reactToMessage(const QString &chatId, const QString &messageId);
 
@@ -53,6 +55,7 @@ private:
 
     void publishNotification(const NotificationGroup *notificationGroup, bool needFeedback);
     void controlLedNotification(bool enabled);
+    NotificationGroup *findGroupForChat(qlonglong chatId) const;
     void updateNotificationGroup(int groupId, qlonglong chatId, int totalCount,
         const QVariantList &addedNotifications,
         const QVariantList &removedNotificationIds = QVariantList(),

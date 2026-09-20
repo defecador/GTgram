@@ -45,6 +45,11 @@ namespace {
     const QString LAST_NAME("last_name");
     const QString SENDER_ID("sender_id");
     const QString USER_ID("user_id");
+    const QString PHOTO("photo");
+    const QString SMALL("small");
+    const QString LOCAL("local");
+    const QString IS_DOWNLOADING_COMPLETED("is_downloading_completed");
+    const QString PATH("path");
     const QString NOTIFICATIONS("notifications");
     const QString NOTIFICATION_GROUP_ID("notification_group_id");
     const QString ADDED_NOTIFICATIONS("added_notifications");
@@ -87,6 +92,7 @@ public:
     TDLibWrapper::ChatType type;
     bool isChannel;
     QString title;
+    QVariantMap photoSmall;
 };
 
 NotificationManager::ChatInfo::ChatInfo(const QVariantMap &chatInfo)
@@ -100,6 +106,7 @@ void NotificationManager::ChatInfo::setChatInfo(const QVariantMap &chatInfo)
     type = TDLibWrapper::chatTypeFromString(chatTypeInformation.value(_TYPE).toString());
     isChannel = chatTypeInformation.value(IS_CHANNEL).toBool();
     title = chatInfo.value(TITLE).toString();
+    photoSmall = chatInfo.value(PHOTO).toMap().value(SMALL).toMap();
 }
 
 class NotificationManager::NotificationGroup
@@ -145,6 +152,8 @@ NotificationManager::NotificationManager(TDLibWrapper *tdLibWrapper, AppSettings
     connect(this->tdLibWrapper, SIGNAL(notificationUpdated(QVariantMap)), this, SLOT(handleUpdateNotification(QVariantMap)));
     connect(this->tdLibWrapper, SIGNAL(newChatDiscovered(QString, QVariantMap)), this, SLOT(handleChatDiscovered(QString, QVariantMap)));
     connect(this->tdLibWrapper, SIGNAL(chatTitleUpdated(QString, QString)), this, SLOT(handleChatTitleUpdated(QString, QString)));
+    connect(this->tdLibWrapper, SIGNAL(chatPhotoUpdated(qlonglong, QVariantMap)), this, SLOT(handleChatPhotoUpdated(qlonglong, QVariantMap)));
+    connect(this->tdLibWrapper, SIGNAL(fileUpdated(int, QVariantMap)), this, SLOT(handleFileUpdated(int, QVariantMap)));
 
     this->controlLedNotification(false);
 
@@ -311,16 +320,63 @@ void NotificationManager::handleChatTitleUpdated(const QString &chatId, const QS
         chat->title = title;
 
         // Silently update notification summary
-        QListIterator<NotificationGroup*> groupsIterator(notificationGroups.values());
-        while (groupsIterator.hasNext()) {
-            const NotificationGroup *group = groupsIterator.next();
-            if (group->chatId == id) {
-                LOG("Updating summary for group ID" << group->notificationGroupId);
-                publishNotification(group, false);
-                break;
-            }
+        const NotificationGroup *group = findGroupForChat(id);
+        if (group) {
+            LOG("Updating summary for group ID" << group->notificationGroupId);
+            publishNotification(group, false);
         }
     }
+}
+
+void NotificationManager::handleChatPhotoUpdated(qlonglong chatId, const QVariantMap &photo)
+{
+    ChatInfo *chat = chatMap.value(chatId);
+    if (chat) {
+        LOG("Chat" << chatId << "photo changed");
+        chat->photoSmall = photo.value(SMALL).toMap();
+
+        // Silently update the notification icon, if there's one showing
+        const NotificationGroup *group = findGroupForChat(chatId);
+        if (group) {
+            LOG("Updating icon for group ID" << group->notificationGroupId);
+            publishNotification(group, false);
+        }
+    }
+}
+
+void NotificationManager::handleFileUpdated(int fileId, const QVariantMap &fileInformation)
+{
+    if (!fileInformation.value(LOCAL).toMap().value(IS_DOWNLOADING_COMPLETED).toBool()) {
+        return;
+    }
+    QMapIterator<qlonglong,ChatInfo*> chatIterator(chatMap);
+    while (chatIterator.hasNext()) {
+        chatIterator.next();
+        ChatInfo *chat = chatIterator.value();
+        if (chat->photoSmall.value(ID).toInt() == fileId) {
+            LOG("Chat" << chatIterator.key() << "photo download completed");
+            chat->photoSmall = fileInformation;
+
+            const NotificationGroup *group = findGroupForChat(chatIterator.key());
+            if (group) {
+                LOG("Updating icon for group ID" << group->notificationGroupId);
+                publishNotification(group, false);
+            }
+            break;
+        }
+    }
+}
+
+NotificationManager::NotificationGroup *NotificationManager::findGroupForChat(qlonglong chatId) const
+{
+    QListIterator<NotificationGroup*> groupsIterator(notificationGroups.values());
+    while (groupsIterator.hasNext()) {
+        NotificationGroup *group = groupsIterator.next();
+        if (group->chatId == chatId) {
+            return group;
+        }
+    }
+    return Q_NULLPTR;
 }
 
 void NotificationManager::replyToMessage(const QString &chatId, const QString &messageId, const QString &text)
@@ -427,7 +483,23 @@ void NotificationManager::publishNotification(const NotificationGroup *notificat
     nemoNotification->setBody(notificationBody);
     nemoNotification->setSummary(summary);
     nemoNotification->setHintValue(HINT_VIBRA, needFeedback);
-    nemoNotification->setHintValue(HINT_IMAGE_PATH, QString());
+
+    // Show the chat's/sender's avatar if we already have it downloaded;
+    // otherwise fetch it and update the notification once handleFileUpdated
+    // sees it complete (TDLib only hands out file ids, never the file itself).
+    QString avatarPath;
+    if (chatInformation) {
+        const QVariantMap photoLocal = chatInformation->photoSmall.value(LOCAL).toMap();
+        if (photoLocal.value(IS_DOWNLOADING_COMPLETED).toBool()) {
+            avatarPath = photoLocal.value(PATH).toString();
+        } else {
+            const int photoFileId = chatInformation->photoSmall.value(ID).toInt();
+            if (photoFileId > 0) {
+                tdLibWrapper->downloadFile(photoFileId);
+            }
+        }
+    }
+    nemoNotification->setHintValue(HINT_IMAGE_PATH, avatarPath);
 
     // Don't show popup for the currently open chat
     if (!needFeedback || (chatModel->getChatId() == notificationGroup->chatId &&
