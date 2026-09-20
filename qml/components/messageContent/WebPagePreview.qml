@@ -30,6 +30,7 @@ Column {
     property bool largerFontSize: false;
     property bool highlighted
     readonly property bool hasImage: picture.fileId !== 0
+    readonly property var previewPhoto: Functions.getLinkPreviewPhoto(webPageData)
     readonly property int fontSize: largerFontSize ? Theme.fontSizeSmall : Theme.fontSizeExtraSmall
 
     spacing: Theme.paddingSmall
@@ -39,20 +40,9 @@ Column {
     onWebPageDataChanged: updatePhoto()
 
     function updatePhoto() {
-        if (webPageData) {
-            if (webPageData.photo) {
-                // Check first which size fits best...
-                var photo
-                for (var i = 0; i < webPageData.photo.sizes.length; i++) {
-                    photo = webPageData.photo.sizes[i].photo;
-                    if (webPageData.photo.sizes[i].width >= webPagePreviewColumn.width) {
-                        break;
-                    }
-                }
-                if (photo) {
-                    picture.fileInformation = photo
-                }
-            }
+        var file = Functions.getLinkPreviewImageFile(webPageData, webPagePreviewColumn.width);
+        if (file) {
+            picture.fileInformation = file
         }
     }
 
@@ -132,8 +122,10 @@ Column {
             Behavior on opacity { FadeAnimation {} }
             MouseArea {
                 anchors.fill: parent
+                // Only a real photo can be opened full screen; a video thumbnail can't
+                enabled: !!webPagePreviewColumn.previewPhoto
                 onClicked: {
-                    pageStack.push(Qt.resolvedUrl("../../pages/ImagePage.qml"), { "photoData" : webPageData.photo, "pictureFileInformation" : picture.fileInformation });
+                    pageStack.push(Qt.resolvedUrl("../../pages/ImagePage.qml"), { "photoData" : webPagePreviewColumn.previewPhoto, "pictureFileInformation" : picture.fileInformation });
                 }
             }
         }

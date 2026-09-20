@@ -407,7 +407,7 @@ ListItem {
         messageDateText.text = getMessageStatusText(myMessage, messageIndex, chatView.lastReadSentIndex, messageDateText.useElapsed);
         messageText.text = Emoji.emojify(Functions.getMessageText(myMessage, false, page.myUserId, false), Theme.fontSizeSmall);
         if (webPagePreviewLoader.item) {
-            webPagePreviewLoader.item.webPageData = myMessage.content.web_page;
+            webPagePreviewLoader.item.webPageData = Functions.getLinkPreview(myMessage.content);
         }
     }
 
@@ -426,7 +426,7 @@ ListItem {
                                 messageListItem: messageListItem
                             })
             } else {
-                if (typeof myMessage.content.web_page !== "undefined") { // only in messageText
+                if (Functions.getLinkPreview(myMessage.content)) { // only in messageText
                     webPagePreviewLoader.active = true;
                 }
             }
@@ -681,11 +681,11 @@ ListItem {
                     active: false
                     asynchronous: true
                     width: parent.width * getContentWidthMultiplier()
-                    height: (status === Loader.Ready) ? item.implicitHeight : myMessage.content.web_page ? precalculatedValues.webPagePreviewHeight : 0
+                    height: (status === Loader.Ready) ? item.implicitHeight : Functions.getLinkPreview(myMessage.content) ? precalculatedValues.webPagePreviewHeight : 0
 
                     sourceComponent: Component {
                         WebPagePreview {
-                            webPageData: myMessage.content.web_page
+                            webPageData: Functions.getLinkPreview(myMessage.content)
                             width: parent.width
                             highlighted: messageListItem.highlighted
                         }

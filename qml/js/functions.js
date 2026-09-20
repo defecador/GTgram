@@ -238,6 +238,62 @@ function getDateTimeTimepoint(timestamp) {
     return Silica.Format.formatDate(new Date(timestamp * 1000), Silica.Formatter.TimepointRelative);
 }
 
+// TDLib renamed webPage to linkPreview: a text message carries "link_preview" instead of
+// "web_page", and the image moved into the type union (article, photo, embedded video player
+// for a YouTube link, and so on). Both shapes are accepted here.
+function getLinkPreview(messageContent) {
+    if (!messageContent) {
+        return null;
+    }
+    return messageContent.link_preview || messageContent.web_page || null;
+}
+
+function getLinkPreviewPhoto(linkPreview) {
+    if (!linkPreview) {
+        return null;
+    }
+    if (linkPreview.photo && linkPreview.photo.sizes) {
+        return linkPreview.photo;
+    }
+    var type = linkPreview.type;
+    for (var key in type) {
+        var value = type[key];
+        if (value && typeof value === "object" && value.sizes) {
+            return value;
+        }
+    }
+    return null;
+}
+
+// The file to download for the preview image: a photo size where there is one, otherwise the
+// thumbnail of whatever the link points at
+function getLinkPreviewImageFile(linkPreview, preferredWidth) {
+    var photo = getLinkPreviewPhoto(linkPreview);
+    if (photo) {
+        var file = null;
+        for (var i = 0; i < photo.sizes.length; i++) {
+            file = photo.sizes[i].photo;
+            if (photo.sizes[i].width >= preferredWidth) {
+                break;
+            }
+        }
+        return file;
+    }
+    var type = linkPreview ? linkPreview.type : null;
+    for (var key in type) {
+        var value = type[key];
+        if (value && typeof value === "object") {
+            if (value.thumbnail && value.thumbnail.file) {
+                return value.thumbnail.file;
+            }
+            if (value.file && value.width) {
+                return value.file;
+            }
+        }
+    }
+    return null;
+}
+
 function getScheduledDateText(timestamp) {
     var date = new Date(timestamp * 1000);
     return Silica.Format.formatDate(date, Silica.Formatter.DateMedium) + ", " + Silica.Format.formatDate(date, Silica.Formatter.TimeValue);
