@@ -96,6 +96,57 @@
     </message>
 </context>
 <context>
+    <name>CallOverlay</name>
+    <message>
+        <source>Calling…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Incoming voice call</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Exchanging encryption keys…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ending call…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>If these emoji match your contact&apos;s, the call is end-to-end encrypted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Decline</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unmute</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Mute</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Speaker off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Speaker</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>End call</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ChatInformationPageContent</name>
     <message numerus="yes">
         <source>%1 subscribers</source>
@@ -183,6 +234,10 @@
     <message>
         <source>ID has been copied to the clipboard.</source>
         <translation>Az azonosító a vágólapra került.</translation>
+    </message>
+    <message>
+        <source>Voice Call</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -524,6 +579,10 @@
     </message>
     <message>
         <source>Send silently</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Only the first shared file has been prepared.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -947,6 +1006,24 @@
         <source>sent a video note</source>
         <translation>Videó üzenetet küldött</translation>
     </message>
+    <message>
+        <source>shared a contact</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>shared the contact %1</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>shared a contact</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>shared the contact %1</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ImagePage</name>
@@ -1043,6 +1120,29 @@
     <message>
         <source>Welcome to GTgram!</source>
         <translation>Üdvözöl a GTgram!</translation>
+    </message>
+</context>
+<context>
+    <name>MessageContact</name>
+    <message>
+        <source>Contact saved to address book</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not save the contact</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Contact</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add to contacts</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2488,6 +2588,42 @@
     <message>
         <source>sent a game</source>
         <translation>játékot küldött</translation>
+    </message>
+    <message>
+        <source>shared a contact</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>shared a contact</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>harbour-gtgram</name>
+    <message>
+        <source>Unknown caller</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Call declined</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No answer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Missed call</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Call failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Send shared content</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>
