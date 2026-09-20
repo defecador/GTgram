@@ -145,6 +145,22 @@
         <source>End call</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Incoming video call</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Camera off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Camera on</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Flip camera</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ChatInformationPageContent</name>
@@ -237,6 +253,10 @@
     </message>
     <message>
         <source>Voice Call</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Video Call</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
