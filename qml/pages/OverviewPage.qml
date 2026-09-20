@@ -107,20 +107,25 @@ Page {
 
     TextFilterModel {
         id: chatCategoryModel
-        // Always filtering (rather than nulling sourceModel for "All", an
-        // empty filterText already matches every row) keeps this the same
-        // proxy object across every tab switch, so SilicaListView below
-        // never has to tear down and recreate its delegates - that
-        // model-object swap was the source of the visible lag when
-        // switching into the Private/Groups/Channels tabs.
-        sourceModel: chatListModel
+        // Tried keeping this always active (an empty filterText already
+        // matches every row) to avoid the view's model-object swap when
+        // switching tabs - but chatListModel does frequent endMoveRows()
+        // during initial sync/reordering, and routing those through this
+        // proxy even while on "All" made QQmlDelegateModel re-incubate
+        // delegates on every reorder instead of cheaply repositioning them,
+        // hanging the whole app during chat-list load. Back to nulling
+        // sourceModel for "All" so it bypasses this proxy entirely and gets
+        // ListView's native (cheap) row-move handling straight from
+        // chatListModel - the tab-switch cost this reintroduces is a much
+        // smaller problem than an unresponsive app.
+        sourceModel: overviewPage.categoryFilter === "" ? null : chatListModel
         filterRoleName: "chatcategory"
         filterText: overviewPage.categoryFilter
     }
 
     TextFilterModel {
         id: chatListProxyModel
-        sourceModel: (chatSearchField.opacity > 0) ? chatCategoryModel : null
+        sourceModel: (chatSearchField.opacity > 0) ? (chatCategoryModel.sourceModel ? chatCategoryModel : chatListModel) : null
         filterRoleName: "filter"
         filterText: chatSearchField.text
     }
@@ -456,7 +461,8 @@ Page {
             clip: true
             opacity: (overviewPage.chatListCreated && !overviewPage.logoutLoading) ? 1 : 0
             Behavior on opacity { FadeAnimation {} }
-            model: chatListProxyModel.sourceModel ? chatListProxyModel : chatCategoryModel
+            model: chatListProxyModel.sourceModel ? chatListProxyModel
+                 : (chatCategoryModel.sourceModel ? chatCategoryModel : chatListModel)
             move: Transition {
                 NumberAnimation { properties: "y"; duration: 200; easing.type: Easing.InOutCubic }
             }
