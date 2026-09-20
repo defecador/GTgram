@@ -118,6 +118,7 @@ DISTFILES += qml/harbour-gtgram.qml \
     qml/components/messageContent/MessageAnimatedEmoji.qml \
     qml/components/messageContent/MessageAnimation.qml \
     qml/components/messageContent/MessageAudio.qml \
+    qml/components/messageContent/MessageContact.qml \
     qml/components/messageContent/MessageContentBase.qml \
     qml/components/messageContent/MessageContentFileInfoBase.qml \
     qml/components/messageContent/MessageDocument.qml \

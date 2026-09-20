@@ -59,6 +59,7 @@ signals:
     void chatOnlineMemberCountUpdated(const QString &chatId, int onlineMemberCount);
     void messagesReceived(const QVariantList &messages, int totalCount);
     void scheduledMessagesReceived(qlonglong chatId, const QVariantList &messages);
+    void pinnedMessagesReceived(qlonglong chatId, const QVariantList &messages);
     void messageLinkInfoReceived(const QString &url, const QVariantMap &messageLinkInfo, const QString &extra);
     void sponsoredMessageReceived(qlonglong chatId, const QVariantMap &message);
     void newMessageReceived(qlonglong chatId, const QVariantMap &message);

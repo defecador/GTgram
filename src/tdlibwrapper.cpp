@@ -170,6 +170,7 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(messageInformation(qlonglong, qlonglong, QVariantMap)), this, SLOT(handleMessageInformation(qlonglong, qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(messagePropertiesReceived(qlonglong, qlonglong, QVariantMap)), this, SIGNAL(messagePropertiesReceived(qlonglong, qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(scheduledMessagesReceived(qlonglong, QVariantList)), this, SIGNAL(scheduledMessagesReceived(qlonglong, QVariantList)));
+    connect(this->tdLibReceiver, SIGNAL(pinnedMessagesReceived(qlonglong, QVariantList)), this, SIGNAL(pinnedMessagesReceived(qlonglong, QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(messageSendSucceeded(qlonglong, qlonglong, QVariantMap)), this, SIGNAL(messageSendSucceeded(qlonglong, qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(activeNotificationsUpdated(QVariantList)), this, SIGNAL(activeNotificationsUpdated(QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(notificationGroupUpdated(QVariantMap)), this, SIGNAL(notificationGroupUpdated(QVariantMap)));
@@ -711,6 +712,29 @@ void TDLibWrapper::getChatScheduledMessages(qlonglong chatId)
     // TDLib answers with a plain "messages" object, just like for chat history; the extra is
     // how the receiver tells the two apart
     requestObject.insert(_EXTRA, QString("getChatScheduledMessages:%1").arg(chatId));
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::getChatPinnedMessages(qlonglong chatId)
+{
+    LOG("Retrieving pinned messages" << chatId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "searchChatMessages");
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert("query", QString());
+    requestObject.insert("filter", [](){
+        QVariantMap filter;
+        filter.insert(_TYPE, "searchMessagesFilterPinned");
+        return filter;
+    }());
+    requestObject.insert("from_message_id", 0);
+    requestObject.insert("offset", 0);
+    // A chat can have many pins; this covers what the official clients show
+    // before falling back to "jump into history" for anything older.
+    requestObject.insert("limit", 50);
+    // TDLib answers with a plain "foundChatMessages" object, just like a live
+    // in-chat text search; the extra is how the receiver tells them apart
+    requestObject.insert(_EXTRA, QString("getChatPinnedMessages:%1").arg(chatId));
     this->sendRequest(requestObject);
 }
 
@@ -2105,6 +2129,10 @@ void TDLibWrapper::handleErrorReceived(int code, const QString &message, const Q
             LOG("Could not get scheduled messages" << parts.at(1) << code << message);
             emit scheduledMessagesReceived(parts.at(1).toLongLong(), QVariantList());
             return;
+        } else if (parts.size() == 2 && parts.at(0) == QStringLiteral("getChatPinnedMessages")) {
+            LOG("Could not get pinned messages" << parts.at(1) << code << message);
+            emit pinnedMessagesReceived(parts.at(1).toLongLong(), QVariantList());
+            return;
         }
     }
     emit errorReceived(code, message, extra);
@@ -2454,7 +2482,12 @@ void TDLibWrapper::initializeOpenWith()
         fileOut.setCodec("UTF-8");
         fileOut << QString("[D-BUS Service]").toUtf8() << "\n";
         fileOut << QString("Name=de.ygriega.gtgram").toUtf8() << "\n";
-        fileOut << QString("Exec=sailjail -- /usr/bin/harbour-gtgram").toUtf8() << "\n";
+        // D-Bus activation execs this directly, with no shell and no PATH
+        // lookup - a bare "sailjail" (as opposed to Jolla's own services,
+        // which all use absolute paths) fails ExecFailed whenever this is
+        // actually needed, i.e. whenever GTgram isn't already running. That
+        // silently swallows notification taps while backgrounded/closed.
+        fileOut << QString("Exec=/usr/bin/invoker -s --type=generic /usr/bin/sailjail -p harbour-gtgram.desktop /usr/bin/harbour-gtgram -prestart").toUtf8() << "\n";
         fileOut.flush();
         dbusServiceFile.close();
     }

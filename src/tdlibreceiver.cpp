@@ -427,6 +427,16 @@ void TDLibReceiver::processMessages(const QVariantMap &receivedInformation)
 void TDLibReceiver::processFoundChatMessages(const QVariantMap &receivedInformation)
 {
     const int total_count = receivedInformation.value(TOTAL_COUNT).toInt();
+    const QString extra(receivedInformation.value(_EXTRA).toString());
+    if (extra.startsWith(QStringLiteral("getChatPinnedMessages:"))) {
+        // Same "foundChatMessages" type as a live in-chat text search, but
+        // this must never be mistaken for one - see the extra-tag dispatch
+        // for scheduled messages in processMessages() above.
+        const qlonglong chatId = extra.mid(extra.indexOf(':') + 1).toLongLong();
+        LOG("Received pinned messages for chat" << chatId << ", amount: " << total_count);
+        emit pinnedMessagesReceived(chatId, cleanupList(receivedInformation.value(MESSAGES).toList()));
+        return;
+    }
     LOG("Received found chat messages, amount: " << total_count);
     emit messagesReceived(cleanupList(receivedInformation.value(MESSAGES).toList()), total_count);
 }

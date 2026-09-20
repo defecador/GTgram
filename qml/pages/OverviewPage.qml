@@ -107,14 +107,20 @@ Page {
 
     TextFilterModel {
         id: chatCategoryModel
-        sourceModel: overviewPage.categoryFilter === "" ? null : chatListModel
+        // Always filtering (rather than nulling sourceModel for "All", an
+        // empty filterText already matches every row) keeps this the same
+        // proxy object across every tab switch, so SilicaListView below
+        // never has to tear down and recreate its delegates - that
+        // model-object swap was the source of the visible lag when
+        // switching into the Private/Groups/Channels tabs.
+        sourceModel: chatListModel
         filterRoleName: "chatcategory"
         filterText: overviewPage.categoryFilter
     }
 
     TextFilterModel {
         id: chatListProxyModel
-        sourceModel: (chatSearchField.opacity > 0) ? (chatCategoryModel.sourceModel ? chatCategoryModel : chatListModel) : null
+        sourceModel: (chatSearchField.opacity > 0) ? chatCategoryModel : null
         filterRoleName: "filter"
         filterText: chatSearchField.text
     }
@@ -450,8 +456,7 @@ Page {
             clip: true
             opacity: (overviewPage.chatListCreated && !overviewPage.logoutLoading) ? 1 : 0
             Behavior on opacity { FadeAnimation {} }
-            model: chatListProxyModel.sourceModel ? chatListProxyModel
-                 : (chatCategoryModel.sourceModel ? chatCategoryModel : chatListModel)
+            model: chatListProxyModel.sourceModel ? chatListProxyModel : chatCategoryModel
             move: Transition {
                 NumberAnimation { properties: "y"; duration: 200; easing.type: Easing.InOutCubic }
             }

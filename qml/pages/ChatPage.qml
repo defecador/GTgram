@@ -617,6 +617,12 @@ Page {
                 chatPage.scheduledMessagesCount = messages.length;
             }
         }
+        onPinnedMessagesReceived: {
+            if (String(chatId) === String(chatPage.chatInformation.id)) {
+                Debug.log("[ChatPage] Received", messages.length, "pinned message(s)");
+                pinnedMessageItem.pinnedMessagesList = messages;
+            }
+        }
         onChatHasScheduledMessagesUpdated: {
             if (chatId === String(chatPage.chatInformation.id) && !chatPage.isSecretChat && chatPage.canSendMessages) {
                 tdLibWrapper.getChatScheduledMessages(chatPage.chatInformation.id);
@@ -817,8 +823,10 @@ Page {
             if (chatInformation.pinned_message_id.toString() !== "0") {
                 Debug.log("[ChatPage] Loading pinned message ", chatInformation.pinned_message_id);
                 tdLibWrapper.getMessage(chatInformation.id, chatInformation.pinned_message_id);
+                tdLibWrapper.getChatPinnedMessages(chatInformation.id);
             } else {
                 pinnedMessageItem.pinnedMessage = undefined;
+                pinnedMessageItem.pinnedMessagesList = [];
             }
         }
     }
@@ -1296,7 +1304,7 @@ Page {
                 PinnedMessageItem {
                     id: pinnedMessageItem
                     onRequestShowMessage: {
-                        messageOverlayLoader.overlayMessage = pinnedMessageItem.pinnedMessage;
+                        messageOverlayLoader.overlayMessage = pinnedMessageItem.displayedMessage;
                         messageOverlayLoader.active = true;
                     }
                     onRequestCloseMessage: {
@@ -1522,6 +1530,8 @@ Page {
                             case "messageVoiceNote":
                             case "messageDocument":
                                 return Theme.itemSizeLarge;
+                            case "messageContact":
+                                return Theme.itemSizeLarge + Theme.itemSizeExtraSmall;
                             case "messageGame":
                                 return parentWidth * 0.66666666 + Theme.itemSizeLarge; // 2 / 3;
                             case "messageLocation":
@@ -1554,7 +1564,7 @@ Page {
                             "messageAnimatedEmoji",
                             "messageAnimation",
                             "messageAudio",
-                            // "messageContact",
+                            "messageContact",
                             // "messageDice"
                             "messageDocument",
                             "messageGame",

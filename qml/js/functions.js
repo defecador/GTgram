@@ -100,6 +100,8 @@ function getMessageText(message, simple, currentUserId, ignoreEntities) {
         return simple ? (myself ? qsTr("sent a location", "myself") : qsTr("sent a location")) : "";
     case 'messageVenue':
         return simple ? (myself ? qsTr("sent a venue", "myself") : qsTr("sent a venue")) : ( "<b>" + message.content.venue.title + "</b>, " + message.content.venue.address );
+    case 'messageContact':
+        return simple ? (myself ? qsTr("shared a contact", "myself") : qsTr("shared a contact")) : "";
     case 'messageContactRegistered':
         return myself ? qsTr("have registered with Telegram") : qsTr("has registered with Telegram");
     case 'messageChatJoinByLink':

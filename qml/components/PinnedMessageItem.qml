@@ -27,15 +27,28 @@ Item {
     id: pinnedMessageItem
 
     property var pinnedMessage;
+    // Every currently-pinned message in the chat, newest first (from
+    // TDLibWrapper::getChatPinnedMessages). Lets the banner cycle through
+    // older pins instead of only ever showing the latest one.
+    property var pinnedMessagesList: [];
+    // 0 means "showing pinnedMessage itself" (the newest pin, kept in sync
+    // reactively); >0 means the user tapped through to an older one.
+    property int browseOffset: 0;
+    readonly property var displayedMessage: (browseOffset > 0 && browseOffset < pinnedMessagesList.length) ? pinnedMessagesList[browseOffset] : pinnedMessage
     signal requestShowMessage;
     signal requestCloseMessage;
 
     onPinnedMessageChanged: {
-        if (pinnedMessage) {
+        // A genuinely new "latest pin" arrived - drop back out of browsing.
+        browseOffset = 0;
+    }
+
+    onDisplayedMessageChanged: {
+        if (displayedMessage) {
             Debug.log("[ChatPage] Activating pinned message");
-            var messageUserText = (pinnedMessage.sender_id.user_id !== chatPage.myUserId) ? Emoji.emojify(Functions.getUserName(tdLibWrapper.getUserInformation(pinnedMessage.sender_id.user_id)), pinnedMessageUserText.font.pixelSize) : qsTr("You");
+            var messageUserText = (displayedMessage.sender_id.user_id !== chatPage.myUserId) ? Emoji.emojify(Functions.getUserName(tdLibWrapper.getUserInformation(displayedMessage.sender_id.user_id)), pinnedMessageUserText.font.pixelSize) : qsTr("You");
             pinnedMessageUserText.text = (messageUserText === "" ? qsTr("Pinned Message") : messageUserText );
-            pinnedMessageText.text = Emoji.emojify(Functions.getMessageText(pinnedMessage, true, chatPage.myUserId, false), pinnedMessageText.font.pixelSize);
+            pinnedMessageText.text = Emoji.emojify(Functions.getMessageText(displayedMessage, true, chatPage.myUserId, false), pinnedMessageText.font.pixelSize);
             pinnedMessageItem.visible = true;
         } else {
             pinnedMessageItem.visible = false;
@@ -70,7 +83,7 @@ Item {
         }
 
         Item {
-            width: parent.width - pinnedMessageButton.width - unpinMessageIconLoader.width - removePinnedMessageIconButton.width
+            width: parent.width - pinnedMessageButton.width - pinnedNavItem.width - unpinMessageIconLoader.width - removePinnedMessageIconButton.width
             height: pinnedMessageColumn.height
             anchors.verticalCenter: parent.verticalCenter
             Column {
@@ -110,6 +123,34 @@ Item {
             }
         }
 
+        Item {
+            id: pinnedNavItem
+            visible: pinnedMessageItem.pinnedMessagesList.length > 1
+            width: visible ? nextPinnedButton.width : 0
+            height: parent.height
+
+            IconButton {
+                id: nextPinnedButton
+                anchors.verticalCenter: parent.verticalCenter
+                icon.source: "image://theme/icon-m-down"
+                onClicked: {
+                    var count = pinnedMessageItem.pinnedMessagesList.length;
+                    pinnedMessageItem.browseOffset = (pinnedMessageItem.browseOffset + 1) % count;
+                }
+
+                Label {
+                    anchors {
+                        bottom: parent.bottom
+                        horizontalCenter: parent.horizontalCenter
+                        bottomMargin: Theme.paddingSmall
+                    }
+                    text: (pinnedMessageItem.browseOffset + 1) + "/" + pinnedMessageItem.pinnedMessagesList.length
+                    font.pixelSize: Theme.fontSizeTiny
+                    color: Theme.secondaryHighlightColor
+                }
+            }
+        }
+
         Loader {
             id: unpinMessageIconLoader
             asynchronous: true
@@ -123,8 +164,17 @@ Item {
                     id: unpinMessageIconButton
                     icon.source: "image://theme/icon-m-remove"
                     onClicked: {
-                        Remorse.itemAction(pinnedMessageRow, qsTr("Message unpinned"), function() { tdLibWrapper.unpinMessage(chatPage.chatInformation.id, pinnedMessage.id);
-                                                                                                     pinnedMessageItem.requestCloseMessage(); });
+                        Remorse.itemAction(pinnedMessageRow, qsTr("Message unpinned"), function() {
+                            tdLibWrapper.unpinMessage(chatPage.chatInformation.id, displayedMessage.id);
+                            // TDLib's chat.pinned_message_id only updates for
+                            // the *latest* pin changing, so unpinning an
+                            // older one browsed to here wouldn't otherwise
+                            // refresh this list until something else does.
+                            var unpinnedId = displayedMessage.id;
+                            pinnedMessageItem.pinnedMessagesList = pinnedMessageItem.pinnedMessagesList.filter(function(m) { return m.id !== unpinnedId; });
+                            pinnedMessageItem.browseOffset = 0;
+                            pinnedMessageItem.requestCloseMessage();
+                        });
 
                     }
                 }

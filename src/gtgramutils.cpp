@@ -148,6 +148,12 @@ QString GTgramUtils::getMessageShortText(TDLibWrapper *tdLibWrapper, const QVari
     if (contentType == MESSAGE_CONTENT_TYPE_VENUE) {
         return myself ? tr("sent a venue", "myself") : tr("sent a venue");
     }
+    if (contentType == "messageContact") {
+        const QString contactName(getUserName(messageContent.value("contact").toMap()));
+        return myself
+            ? (contactName.isEmpty() ? tr("shared a contact", "myself") : tr("shared the contact %1", "myself").arg(contactName))
+            : (contactName.isEmpty() ? tr("shared a contact") : tr("shared the contact %1").arg(contactName));
+    }
     if (contentType == "messageContactRegistered") {
         return myself ? tr("have registered with Telegram", "myself") : tr("has registered with Telegram");
     }
