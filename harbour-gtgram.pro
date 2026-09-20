@@ -212,11 +212,11 @@ equals(QT_ARCH, arm64){
     TARGET_ARCHITECTURE = aarch64
 }
 
-# Voice calls (tgcalls + tg_owt), opt-in: qmake CONFIG+=gtgram_voicecalls
+# Voice and video calls (tgcalls + tg_owt), opt-in: qmake CONFIG+=gtgram_voicecalls
 #
-# TDLib only handles call *signaling* - the actual audio needs a WebRTC media
-# stack, which for Telegram means tgcalls on top of tg_owt (Telegram's WebRTC
-# fork). Both are vendored under vendor/ (NOT committed to git - see
+# TDLib only handles call *signaling* - the actual audio/video needs a WebRTC
+# media stack, which for Telegram means tgcalls on top of tg_owt (Telegram's
+# WebRTC fork). Both are vendored under vendor/ (NOT committed to git - see
 # NOTICE.md for where to get them) rather than built from this .pro, because
 # tg_owt is a multi-hundred-MB prebuilt static lib per architecture; only
 # aarch64 has a prebuild, so this is aarch64-only for now.
@@ -231,14 +231,23 @@ gtgram_voicecalls {
         QMAKE_CXXFLAGS += -std=gnu++17
         HEADERS += src/callmanager.h src/systemcallbridge.h
         SOURCES += src/callmanager.cpp src/systemcallbridge.cpp
-        # Voice-only build: no camera/video capture, so use tgcalls' own no-op
-        # PlatformInterface (only the desktop/mobile platforms it ships one
-        # for need a real one - Sailfish isn't among them).
-        SOURCES += vendor/tgcalls/upstream/tgcalls/platform/fake/FakeInterface.cpp
-        HEADERS += vendor/tgcalls/upstream/tgcalls/platform/fake/FakeInterface.h
+        # src/videocalls/ is tgcalls' PlatformInterface for Sailfish (camera
+        # capture via QtMultimedia + VP8/VP9 video, replacing tgcalls' own
+        # no-op platform/fake/FakeInterface, which must NOT be compiled
+        # alongside this - both define tgcalls::CreatePlatformInterface().
+        HEADERS += src/videocalls/sailfishvideotracksource.h \
+                   src/videocalls/callcameragrabber.h \
+                   src/videocalls/sailfishvideocapturer.h \
+                   src/videocalls/sailfishinterface.h \
+                   src/videocalls/callvideorenderer.h
+        SOURCES += src/videocalls/callcameragrabber.cpp \
+                   src/videocalls/sailfishvideocapturer.cpp \
+                   src/videocalls/sailfishinterface.cpp \
+                   src/videocalls/callvideorenderer.cpp
         # libtg_owt.a was built with H264 support (references openh264's
-        # encoder), which the SDK target doesn't provide - it's only reached
-        # by video calls, so stub it out rather than bundling openh264.
+        # encoder), which the SDK target doesn't provide - SailfishInterface
+        # only ever offers VP8/VP9, so this stub is never actually reached,
+        # just needed to satisfy the linker (see its own header comment).
         SOURCES += src/openh264_stub.cpp
         include(vendor/tg_owt/abseil-cpp.pri)
         include(vendor/tg_owt/tg_owt.pri)

@@ -23,6 +23,7 @@
 #include "tdlibwrapper.h"
 #include "mceinterface.h"
 #include "systemcallbridge.h"
+#include "videocalls/callvideorenderer.h"
 #include <QTimer>
 
 #define DEBUG_MODULE CallManager
@@ -38,6 +39,7 @@
 #include <tgcalls/Instance.h>
 #include <tgcalls/InstanceImpl.h>
 #include <tgcalls/StaticThreads.h>
+#include <tgcalls/VideoCaptureInterface.h>
 #include <tgcalls/v2/InstanceV2Impl.h>
 #include <tgcalls/v2/InstanceV2ReferenceImpl.h>
 
@@ -57,6 +59,11 @@ CallManager::CallManager(TDLibWrapper *tdLibWrapper, MceInterface *mceInterface,
     , currentCallId(0)
     , currentUserId(0)
     , currentIsOutgoing(false)
+    , currentIsVideo(false)
+    , remoteVideoRenderer(new CallVideoRenderer(this))
+    , localVideoRenderer(new CallVideoRenderer(this))
+    , m_frontCamera(true)
+    , m_remoteVideoActive(false)
     , m_pulseMainloop(nullptr)
     , m_pulseContext(nullptr)
     , m_speakerOn(false)
@@ -111,6 +118,26 @@ bool CallManager::systemCallUiActive() const
     return systemCallBridge && systemCallBridge->isAvailable();
 }
 
+QObject *CallManager::remoteVideo() const
+{
+    return remoteVideoRenderer;
+}
+
+QObject *CallManager::localVideo() const
+{
+    return localVideoRenderer;
+}
+
+bool CallManager::frontCamera() const
+{
+    return m_frontCamera;
+}
+
+bool CallManager::remoteVideoActive() const
+{
+    return m_remoteVideoActive;
+}
+
 void CallManager::handleCallUpdated(const QVariantMap &call)
 {
     const qlonglong callId = call.value("id").toLongLong();
@@ -122,6 +149,7 @@ void CallManager::handleCallUpdated(const QVariantMap &call)
     currentCallId = callId;
     currentUserId = call.value("user_id").toLongLong();
     currentIsOutgoing = call.value("is_outgoing").toBool();
+    currentIsVideo = call.value("is_video").toBool();
 
     const QVariantMap callState = call.value("state").toMap();
     const QString callStateType = callState.value("@type").toString();
@@ -190,7 +218,7 @@ void CallManager::handleSystemAnswerRequested()
 {
     LOG("Answer requested from the system UI, call" << currentCallId);
     if (tdLibWrapper && currentCallId > 0) {
-        tdLibWrapper->acceptVoiceCall(currentCallId, false);
+        tdLibWrapper->acceptVoiceCall(currentCallId, currentIsVideo);
     }
 }
 
@@ -198,7 +226,7 @@ void CallManager::handleSystemHangupRequested()
 {
     LOG("Hangup requested from the system UI, call" << currentCallId);
     if (tdLibWrapper && currentCallId > 0) {
-        tdLibWrapper->discardVoiceCall(currentCallId, false, 0, false, 0);
+        tdLibWrapper->discardVoiceCall(currentCallId, false, 0, currentIsVideo, 0);
     }
 }
 
@@ -227,6 +255,58 @@ void CallManager::setMicrophoneMuted(bool muted)
 {
     if (instance) {
         instance->setMuteMicrophone(muted);
+    }
+}
+
+void CallManager::switchCamera()
+{
+    if (!videoCapture) {
+        return;
+    }
+    m_frontCamera = !m_frontCamera;
+    // "" -> front, "back" -> back (see SailfishInterface::makeVideoCapturer).
+    videoCapture->switchToDevice(m_frontCamera ? std::string() : std::string("back"), false);
+    emit frontCameraChanged();
+    // Switching cameras recreates the capturer - re-route/unmute audio just in case.
+    routeWebrtcToCallSink();
+    m_audioUnmuteTimer->start();
+    LOG("Video call: switched camera, front =" << m_frontCamera);
+}
+
+void CallManager::setVideoEnabled(bool enabled)
+{
+    if (!videoCapture || !instance) {
+        return;
+    }
+    if (enabled) {
+        videoCapture->setState(tgcalls::VideoState::Active);
+        // Re-attach the capture to the instance so the peer receives video again.
+        instance->setVideoCapture(videoCapture);
+    } else {
+        // Detach the capture from the instance so tgcalls SIGNALS to the peer
+        // that video is off (they show their own placeholder) instead of
+        // leaving them on our last frozen frame. Also stops the camera.
+        instance->setVideoCapture(nullptr);
+        videoCapture->setState(tgcalls::VideoState::Inactive);
+    }
+    // Toggling video renegotiates the media and can drop/re-mute the incoming
+    // audio stream - re-route and unmute it (retries until it reappears).
+    routeWebrtcToCallSink();
+    m_audioUnmuteTimer->start();
+    LOG("Video call: video enabled =" << enabled);
+}
+
+void CallManager::setRemoteVideoActive(bool active)
+{
+    if (m_remoteVideoActive != active) {
+        m_remoteVideoActive = active;
+        emit remoteVideoActiveChanged();
+        LOG("Video call: remote video active =" << active);
+    }
+    if (!active) {
+        // No more remote video - clear the last frame (the overlay shows the
+        // caller's avatar/a placeholder underneath instead).
+        remoteVideoRenderer->reset();
     }
 }
 
@@ -413,6 +493,11 @@ void CallManager::setSpeakerphoneOn(bool on)
     }
     pa_threaded_mainloop_unlock(ml);
     LOG("Voice call speakerphone" << on << "port" << port);
+    // On a video call, the WebRTC stream needs to stay on the call sink and
+    // unmuted - the speaker toggle otherwise leaves it muted on deep_buffer.
+    if (currentIsVideo) {
+        routeWebrtcToCallSink();
+    }
 }
 
 bool CallManager::routeWebrtcToCallSink()
@@ -537,6 +622,13 @@ void CallManager::stopInstance()
         }
         m_sinkVolumeSaved = false;
     }
+    if (videoCapture) {
+        videoCapture->setState(tgcalls::VideoState::Inactive);
+        videoCapture.reset();
+    }
+    remoteVideoRenderer->reset();
+    localVideoRenderer->reset();
+
     if (!instance) {
         return;
     }
@@ -617,6 +709,25 @@ void CallManager::ensureInstanceForReadyCall(const QVariantMap &callState)
         descriptor.config.maxApiLayer = tgcalls::Meta::MaxLayer();
     }
     descriptor.config.customParameters = callState.value("custom_parameters").toString().toStdString();
+
+    if (currentIsVideo) {
+        m_frontCamera = true; // always start on the front camera
+        emit frontCameraChanged();
+        m_remoteVideoActive = false; // placeholder until the remote sends video
+        emit remoteVideoActiveChanged();
+        videoCapture = tgcalls::VideoCaptureInterface::Create(
+            tgcalls::StaticThreads::getThreads(), std::string(), false, nullptr);
+        descriptor.videoCapture = videoCapture;
+        LOG("Video call: created video capture for call" << currentCallId);
+    }
+
+    // Tells us when the remote mutes/unmutes their camera, so the overlay can
+    // switch between showing their video and a placeholder.
+    descriptor.remoteMediaStateUpdated = [this](tgcalls::AudioState, tgcalls::VideoState videoState) {
+        const bool active = (videoState == tgcalls::VideoState::Active);
+        QMetaObject::invokeMethod(this, "setRemoteVideoActive", Qt::QueuedConnection,
+                                  Q_ARG(bool, active));
+    };
 
     descriptor.stateUpdated = [this](tgcalls::State state) {
         // 0=WaitInit 1=WaitInitAck 2=Established 3=Failed 4=Reconnecting
@@ -721,10 +832,23 @@ void CallManager::ensureInstanceForReadyCall(const QVariantMap &callState)
         return;
     }
 
+    // Activate the video capture (starts the camera, enables sending video)
+    // and attach the render sinks: remote (the other party) + local (preview).
+    if (videoCapture) {
+        videoCapture->setState(tgcalls::VideoState::Active);
+        videoCapture->setOutput(localVideoRenderer->sink());
+    }
+    if (currentIsVideo) {
+        instance->setIncomingVideoOutput(remoteVideoRenderer->sink());
+    }
     // Route the incoming audio onto the call sink + unmute (starts muted on
-    // Halium) + bring the volume up (starts at 0% on SFOS 5.1).
+    // Halium) + bring the volume up (starts at 0% on SFOS 5.1). Applies to
+    // voice AND video calls.
     routeWebrtcToCallSink();     // immediate attempt
     m_audioUnmuteTimer->start(); // + keep retrying until the stream shows up
+    if (currentIsVideo) {
+        startKeepDisplayOn(); // keep the screen on for the whole call, not just ringing
+    }
 
     while (!pendingSignalingData.isEmpty()) {
         instance->receiveSignalingData(toByteVector(pendingSignalingData.takeFirst()));

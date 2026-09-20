@@ -14,22 +14,26 @@
     You should have received a copy of the GNU General Public License
     along with GTgram. If not, see <http://www.gnu.org/licenses/>.
 
-    Stub for openh264 (voice calls only).
+    Stub for openh264.
 
     The prebuilt libtg_owt.a references openh264's H264 encoder
-    (WelsCreateSVCEncoder / WelsDestroySVCEncoder), but the SailfishOS SDK
-    target doesn't provide libopenh264. That encoder is only needed for
-    VIDEO calls - voice calls never invoke it. These stubs just satisfy the
-    linker and fail cleanly if ever called by mistake.
+    (WelsCreateSVCEncoder / WelsDestroySVCEncoder) from its codec factory
+    registration code, but the SailfishOS SDK target doesn't provide
+    libopenh264 - so these stubs exist purely to satisfy the linker.
 
-    Would need replacing with the real libopenh264 if video calls are added.
+    They stay unreached even with video calls enabled: H.264 is never
+    negotiated, because SailfishInterface::supportsEncoding() (see
+    src/videocalls/sailfishinterface.cpp) only advertises VP8/VP9, and
+    webrtc's FilterAndSortEncoders() erases any codec a platform doesn't
+    advertise from the offered list entirely - it never falls through to
+    these stubs, it just never asks.
 */
 
 extern "C" {
 
 // int WelsCreateSVCEncoder(ISVCEncoder** ppEncoder) - cmResultSuccess == 0.
 // Returns non-zero (failure) so nothing proceeds with a null encoder; never
-// actually called for voice calls.
+// actually called, since H.264 is never negotiated (see above).
 int WelsCreateSVCEncoder(void **ppEncoder)
 {
     if (ppEncoder) {

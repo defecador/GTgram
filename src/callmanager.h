@@ -31,19 +31,23 @@
 
 namespace tgcalls {
 class Instance;
+class VideoCaptureInterface;
 }
 
 class TDLibWrapper;
 class MceInterface;
 class SystemCallBridge;
 class QTimer;
+class CallVideoRenderer;
 
-// Owns the tgcalls runtime for one Telegram voice call at a time: builds the
-// tgcalls::Instance once TDLib reports a call as ready, feeds/receives its
-// signaling data through TDLibWrapper, and works around a couple of
-// Sailfish/Halium PulseAudio quirks (WebRTC's own playout stream starts
-// muted, on the wrong sink, and dragging up the system volume) that would
-// otherwise make a connected call inaudible.
+// Owns the tgcalls runtime for one Telegram call (voice or video) at a time:
+// builds the tgcalls::Instance once TDLib reports a call as ready,
+// feeds/receives its signaling data through TDLibWrapper, and works around a
+// couple of Sailfish/Halium PulseAudio quirks (WebRTC's own playout stream
+// starts muted, on the wrong sink, and dragging up the system volume) that
+// would otherwise make a connected call inaudible. For a video call, also
+// owns the camera capturer and the two video renderers (src/videocalls/) -
+// system integration (SystemCallBridge, below) stays voice-only either way.
 //
 // Ringing/connecting the call to the rest of the system goes through
 // SystemCallBridge (the native lock-screen answer UI, proximity sensor)
@@ -56,22 +60,44 @@ class CallManager : public QObject
     // if so, the in-app call screen should mirror it rather than play its
     // own ringtone/vibration on top of the system's.
     Q_PROPERTY(bool systemCallUiActive READ systemCallUiActive CONSTANT)
+    // The remote/local video renderers, exposed as plain QObject* so QML's
+    // VideoOutput can bind its source directly (e.g. VideoOutput { source:
+    // callManager.remoteVideo }) - always valid, whether or not a call is
+    // currently video.
+    Q_PROPERTY(QObject* remoteVideo READ remoteVideo CONSTANT)
+    Q_PROPERTY(QObject* localVideo READ localVideo CONSTANT)
+    Q_PROPERTY(bool frontCamera READ frontCamera NOTIFY frontCameraChanged)
+    Q_PROPERTY(bool remoteVideoActive READ remoteVideoActive NOTIFY remoteVideoActiveChanged)
 
 public:
     explicit CallManager(TDLibWrapper *tdLibWrapper, MceInterface *mceInterface, QObject *parent = nullptr);
     ~CallManager() override;
 
     bool systemCallUiActive() const;
+    QObject *remoteVideo() const;
+    QObject *localVideo() const;
+    bool frontCamera() const;
+    bool remoteVideoActive() const;
 
     // No-op if no call is in progress.
     Q_INVOKABLE void setMicrophoneMuted(bool muted);
     Q_INVOKABLE void setSpeakerphoneOn(bool on);
+    // No-op outside a video call, or if the camera failed to open.
+    Q_INVOKABLE void switchCamera();
+    Q_INVOKABLE void setVideoEnabled(bool enabled);
+
+signals:
+    void frontCameraChanged();
+    void remoteVideoActiveChanged();
 
 private slots:
     void handleCallUpdated(const QVariantMap &call);
     void handleCallSignalingDataReceived(qlonglong callId, const QByteArray &data);
     void handleSystemAnswerRequested();
     void handleSystemHangupRequested();
+    // Marshaled off tgcalls' descriptor.remoteMediaStateUpdated callback
+    // (webrtc's own thread) onto the Qt/GUI thread via a queued invoke.
+    void setRemoteVideoActive(bool active);
 
 private:
     void stopInstance();
@@ -101,7 +127,14 @@ private:
     qlonglong currentCallId;
     qlonglong currentUserId;
     bool currentIsOutgoing;
+    bool currentIsVideo;
     QList<QByteArray> pendingSignalingData;
+
+    std::shared_ptr<tgcalls::VideoCaptureInterface> videoCapture;
+    CallVideoRenderer *remoteVideoRenderer;
+    CallVideoRenderer *localVideoRenderer;
+    bool m_frontCamera;
+    bool m_remoteVideoActive;
 
     // PulseAudio state (pa_threaded_mainloop*/pa_context*; kept as void* here
     // so this header doesn't need <pulse/pulseaudio.h>).

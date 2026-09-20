@@ -252,6 +252,14 @@ SilicaFlickable {
             }
             text: qsTr("Voice Call")
         }
+        MenuItem {
+            visible: chatInformationPage.isPrivateChat
+                     && typeof voiceCallsAvailable !== 'undefined' && voiceCallsAvailable === true
+            onClicked: {
+                tdLibWrapper.createVoiceCall(chatInformationPage.chatPartnerGroupId, true);
+            }
+            text: qsTr("Video Call")
+        }
     }
     // header
     PageHeader {

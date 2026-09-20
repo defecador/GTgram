@@ -193,8 +193,14 @@ ApplicationWindow
                     callOverlay.callerPhoto = (userInfo && userInfo.profile_photo) ? userInfo.profile_photo.small : ({});
                     callOverlay.callId = callId;
                     callOverlay.outgoing = outgoing;
+                    callOverlay.isVideo = call.is_video === true;
+                    callOverlay.videoEnabled = true;
                     callOverlay.muted = false;
-                    callOverlay.speakerOn = false;
+                    // Default to speaker for video (holding the phone to your
+                    // ear defeats the point of seeing the screen); earpiece
+                    // for voice, as before. Actually applied to PulseAudio
+                    // once connected, below.
+                    callOverlay.speakerOn = callOverlay.isVideo;
                     callOverlay.connectedAt = 0;
                     callOverlay.elapsed = 0;
                     callOverlay.verifyEmojis = [];
