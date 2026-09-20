@@ -4,6 +4,12 @@ X-Nemo-Application-Type=generic
 Icon=harbour-gtgram
 Exec=harbour-gtgram
 Name=GTgram
+X-Share-Methods=gtgram_share;
+
+[X-Share Method gtgram_share]
+Description=Send to GTgram...
+Capabilities=text/x-url;text/plain;text/*;image/*;video/*;audio/*;application/*
+SupportsMultipleFiles=yes
 
 [X-Sailjail]
 Permissions=Audio;Contacts;Documents;Downloads;Internet;Location;MediaIndexing;Microphone;Music;Pictures;Privileged;PublicDir;RemovableMedia;UserDirs;Videos

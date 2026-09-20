@@ -44,6 +44,10 @@ PkgBR:
 Requires:
   - sailfishsilica-qt5 >= 0.10.9
   - nemo-qml-plugin-contacts-qt5
+  # Gallery/etc "Share" integration: Sailfish.Share (QML-only, ships inside
+  # sailfishsilica-qt5 itself) plus the Nemo.DBus adaptor that exposes the
+  # share method - see harbour-gtgram.desktop's X-Share-Methods.
+  - nemo-qml-plugin-dbus-qt5
 
 # All installed files
 Files:

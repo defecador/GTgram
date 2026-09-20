@@ -55,6 +55,10 @@ Page {
     property var messageToShow;
     property string messageIdToShow;
     property string messageIdToScrollTo;
+    // Set by ChatSelectionPage when this page was pushed for the
+    // "shareResources" flow (see harbour-gtgram.qml's Sailfish.Share
+    // integration) - consumed once on the first PageStatus.Active below.
+    property var pendingSharedResources: [];
     readonly property bool userIsMember: ((isPrivateChat || isSecretChat) && chatInformation["@type"]) || // should be optimized
                                 (isBasicGroup || isSuperGroup) && (
                                     (chatGroupInformation.status["@type"] === "chatMemberStatusMember")
@@ -260,6 +264,108 @@ Page {
         attachmentPreviewRow.locationData = null;
         attachmentPreviewRow.attachmentDescription = "";
         gtgramUtils.stopGeoLocationUpdates();
+    }
+
+    function normalizeSharedFilePath(filePath) {
+        if (!filePath) {
+            return "";
+        }
+        var normalizedPath = filePath.toString();
+        if (normalizedPath.indexOf("file://") === 0) {
+            var encodedPath = normalizedPath.substring(7);
+            try {
+                normalizedPath = decodeURIComponent(encodedPath);
+            } catch (error) {
+                normalizedPath = encodedPath;
+            }
+        }
+        return normalizedPath;
+    }
+
+    function getSharedFileName(filePath) {
+        if (!filePath) {
+            return "";
+        }
+        var slashIndex = filePath.lastIndexOf("/");
+        if (slashIndex === -1 || slashIndex === (filePath.length - 1)) {
+            return filePath;
+        }
+        return filePath.substring(slashIndex + 1);
+    }
+
+    function isSharedPicture(filePath) {
+        return /\.(jpg|jpeg|png|gif|webp|bmp|heic|heif)$/i.test(filePath);
+    }
+
+    function isSharedVideo(filePath) {
+        return /\.(mp4|m4v|mov|mkv|webm|avi|3gp|mpeg|mpg)$/i.test(filePath);
+    }
+
+    // Pre-fills the attachment preview (the same one the photo/video/document
+    // pickers use) rather than sending immediately, so the user can add a
+    // caption or back out - matches how attaching a file already works.
+    function prepareSharedAttachment(filePath) {
+        var normalizedPath = normalizeSharedFilePath(filePath);
+        if (normalizedPath === "") {
+            return false;
+        }
+        clearAttachmentPreviewRow();
+        attachmentPreviewRow.fileProperties = {
+            filePath: normalizedPath,
+            fileName: getSharedFileName(normalizedPath),
+            mimeType: "",
+            url: "file://" + encodeURI(normalizedPath)
+        };
+        if (isSharedPicture(normalizedPath)) {
+            attachmentPreviewRow.isPicture = true;
+        } else if (isSharedVideo(normalizedPath)) {
+            attachmentPreviewRow.isVideo = true;
+        } else {
+            attachmentPreviewRow.isDocument = true;
+        }
+        return true;
+    }
+
+    // Only the first shared file is prepared as an attachment (GTgram's
+    // composer, like Telegram's own, sends one attachment at a time); any
+    // shared text is dropped straight into the message field.
+    function handleSharedResources(resources) {
+        if (!resources || resources.length === 0) {
+            return;
+        }
+        var sharedTextParts = [];
+        var sharedFilePath = "";
+        var extraFilesCount = 0;
+        for (var i = 0; i < resources.length; i += 1) {
+            var resource = resources[i];
+            if (!resource || !resource.type) {
+                continue;
+            }
+            if (resource.type === "text") {
+                var textData = resource.data ? resource.data.toString().trim() : "";
+                if (textData !== "") {
+                    sharedTextParts.push(textData);
+                }
+            } else if (resource.type === "file") {
+                var currentPath = resource.filePath ? resource.filePath.toString() : "";
+                if (currentPath !== "") {
+                    if (sharedFilePath === "") {
+                        sharedFilePath = currentPath;
+                    } else {
+                        extraFilesCount += 1;
+                    }
+                }
+            }
+        }
+        if (sharedTextParts.length > 0) {
+            setMessageText(sharedTextParts.join("\n"), false);
+        }
+        if (sharedFilePath !== "") {
+            if (prepareSharedAttachment(sharedFilePath) && extraFilesCount > 0) {
+                appNotification.show(qsTr("Only the first shared file has been prepared."));
+            }
+        }
+        controlSendButton();
     }
 
     function controlSendButton() {
@@ -595,6 +701,11 @@ Page {
 
                 if(doSendBotStartMessage) {
                     tdLibWrapper.sendBotStartMessage(chatInformation.id, chatInformation.id, sendBotStartMessageParameter, "")
+                }
+
+                if (chatPage.pendingSharedResources && chatPage.pendingSharedResources.length > 0) {
+                    chatPage.handleSharedResources(chatPage.pendingSharedResources);
+                    chatPage.pendingSharedResources = [];
                 }
             }
             break;
