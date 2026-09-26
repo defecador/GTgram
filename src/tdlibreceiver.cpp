@@ -144,6 +144,7 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("updateMessageSendSucceeded", &TDLibReceiver::processMessageSendSucceeded);
     handlers.insert("updateActiveNotifications", &TDLibReceiver::processUpdateActiveNotifications);
     handlers.insert("updateNotificationGroup", &TDLibReceiver::processUpdateNotificationGroup);
+    handlers.insert("updateNotification", &TDLibReceiver::processUpdateNotification);
     handlers.insert("updateChatNotificationSettings", &TDLibReceiver::processUpdateChatNotificationSettings);
     handlers.insert("updateMessageContent", &TDLibReceiver::processUpdateMessageContent);
     handlers.insert("updateDeleteMessages", &TDLibReceiver::processUpdateDeleteMessages);

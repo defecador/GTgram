@@ -54,6 +54,13 @@ namespace {
     const QString NOTIFICATION_GROUP_ID("notification_group_id");
     const QString ADDED_NOTIFICATIONS("added_notifications");
     const QString REMOVED_NOTIFICATION_IDS("removed_notification_ids");
+    const QString NOTIFICATION("notification");
+    const QString NOTIFICATION_TYPE_NEW_PUSH_MESSAGE("notificationTypeNewPushMessage");
+    const QString MESSAGE_ID("message_id");
+    const QString SENDER_NAME("sender_name");
+    const QString REACTION_TYPE("reaction_type");
+    const QString EMOJI("emoji");
+    const QString TEXT("text");
 
     const QString CHAT_TYPE_BASIC_GROUP("chatTypeBasicGroup");
     const QString CHAT_TYPE_SUPERGROUP("chatTypeSupergroup");
@@ -294,7 +301,43 @@ void NotificationManager::updateNotificationGroup(int groupId, qlonglong chatId,
 
 void NotificationManager::handleUpdateNotification(const QVariantMap &updatedNotification)
 {
-    LOG("Received notification update, group ID:" << updatedNotification.value(NOTIFICATION_GROUP_ID).toInt());
+    const int groupId = updatedNotification.value(NOTIFICATION_GROUP_ID).toInt();
+    const QVariantMap notification = updatedNotification.value(NOTIFICATION).toMap();
+    const int notificationId = notification.value(ID).toInt();
+    LOG("Received notification update, group ID:" << groupId << "notification ID:" << notificationId);
+
+    NotificationGroup *notificationGroup = notificationGroups.value(groupId);
+    if (!notificationGroup) {
+        // TDLib only sends single-notification updates for groups that already
+        // exist (e.g. a reaction added to a message that already has an active
+        // notification); if we haven't seen the group yet there's nothing to
+        // update it into.
+        WARN("Notification update for unknown group" << groupId);
+        return;
+    }
+
+    notificationGroup->activeNotifications.insert(notificationId, notification);
+    if (!notificationGroup->notificationOrder.contains(notificationId)) {
+        notificationGroup->notificationOrder.append(notificationId);
+    }
+
+    bool needFeedback = false;
+    switch (appSettings->notificationFeedback()) {
+    case AppSettings::NotificationFeedbackNone:
+        break;
+    case AppSettings::NotificationFeedbackNew:
+        needFeedback = !notificationGroup->nemoNotification->replacesId();
+        break;
+    case AppSettings::NotificationFeedbackAll:
+        needFeedback = true;
+        break;
+    }
+
+    LOG("Feedback" << needFeedback);
+    publishNotification(notificationGroup, needFeedback);
+    if (needFeedback) {
+        controlLedNotification(true);
+    }
 }
 
 void NotificationManager::handleChatDiscovered(const QString &chatId, const QVariantMap &chatInformation)
@@ -414,23 +457,59 @@ void NotificationManager::reactToMessage(const QString &chatId, const QString &m
     tdLibWrapper->viewMessage(chat, message, true);
 }
 
+namespace {
+    // TDLib reports content it hasn't (or can't) resolve into a full Message -
+    // most notably reactions, which are never a Message of their own - as a
+    // lightweight notificationTypeNewPushMessage/PushMessageContent pair
+    // instead. Render the short set of content types this actually produces
+    // in practice; anything else just falls back to a generic phrase rather
+    // than showing nothing.
+    QString getPushMessageShortText(const QVariantMap &pushMessageContent)
+    {
+        const QString contentType(pushMessageContent.value(_TYPE).toString());
+        if (contentType == "pushMessageContentMessageReaction") {
+            const QString emoji(pushMessageContent.value(REACTION_TYPE).toMap().value(EMOJI).toString());
+            return emoji.isEmpty()
+                ? NotificationManager::tr("reacted to your message")
+                : NotificationManager::tr("reacted %1 to your message").arg(emoji);
+        }
+        if (contentType == "pushMessageContentText") {
+            return pushMessageContent.value(TEXT).toString();
+        }
+        return NotificationManager::tr("sent you a message");
+    }
+}
+
 void NotificationManager::publishNotification(const NotificationGroup *notificationGroup, bool needFeedback)
 {
     QVariantMap messageMap;
+    QVariantMap pushMessage;
     const ChatInfo *chatInformation = chatMap.value(notificationGroup->chatId);
     if (!notificationGroup->notificationOrder.isEmpty()) {
         const int lastNotificationId = notificationGroup->notificationOrder.last();
         const QVariantMap lastNotification(notificationGroup->activeNotifications.value(lastNotificationId));
-        messageMap = lastNotification.value(TYPE).toMap().value(MESSAGE).toMap();
+        const QVariantMap notificationType(lastNotification.value(TYPE).toMap());
+        if (notificationType.value(_TYPE).toString() == NOTIFICATION_TYPE_NEW_PUSH_MESSAGE) {
+            // No full Message is available for this one (e.g. a reaction) -
+            // work off the lighter push content instead.
+            pushMessage = notificationType;
+        } else {
+            messageMap = notificationType.value(MESSAGE).toMap();
+        }
     }
 
     Notification *nemoNotification = notificationGroup->nemoNotification;
-    if (!messageMap.isEmpty()) {
-        nemoNotification->setTimestamp(QDateTime::fromMSecsSinceEpoch(messageMap.value(DATE).toLongLong() * 1000));
+    const bool messageIsEmpty = messageMap.isEmpty() && pushMessage.isEmpty();
+    if (!messageIsEmpty) {
+        if (!messageMap.isEmpty()) {
+            nemoNotification->setTimestamp(QDateTime::fromMSecsSinceEpoch(messageMap.value(DATE).toLongLong() * 1000));
+        }
 
+        const qlonglong notificationMessageId = !messageMap.isEmpty()
+            ? messageMap.value(ID).toLongLong() : pushMessage.value(MESSAGE_ID).toLongLong();
         QVariantList remoteActionArguments;
         remoteActionArguments.append(QString::number(notificationGroup->chatId));
-        remoteActionArguments.append(messageMap.value(ID).toString());
+        remoteActionArguments.append(QString::number(notificationMessageId));
 
         QVariantList remoteActions;
         // Tapping the notification body
@@ -452,9 +531,9 @@ void NotificationManager::publishNotification(const NotificationGroup *notificat
     }
 
     QString notificationBody;
-    const QVariantMap senderInformation = messageMap.value(SENDER_ID).toMap();
+    const QVariantMap senderInformation = !messageMap.isEmpty()
+        ? messageMap.value(SENDER_ID).toMap() : pushMessage.value(SENDER_ID).toMap();
     bool outputMessageCount = notificationGroup->totalCount > 1;
-    bool messageIsEmpty = messageMap.isEmpty();
     if (outputMessageCount || messageIsEmpty) {
         // Either we have more than one notification or we have no content to display
         LOG("Group" << notificationGroup->notificationGroupId << "has" << notificationGroup->totalCount << "notifications");
@@ -474,9 +553,17 @@ void NotificationManager::publishNotification(const NotificationGroup *notificat
             } else {
                 fullName = GTgramUtils::getUserName(tdLibWrapper->getUserInformation(senderInformation.value(USER_ID).toString()));
             }
+            if (fullName.trimmed().isEmpty()) {
+                // Push-only notifications (e.g. reactions) carry sender_name as
+                // a ready-made fallback for exactly this case - when the full
+                // user isn't resolved locally yet.
+                fullName = pushMessage.value(SENDER_NAME).toString();
+            }
             notificationBody += fullName.trimmed() + ": ";
         }
-        notificationBody += GTgramUtils::getMessageShortText(tdLibWrapper, messageMap.value(CONTENT).toMap(), (chatInformation ? chatInformation->isChannel : false), tdLibWrapper->getUserInformation().value(ID).toLongLong(), senderInformation );
+        notificationBody += !messageMap.isEmpty()
+            ? GTgramUtils::getMessageShortText(tdLibWrapper, messageMap.value(CONTENT).toMap(), (chatInformation ? chatInformation->isChannel : false), tdLibWrapper->getUserInformation().value(ID).toLongLong(), senderInformation)
+            : getPushMessageShortText(pushMessage.value(CONTENT).toMap());
     }
 
     const QString summary(chatInformation ? chatInformation->title : QString());
