@@ -145,6 +145,8 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("updateActiveNotifications", &TDLibReceiver::processUpdateActiveNotifications);
     handlers.insert("updateNotificationGroup", &TDLibReceiver::processUpdateNotificationGroup);
     handlers.insert("updateNotification", &TDLibReceiver::processUpdateNotification);
+    handlers.insert("updateMessageUnreadReactions", &TDLibReceiver::processUpdateMessageUnreadReactions);
+    handlers.insert("updateReactionNotificationSettings", &TDLibReceiver::processUpdateReactionNotificationSettings);
     handlers.insert("updateChatNotificationSettings", &TDLibReceiver::processUpdateChatNotificationSettings);
     handlers.insert("updateMessageContent", &TDLibReceiver::processUpdateMessageContent);
     handlers.insert("updateDeleteMessages", &TDLibReceiver::processUpdateDeleteMessages);
@@ -539,6 +541,21 @@ void TDLibReceiver::processUpdateNotification(const QVariantMap &receivedInforma
 {
     LOG("Received notification update");
     emit notificationUpdated(receivedInformation);
+}
+
+void TDLibReceiver::processUpdateMessageUnreadReactions(const QVariantMap &receivedInformation)
+{
+    const qlonglong chatId = receivedInformation.value(CHAT_ID).toLongLong();
+    const qlonglong messageId = receivedInformation.value(MESSAGE_ID).toLongLong();
+    const QVariantList unreadReactions = receivedInformation.value("unread_reactions").toList();
+    LOG("Unread reactions updated for message" << messageId << "in chat" << chatId << "count" << unreadReactions.size());
+    emit messageUnreadReactionsUpdated(chatId, messageId, unreadReactions);
+}
+
+void TDLibReceiver::processUpdateReactionNotificationSettings(const QVariantMap &receivedInformation)
+{
+    LOG("Reaction notification settings updated");
+    emit reactionNotificationSettingsUpdated(receivedInformation.value("notification_settings").toMap());
 }
 
 void TDLibReceiver::processUpdateChatNotificationSettings(const QVariantMap &receivedInformation)

@@ -69,6 +69,8 @@ signals:
     void activeNotificationsUpdated(const QVariantList notificationGroups);
     void notificationGroupUpdated(const QVariantMap notificationGroupUpdate);
     void notificationUpdated(const QVariantMap updatedNotification);
+    void messageUnreadReactionsUpdated(qlonglong chatId, qlonglong messageId, const QVariantList &unreadReactions);
+    void reactionNotificationSettingsUpdated(const QVariantMap &settings);
     void chatNotificationSettingsUpdated(const QString &chatId, const QVariantMap updatedChatNotificationSettings);
     void messageContentUpdated(qlonglong chatId, qlonglong messageId, const QVariantMap &newContent);
     void messageEditedUpdated(qlonglong chatId, qlonglong messageId, const QVariantMap &replyMarkup);
@@ -161,6 +163,8 @@ private:
     void processUpdateActiveNotifications(const QVariantMap &receivedInformation);
     void processUpdateNotificationGroup(const QVariantMap &receivedInformation);
     void processUpdateNotification(const QVariantMap &receivedInformation);
+    void processUpdateMessageUnreadReactions(const QVariantMap &receivedInformation);
+    void processUpdateReactionNotificationSettings(const QVariantMap &receivedInformation);
     void processUpdateChatNotificationSettings(const QVariantMap &receivedInformation);
     void processUpdateMessageContent(const QVariantMap &receivedInformation);
     void processUpdateDeleteMessages(const QVariantMap &receivedInformation);

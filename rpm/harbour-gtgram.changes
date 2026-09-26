@@ -4,6 +4,10 @@
 # * date Author's Name <author's email> version-release
 # - Summary of changes
 
+* Sun Sep 27 2026 Guillermo Torres <guillermo.torresbelando@mailfence.com> 0.18-60
+- Fix reaction notifications: build them from TDLib's unread reactions
+  (TDLib has no push reaction notification without a push service)
+
 * Sun Sep 27 2026 Guillermo Torres <guillermo.torresbelando@mailfence.com> 0.18-59
 - Search field in the chat picker when forwarding or sharing
 - Notifications for reactions to your messages

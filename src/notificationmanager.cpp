@@ -58,8 +58,8 @@ namespace {
     const QString NOTIFICATION_TYPE_NEW_PUSH_MESSAGE("notificationTypeNewPushMessage");
     const QString MESSAGE_ID("message_id");
     const QString SENDER_NAME("sender_name");
-    const QString REACTION_TYPE("reaction_type");
     const QString EMOJI("emoji");
+    const QString UNREAD_REACTION_SIGNATURES_SEPARATOR("\n");
     const QString TEXT("text");
 
     const QString CHAT_TYPE_BASIC_GROUP("chatTypeBasicGroup");
@@ -77,6 +77,11 @@ namespace {
     const QString HINT_GROUP_ID("x-gtgram.group_id");        // int
     const QString HINT_CHAT_ID("x-gtgram.chat_id");          // qlonglong
     const QString HINT_TOTAL_COUNT("x-gtgram.total_count");  // int
+    const QString HINT_REACTION_MESSAGE_ID("x-gtgram.reaction_message_id"); // qlonglong
+    const QString HINT_REACTION_SIGNATURES("x-gtgram.reactions");          // QString
+
+    const QString REACTION_SOURCE_NONE("reactionNotificationSourceNone");
+    const QString REACTION_SOURCE_CONTACTS("reactionNotificationSourceContacts");
 
     const QString HINT_IMAGE_PATH("image-path");                    // QString
     const QString HINT_VIBRA("x-nemo-vibrate");                     // bool
@@ -161,6 +166,8 @@ NotificationManager::NotificationManager(TDLibWrapper *tdLibWrapper, AppSettings
     connect(this->tdLibWrapper, SIGNAL(chatTitleUpdated(QString, QString)), this, SLOT(handleChatTitleUpdated(QString, QString)));
     connect(this->tdLibWrapper, SIGNAL(chatPhotoUpdated(qlonglong, QVariantMap)), this, SLOT(handleChatPhotoUpdated(qlonglong, QVariantMap)));
     connect(this->tdLibWrapper, SIGNAL(fileUpdated(int, QVariantMap)), this, SLOT(handleFileUpdated(int, QVariantMap)));
+    connect(this->tdLibWrapper, SIGNAL(messageUnreadReactionsUpdated(qlonglong, qlonglong, QVariantList)), this, SLOT(handleMessageUnreadReactionsUpdated(qlonglong, qlonglong, QVariantList)));
+    connect(this->tdLibWrapper, SIGNAL(reactionNotificationSettingsUpdated(QVariantMap)), this, SLOT(handleReactionNotificationSettingsUpdated(QVariantMap)));
 
     this->controlLedNotification(false);
 
@@ -176,6 +183,17 @@ NotificationManager::NotificationManager(TDLibWrapper *tdLibWrapper, AppSettings
             const int groupId = notification->hintValue(HINT_GROUP_ID).toInt(&groupOk);
             const qlonglong chatId = notification->hintValue(HINT_CHAT_ID).toLongLong(&chatOk);
             const int totalCount = notification->hintValue(HINT_TOTAL_COUNT).toInt(&countOk);
+            bool reactionOk;
+            const qlonglong reactionMessageId = notification->hintValue(HINT_REACTION_MESSAGE_ID).toLongLong(&reactionOk);
+            if (chatOk && reactionOk && reactionMessageId) {
+                const QPair<qlonglong,qlonglong> key(chatId, reactionMessageId);
+                if (!reactionNotifications.contains(key)) {
+                    LOG("Restoring reaction notification for message" << reactionMessageId << "chatId" << chatId);
+                    notification->setParent(this);
+                    reactionNotifications.insert(key, notification);
+                    continue;
+                }
+            }
             if (groupOk && chatOk && countOk && !notificationGroups.contains(groupId)) {
                 LOG("Restoring notification group" << groupId << "chatId" << chatId << "count" << totalCount);
                 notificationGroups.insert(groupId, new NotificationGroup(groupId, chatId, totalCount, notification));
@@ -191,6 +209,7 @@ NotificationManager::~NotificationManager()
     LOG("Destroying myself...");
     qDeleteAll(chatMap.values());
     qDeleteAll(notificationGroups.values());
+    qDeleteAll(reactionNotifications.values());
 }
 
 void NotificationManager::handleUpdateActiveNotifications(const QVariantList &notificationGroups)
@@ -309,8 +328,7 @@ void NotificationManager::handleUpdateNotification(const QVariantMap &updatedNot
     NotificationGroup *notificationGroup = notificationGroups.value(groupId);
     if (!notificationGroup) {
         // TDLib only sends single-notification updates for groups that already
-        // exist (e.g. a reaction added to a message that already has an active
-        // notification); if we haven't seen the group yet there's nothing to
+        // exist; if we haven't seen the group yet there's nothing to
         // update it into.
         WARN("Notification update for unknown group" << groupId);
         return;
@@ -458,21 +476,13 @@ void NotificationManager::reactToMessage(const QString &chatId, const QString &m
 }
 
 namespace {
-    // TDLib reports content it hasn't (or can't) resolve into a full Message -
-    // most notably reactions, which are never a Message of their own - as a
-    // lightweight notificationTypeNewPushMessage/PushMessageContent pair
-    // instead. Render the short set of content types this actually produces
-    // in practice; anything else just falls back to a generic phrase rather
-    // than showing nothing.
+    // TDLib reports content it hasn't (or can't) resolve into a full Message
+    // as a lightweight notificationTypeNewPushMessage/PushMessageContent pair
+    // instead. Render plain text; anything else just falls back to a generic
+    // phrase rather than showing nothing.
     QString getPushMessageShortText(const QVariantMap &pushMessageContent)
     {
         const QString contentType(pushMessageContent.value(_TYPE).toString());
-        if (contentType == "pushMessageContentMessageReaction") {
-            const QString emoji(pushMessageContent.value(REACTION_TYPE).toMap().value(EMOJI).toString());
-            return emoji.isEmpty()
-                ? NotificationManager::tr("reacted to your message")
-                : NotificationManager::tr("reacted %1 to your message").arg(emoji);
-        }
         if (contentType == "pushMessageContentText") {
             return pushMessageContent.value(TEXT).toString();
         }
@@ -554,7 +564,7 @@ void NotificationManager::publishNotification(const NotificationGroup *notificat
                 fullName = GTgramUtils::getUserName(tdLibWrapper->getUserInformation(senderInformation.value(USER_ID).toString()));
             }
             if (fullName.trimmed().isEmpty()) {
-                // Push-only notifications (e.g. reactions) carry sender_name as
+                // Push-only notifications carry sender_name as
                 // a ready-made fallback for exactly this case - when the full
                 // user isn't resolved locally yet.
                 fullName = pushMessage.value(SENDER_NAME).toString();
@@ -609,6 +619,165 @@ void NotificationManager::publishNotification(const NotificationGroup *notificat
     }
 
     nemoNotification->publish();
+}
+
+void NotificationManager::handleReactionNotificationSettingsUpdated(const QVariantMap &settings)
+{
+    reactionNotificationSource = settings.value("message_reaction_source").toMap().value(_TYPE).toString();
+    LOG("Reaction notification source" << reactionNotificationSource);
+}
+
+QString NotificationManager::getReactionSenderName(qlonglong chatId, const QVariantMap &senderId) const
+{
+    QString name;
+    if (senderId.value(_TYPE).toString() == "messageSenderChat") {
+        name = tdLibWrapper->getChat(senderId.value(CHAT_ID).toString()).value(TITLE).toString();
+    } else {
+        name = GTgramUtils::getUserName(tdLibWrapper->getUserInformation(senderId.value(USER_ID).toString()));
+    }
+    if (name.trimmed().isEmpty()) {
+        // Not resolved locally - in a private chat the chat title is the sender
+        const ChatInfo *chat = chatMap.value(chatId);
+        if (chat && chat->type == TDLibWrapper::ChatTypePrivate) {
+            name = chat->title;
+        }
+    }
+    return name.trimmed();
+}
+
+QString NotificationManager::getChatAvatarPath(qlonglong chatId) const
+{
+    const ChatInfo *chat = chatMap.value(chatId);
+    if (chat) {
+        const QVariantMap photoLocal = chat->photoSmall.value(LOCAL).toMap();
+        if (photoLocal.value(IS_DOWNLOADING_COMPLETED).toBool()) {
+            return photoLocal.value(PATH).toString();
+        }
+        const int photoFileId = chat->photoSmall.value(ID).toInt();
+        if (photoFileId > 0) {
+            tdLibWrapper->downloadFile(photoFileId);
+        }
+    }
+    return QString();
+}
+
+void NotificationManager::handleMessageUnreadReactionsUpdated(qlonglong chatId, qlonglong messageId, const QVariantList &unreadReactions)
+{
+    const QPair<qlonglong,qlonglong> key(chatId, messageId);
+    Notification *notification = reactionNotifications.value(key);
+
+    // Filter by the account's reaction notification settings, and render
+    QStringList signatures;
+    QStringList lines;
+    if (reactionNotificationSource != REACTION_SOURCE_NONE) {
+        QListIterator<QVariant> it(unreadReactions);
+        while (it.hasNext()) {
+            const QVariantMap unreadReaction(it.next().toMap());
+            const QVariantMap senderId(unreadReaction.value("sender_id").toMap());
+            if (reactionNotificationSource == REACTION_SOURCE_CONTACTS) {
+                if (senderId.value(_TYPE).toString() != "messageSenderUser" ||
+                    !tdLibWrapper->getUserInformation(senderId.value(USER_ID).toString()).value("is_contact").toBool()) {
+                    continue;
+                }
+            }
+            const QVariantMap reactionType(unreadReaction.value(TYPE).toMap());
+            const QString reactionTypeName(reactionType.value(_TYPE).toString());
+            QString emoji;
+            if (reactionTypeName == "reactionTypeEmoji") {
+                emoji = reactionType.value(EMOJI).toString();
+            } else if (reactionTypeName == "reactionTypePaid") {
+                emoji = QString::fromUtf8("â­"); // star
+            }
+            const QString senderKey(senderId.value(USER_ID).toString() + senderId.value(CHAT_ID).toString());
+            signatures.append(senderKey + ":" + emoji);
+
+            const QString name(getReactionSenderName(chatId, senderId));
+            const QString text(emoji.isEmpty()
+                ? tr("reacted to your message")
+                : tr("reacted %1 to your message").arg(emoji));
+            lines.append(name.isEmpty() ? text : name + " " + text);
+        }
+    }
+
+    if (signatures.isEmpty()) {
+        // Read in the app (or nothing we should show) - drop the notification
+        if (notification) {
+            LOG("Closing reaction notification for message" << messageId << "in chat" << chatId);
+            notification->close();
+            reactionNotifications.remove(key);
+            delete notification;
+        }
+        return;
+    }
+
+    const QStringList previous(notification
+        ? notification->hintValue(HINT_REACTION_SIGNATURES).toString().split(UNREAD_REACTION_SIGNATURES_SEPARATOR, QString::SkipEmptyParts)
+        : QStringList());
+    bool hasNew = false;
+    for (const QString &signature : signatures) {
+        if (!previous.contains(signature)) {
+            hasNew = true;
+            break;
+        }
+    }
+    if (!hasNew && previous.size() == signatures.size()) {
+        return;
+    }
+
+    if (!notification) {
+        notification = new Notification(this);
+        notification->setCategory("x-nemo.messaging.im");
+        notification->setAppName(APP_NAME);
+        notification->setAppIcon(appIconFile);
+        notification->setIcon(appIconFile);
+        notification->setHintValue(HINT_CHAT_ID, chatId);
+        notification->setHintValue(HINT_REACTION_MESSAGE_ID, messageId);
+        notification->setHintValue(HINT_FEEDBACK, "chat_exists");
+        notification->setHintValue(HINT_PRIORITY, 120);
+        reactionNotifications.insert(key, notification);
+    }
+    notification->setHintValue(HINT_REACTION_SIGNATURES, signatures.join(UNREAD_REACTION_SIGNATURES_SEPARATOR));
+
+    QVariantList remoteActionArguments;
+    remoteActionArguments.append(QString::number(chatId));
+    remoteActionArguments.append(QString::number(messageId));
+    QVariantList remoteActions;
+    remoteActions.append(Notification::remoteAction("default", "openMessage",
+        DBUS_SERVICE, DBUS_PATH, DBUS_SERVICE, "openMessage", remoteActionArguments));
+    notification->setRemoteActions(remoteActions);
+
+    const ChatInfo *chat = chatMap.value(chatId);
+    const QString summary(chat ? chat->title : QString());
+    // Newest last, so the preview shows the most recent reaction
+    const QString body(lines.join("\n"));
+    notification->setSummary(summary);
+    notification->setBody(body);
+    notification->setTimestamp(QDateTime::currentDateTime());
+    notification->setHintValue(HINT_IMAGE_PATH, getChatAvatarPath(chatId));
+
+    const bool needFeedback = hasNew && appSettings->notificationFeedback() != AppSettings::NotificationFeedbackNone;
+    notification->setHintValue(HINT_VIBRA, needFeedback);
+    if (!needFeedback || (chatModel->getChatId() == chatId &&
+            qGuiApp->applicationState() == Qt::ApplicationActive)) {
+        notification->setHintValue(HINT_SUPPRESS_SOUND, true);
+        notification->setHintValue(HINT_DISPLAY_ON, false);
+        notification->setHintValue(HINT_VISIBILITY, QString());
+        notification->setUrgency(Notification::Low);
+    } else {
+        notification->setPreviewSummary(summary);
+        notification->setPreviewBody(appSettings->notificationSuppressContent()
+            ? tr("reacted to your message") : lines.last());
+        notification->setHintValue(HINT_SUPPRESS_SOUND, !appSettings->notificationSoundsEnabled());
+        notification->setHintValue(HINT_DISPLAY_ON, appSettings->notificationTurnsDisplayOn());
+        notification->setHintValue(HINT_VISIBILITY, VISIBILITY_PUBLIC);
+        notification->setUrgency(Notification::Normal);
+    }
+
+    LOG("Publishing reaction notification for message" << messageId << "in chat" << chatId << "feedback" << needFeedback);
+    notification->publish();
+    if (needFeedback) {
+        controlLedNotification(true);
+    }
 }
 
 void NotificationManager::controlLedNotification(bool enabled)

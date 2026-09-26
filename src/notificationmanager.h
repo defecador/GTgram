@@ -50,11 +50,15 @@ public slots:
     void handleFileUpdated(int fileId, const QVariantMap &fileInformation);
     void replyToMessage(const QString &chatId, const QString &messageId, const QString &text);
     void reactToMessage(const QString &chatId, const QString &messageId);
+    void handleMessageUnreadReactionsUpdated(qlonglong chatId, qlonglong messageId, const QVariantList &unreadReactions);
+    void handleReactionNotificationSettingsUpdated(const QVariantMap &settings);
 
 private:
 
     void publishNotification(const NotificationGroup *notificationGroup, bool needFeedback);
     void controlLedNotification(bool enabled);
+    QString getReactionSenderName(qlonglong chatId, const QVariantMap &senderId) const;
+    QString getChatAvatarPath(qlonglong chatId) const;
     NotificationGroup *findGroupForChat(qlonglong chatId) const;
     void updateNotificationGroup(int groupId, qlonglong chatId, int totalCount,
         const QVariantList &addedNotifications,
@@ -70,6 +74,11 @@ private:
     QMap<qlonglong,ChatInfo*> chatMap;
     QMap<int,NotificationGroup*> notificationGroups;
     QString appIconFile;
+    // Reactions to our own messages, one notification per (chat, message).
+    // TDLib never turns these into notification groups without a push
+    // service, so they're built here from updateMessageUnreadReactions.
+    QMap<QPair<qlonglong,qlonglong>,Notification*> reactionNotifications;
+    QString reactionNotificationSource;
 
 };
 
