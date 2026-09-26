@@ -104,11 +104,3 @@ desktop-file-install --delete-original       \
 /usr/lib64/voicecall/plugins/libgtgram-voicecall-plugin.so
 %endif
 # << files
-
-%posttrans
-# Restarts voicecall-manager so it picks up voicecallplugin/ (installed
-# above) right away instead of waiting for a reboot - see
-# bin/restart-voicecall.sh.
-%ifarch aarch64
-%{_datadir}/%{name}/bin/restart-voicecall.sh
-%endif
