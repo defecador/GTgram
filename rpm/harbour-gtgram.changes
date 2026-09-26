@@ -4,6 +4,10 @@
 # * date Author's Name <author's email> version-release
 # - Summary of changes
 
+* Sun Sep 27 2026 Guillermo Torres <guillermo.torresbelando@mailfence.com> 0.18-59
+- Search field in the chat picker when forwarding or sharing
+- Notifications for reactions to your messages
+
 * Fri Sep 11 2026 Guillermo Torres <guillermo.torresbelando@mailfence.com> 0.18-53
 - First GTgram release, based on Fernschreiber 0.18
 - Installs as a separate package with its own data, launcher entry and icon
