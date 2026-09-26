@@ -69,11 +69,38 @@ Dialog {
         width: parent.width
     }
 
+    SearchField {
+        id: chatSearchField
+        anchors.top: pageHeader.bottom
+        width: parent.width
+        placeholderText: qsTr("Search chats...")
+
+        EnterKey.iconSource: "image://theme/icon-m-enter-close"
+        EnterKey.onClicked: focus = false
+    }
+
+    ChatPermissionFilterModel {
+        id: permittedChatsModel
+        tdlib: tdLibWrapper
+        sourceModel: chatListModel
+        requirePermissions: chatSelectionPage.payload.neededPermissions
+    }
+
+    TextFilterModel {
+        id: searchedChatsModel
+        // Only route through this proxy while actually searching, so the
+        // unfiltered list keeps the view's cheap native row-move handling
+        // (see the note on chatCategoryModel in OverviewPage.qml).
+        sourceModel: chatSearchField.text === "" ? null : permittedChatsModel
+        filterRoleName: "title"
+        filterText: chatSearchField.text
+    }
+
     SilicaListView {
         id: chatListView
 
         anchors {
-            top: pageHeader.bottom
+            top: chatSearchField.bottom
             bottom: parent.bottom
             left: parent.left
             right: parent.right
@@ -81,11 +108,7 @@ Dialog {
 
         clip: true
 
-        model: ChatPermissionFilterModel {
-            tdlib: tdLibWrapper
-            sourceModel: chatListModel
-            requirePermissions: chatSelectionPage.payload.neededPermissions
-        }
+        model: chatSearchField.text === "" ? permittedChatsModel : searchedChatsModel
 
         move: Transition {
             NumberAnimation { properties: "y"; duration: 200; easing.type: Easing.InOutCubic }
@@ -119,7 +142,7 @@ Dialog {
 
         ViewPlaceholder {
             enabled: chatListView.count === 0
-            text: qsTr("You don't have any chats yet.")
+            text: chatSearchField.text === "" ? qsTr("You don't have any chats yet.") : qsTr("No chats found.")
         }
 
         VerticalScrollDecorator {}
