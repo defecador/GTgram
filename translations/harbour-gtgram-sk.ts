@@ -636,6 +636,14 @@
         <source>You don&apos;t have any chats yet.</source>
         <translation>Nemáte žiadne čety.</translation>
     </message>
+    <message>
+        <source>Search chats...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No chats found.</source>
+        <translation type="unfinished">Nebol nenájdený žiaden čet.</translation>
+    </message>
 </context>
 <context>
     <name>ContactSync</name>

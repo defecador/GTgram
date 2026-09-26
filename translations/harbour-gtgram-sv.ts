@@ -625,6 +625,14 @@
         <source>You don&apos;t have any chats yet.</source>
         <translation>Du har inga chattar än.</translation>
     </message>
+    <message>
+        <source>Search chats...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No chats found.</source>
+        <translation type="unfinished">Inga chattar hittades.</translation>
+    </message>
 </context>
 <context>
     <name>ContactSync</name>
