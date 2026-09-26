@@ -1393,6 +1393,18 @@
         <source>Reply</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>reacted to your message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>reacted %1 to your message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>sent you a message</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>OverviewPage</name>
