@@ -24,7 +24,7 @@ GTgram builds with the Sailfish OS SDK's `mb2` for Sailfish OS 5.2, for example 
 Before building:
 
 - Check out the submodules: `git submodule update --init`.
-- Provide a compiled [TDLib](https://github.com/tdlib/td) (GTgram currently bundles 1.8.62) in
+- Provide a compiled [TDLib](https://github.com/tdlib/td) (GTgram currently bundles 1.8.68) in
   `tdlib/<architecture>/lib`, containing at least `libtdjson.so` - for example `tdlib/aarch64/lib`.
 - Create `src/tdlibsecrets.h` with your own Telegram API ID and hash, which you get by
   registering an application on [my.telegram.org](https://my.telegram.org):
