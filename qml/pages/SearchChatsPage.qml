@@ -39,18 +39,40 @@ Page {
         running: false
         repeat: false
         onTriggered: {
-            Debug.log("Searching for '" + publicChatsSearchField.text + "'");
-            tdLibWrapper.searchPublicChats(publicChatsSearchField.text);
+            var query = publicChatsSearchField.text;
+            Debug.log("Searching for '" + query + "'");
+            if (query.length === 0) {
+                searchChatsPage.ownChatIds = [];
+                searchChatsPage.publicChatIds = [];
+                searchChatsPage.isLoading = false;
+                return;
+            }
+            // The chats already in the account come first; they are searched locally
+            // and need no minimum length. Public chats are only searched from 5 characters.
+            tdLibWrapper.searchOwnChats(query);
             searchChatsPage.isLoading = true;
+            if (query.length >= 5) {
+                tdLibWrapper.searchPublicChats(query);
+            } else {
+                searchChatsPage.publicChatIds = [];
+            }
         }
     }
 
     Connections {
         target: tdLibWrapper
         onChatsReceived: {
+            var extra = chats["@extra"];
+            if (extra !== "searchOwnChats" && extra !== "searchPublicChats") {
+                return;
+            }
             searchChatsPage.isLoading = false;
             Debug.log(JSON.stringify(chats));
-            chatsFound = chats;
+            if (extra === "searchOwnChats") {
+                searchChatsPage.ownChatIds = chats.chat_ids;
+            } else {
+                searchChatsPage.publicChatIds = chats.chat_ids;
+            }
         }
         onErrorReceived: {
             searchChatsPage.isLoading = false;
@@ -59,7 +81,23 @@ Page {
     }
 
     property bool isLoading: false;
-    property var chatsFound;
+    property var ownChatIds: [];
+    property var publicChatIds: [];
+    // Chats of the account first, then public ones that are not among them
+    readonly property var foundChatIds: {
+        var result = ownChatIds.slice();
+        var known = {};
+        var i;
+        for (i = 0; i < result.length; i++) {
+            known[String(result[i])] = true;
+        }
+        for (i = 0; i < publicChatIds.length; i++) {
+            if (!known[String(publicChatIds[i])]) {
+                result.push(publicChatIds[i]);
+            }
+        }
+        return result;
+    }
     readonly property var ownUserId: tdLibWrapper.getUserInformation().id;
 
     SilicaFlickable {
@@ -113,12 +151,12 @@ Page {
                         visible: !searchChatsPage.isLoading
                         opacity: visible ? 1 : 0
                         Behavior on opacity { FadeAnimation {} }
-                        model: searchChatsPage.chatsFound.chat_ids
+                        model: searchChatsPage.foundChatIds
 
                         ViewPlaceholder {
                             y: Theme.paddingLarge
                             enabled: searchChatsListView.count === 0
-                            text: publicChatsSearchField.text.length < 5 ? qsTr("Enter your query to start searching (at least 5 characters needed)") : qsTr("No chats found.")
+                            text: publicChatsSearchField.text.length === 0 ? qsTr("Enter your query to start searching (at least 5 characters to also search public chats)") : qsTr("No chats found.")
                         }
 
                         delegate: Item {

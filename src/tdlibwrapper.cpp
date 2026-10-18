@@ -1243,6 +1243,17 @@ void TDLibWrapper::searchPublicChats(const QString &query)
     this->sendRequest(requestObject);
 }
 
+void TDLibWrapper::searchOwnChats(const QString &query)
+{
+    LOG("Searching own chats" << query);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "searchChats");
+    requestObject.insert("query", query);
+    requestObject.insert("limit", 30);
+    requestObject.insert(_EXTRA, "searchOwnChats");
+    this->sendRequest(requestObject);
+}
+
 void TDLibWrapper::readAllChatMentions(qlonglong chatId)
 {
     LOG("Read all chat mentions" << chatId);
