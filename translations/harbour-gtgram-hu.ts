@@ -83,6 +83,14 @@
         <source>other contributors</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Source code on GitHub</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Support me on Ko-fi</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>BackgroundProgressIndicator</name>
@@ -1771,6 +1779,22 @@
     <message>
         <source>Animate stickers</source>
         <translation>Animált matricák</translation>
+    </message>
+    <message>
+        <source>Theme</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Iris: indigo and sand, set in JetBrains Mono</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Default (system ambience)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Iris</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
