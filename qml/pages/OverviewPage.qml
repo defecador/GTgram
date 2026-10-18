@@ -328,6 +328,8 @@ Page {
         initializePage();
     }
 
+    IrisBackground {}
+
     SilicaFlickable {
         id: overviewContainer
         contentHeight: parent.height

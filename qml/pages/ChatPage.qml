@@ -1037,6 +1037,8 @@ Page {
         }
     }
 
+    IrisBackground {}
+
     Drawer {
         id: messageOptionsDrawer
 
@@ -1370,8 +1372,8 @@ Page {
                             text: chatInformation.title !== "" ? Emoji.emojify(chatInformation.title, font.pixelSize) : qsTr("Unknown")
                             textFormat: Text.StyledText
                             font.pixelSize: chatPage.isPortrait ? Theme.fontSizeLarge : Theme.fontSizeMedium
-                            font.family: Theme.fontFamilyHeading
-                            color: Theme.highlightColor
+                            font.family: IrisTheme.active ? IrisTheme.fontFamily : Theme.fontFamilyHeading
+                            color: IrisTheme.active ? IrisTheme.accent : Theme.highlightColor
                             truncationMode: TruncationMode.Fade
                             maximumLineCount: 1
                         }
@@ -1385,8 +1387,8 @@ Page {
                             text: ""
                             textFormat: Text.StyledText
                             font.pixelSize: chatPage.isPortrait ? Theme.fontSizeExtraSmall : Theme.fontSizeTiny
-                            font.family: Theme.fontFamilyHeading
-                            color: headerMouseArea.pressed ? Theme.secondaryHighlightColor : Theme.secondaryColor
+                            font.family: IrisTheme.active ? IrisTheme.fontFamily : Theme.fontFamilyHeading
+                            color: IrisTheme.active ? IrisTheme.inkSecondary : (headerMouseArea.pressed ? Theme.secondaryHighlightColor : Theme.secondaryColor)
                             truncationMode: TruncationMode.Fade
                             maximumLineCount: 1
                         }
@@ -2376,6 +2378,7 @@ Page {
                             height: Math.min(chatContainer.height / 3, implicitHeight)
                             anchors.verticalCenter: parent.verticalCenter
                             font.pixelSize: Theme.fontSizeSmall
+                            font.family: IrisTheme.active ? IrisTheme.fontFamily : Theme.fontFamily
                             placeholderText: qsTr("Your message")
                             labelVisible: false
                             textLeftMargin: 0

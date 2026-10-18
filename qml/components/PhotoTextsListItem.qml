@@ -2,6 +2,7 @@ import QtQuick 2.6
 import Sailfish.Silica 1.0
 import WerkWolf.GTgram 1.0
 import "../js/functions.js" as Functions
+import "."
 
 ListItem {
     id: chatListViewItem
@@ -20,6 +21,8 @@ ListItem {
     property bool isPinned: false
     property bool isMuted: false
     property alias pictureThumbnail: pictureThumbnail
+
+    readonly property bool iris: IrisTheme.active
 
     contentHeight: Theme.itemSizeExtraLarge
     contentWidth: parent.width
@@ -87,7 +90,7 @@ ListItem {
 
             Rectangle {
                 id: chatUnreadMessagesCountBackground
-                color: isMuted ? ((Theme.colorScheme === Theme.DarkOnLight) ? "lightgray" : "dimgray") : Theme.highlightBackgroundColor
+                color: isMuted ? ((Theme.colorScheme === Theme.DarkOnLight) ? "lightgray" : "dimgray") : (chatListViewItem.iris ? IrisTheme.attention : Theme.highlightBackgroundColor)
                 width: Theme.fontSizeLarge
                 height: Theme.fontSizeLarge
                 anchors.right: parent.right
@@ -100,7 +103,8 @@ ListItem {
                 id: chatUnreadMessagesCount
                 font.pixelSize: Theme.fontSizeExtraSmall
                 font.bold: true
-                color: Theme.primaryColor
+                font.family: chatListViewItem.iris ? IrisTheme.fontFamily : Theme.fontFamily
+                color: chatListViewItem.iris ? IrisTheme.onAttention : Theme.primaryColor
                 anchors.centerIn: chatUnreadMessagesCountBackground
                 visible: chatListViewItem.unreadCount > 0
                 opacity: isMuted ? Theme.opacityHigh : 1.0
@@ -108,7 +112,7 @@ ListItem {
             }
 
             Rectangle {
-                color: isMuted ? ((Theme.colorScheme === Theme.DarkOnLight) ? "lightgray" : "dimgray") : Theme.highlightBackgroundColor
+                color: isMuted ? ((Theme.colorScheme === Theme.DarkOnLight) ? "lightgray" : "dimgray") : (chatListViewItem.iris ? IrisTheme.attention : Theme.highlightBackgroundColor)
                 width: Theme.fontSizeLarge
                 height: Theme.fontSizeLarge
                 anchors.right: parent.right
@@ -130,7 +134,7 @@ ListItem {
                         pixelSize: Theme.iconSizeExtraSmall
                         bold: true
                     }
-                    color: Theme.primaryColor
+                    color: chatListViewItem.iris ? IrisTheme.onAttention : Theme.primaryColor
                     anchors.centerIn: parent
                     visible: chatListViewItem.unreadMentionCount > 0
                     opacity: isMuted ? Theme.opacityHigh : 1.0
@@ -159,12 +163,13 @@ ListItem {
                 id: primaryText
                 textFormat: Text.StyledText
                 font.pixelSize: Theme.fontSizeMedium
+                font.family: chatListViewItem.iris ? IrisTheme.fontFamily : Theme.fontFamily
                 truncationMode: TruncationMode.Fade
                 anchors.verticalCenter: parent.verticalCenter
                 width: Math.min(contentColumn.width - (verifiedImage.visible ? (verifiedImage.width + primaryTextRow.spacing) :  0) - (mutedImage.visible ? (mutedImage.width + primaryTextRow.spacing) :  0), implicitWidth)
                 font.bold: appSettings.highlightUnreadConversations && ( !chatListViewItem.isMuted && (chatListViewItem.unreadCount > 0 || chatListViewItem.isMarkedAsUnread) )
                 font.italic: appSettings.highlightUnreadConversations  && (chatListViewItem.unreadReactionCount > 0)
-                color: (appSettings.highlightUnreadConversations && (chatListViewItem.unreadCount > 0)) ? Theme.highlightColor : Theme.primaryColor
+                color: (appSettings.highlightUnreadConversations && (chatListViewItem.unreadCount > 0)) ? (chatListViewItem.iris ? IrisTheme.accent : Theme.highlightColor) : (chatListViewItem.iris ? IrisTheme.ink : Theme.primaryColor)
             }
 
             Image {
@@ -194,14 +199,17 @@ ListItem {
             Label {
                 id: prologSecondaryText
                 font.pixelSize: Theme.fontSizeExtraSmall
+                font.family: chatListViewItem.iris ? IrisTheme.fontFamily : Theme.fontFamily
                 width: Math.min(implicitWidth, parent.width)
-                color: Theme.highlightColor
+                color: chatListViewItem.iris ? IrisTheme.accent : Theme.highlightColor
                 textFormat: Text.StyledText
                 truncationMode: TruncationMode.Fade
             }
             Label {
                 id: secondaryText
                 font.pixelSize: Theme.fontSizeExtraSmall
+                font.family: chatListViewItem.iris ? IrisTheme.fontFamily : Theme.fontFamily
+                color: chatListViewItem.iris ? IrisTheme.inkSecondary : Theme.primaryColor
                 width: parent.width - Theme.paddingMedium - prologSecondaryText.width
                 truncationMode: TruncationMode.Fade
                 textFormat: Text.StyledText
@@ -213,7 +221,8 @@ ListItem {
             id: tertiaryText
             width: parent.width
             font.pixelSize: Theme.fontSizeTiny
-            color: Theme.secondaryColor
+            font.family: chatListViewItem.iris ? IrisTheme.fontFamily : Theme.fontFamily
+            color: chatListViewItem.iris ? IrisTheme.inkSecondary : Theme.secondaryColor
             truncationMode: TruncationMode.Fade
         }
     }
@@ -226,7 +235,7 @@ ListItem {
         }
 
         width: parent.width
-        color: Theme.primaryColor
+        color: chatListViewItem.iris ? IrisTheme.glassBorder : Theme.primaryColor
         horizontalAlignment: Qt.AlignHCenter
     }
 

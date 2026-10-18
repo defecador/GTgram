@@ -85,3 +85,6 @@ It also uses:
   built this on [tgcalls](https://github.com/TelegramMessenger/tgcalls) (LGPLv3) and
   [tg_owt](https://github.com/desktop-app/tg_owt) (Telegram's WebRTC fork; BSD-style,
   GPL-compatible), both by Telegram Messenger LLP.
+- The optional "Iris" theme's typeface, [JetBrains Mono](https://www.jetbrains.com/lp/mono/),
+  copyright 2020 The JetBrains Mono Project Authors, under the
+  [SIL Open Font License 1.1](qml/fonts/JetBrainsMono-OFL.txt).

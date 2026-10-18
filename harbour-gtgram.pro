@@ -64,6 +64,8 @@ DISTFILES += qml/harbour-gtgram.qml \
     qml/components/BackgroundImage.qml \
     qml/components/CallOverlay.qml \
     qml/components/ChatListViewItem.qml \
+    qml/components/IrisBackground.qml \
+    qml/components/IrisTheme.qml \
     qml/components/ContactSync.qml \
     qml/components/DocumentPreview.qml \
     qml/components/GamePreview.qml \

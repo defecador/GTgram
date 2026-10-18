@@ -1,0 +1,5 @@
+# Directory-listing qmldir: only needed to declare the Iris theme singleton
+# (a singleton is not reachable without a qmldir, even via a directory
+# import). Other components in this folder still resolve by file name as
+# before and must NOT be listed here.
+singleton IrisTheme 1.0 IrisTheme.qml

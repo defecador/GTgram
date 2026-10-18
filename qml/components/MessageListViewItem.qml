@@ -22,6 +22,7 @@ import "./messageContent"
 import "../js/twemoji.js" as Emoji
 import "../js/functions.js" as Functions
 import "../js/debug.js" as Debug
+import "."
 
 ListItem {
     id: messageListItem
@@ -38,7 +39,10 @@ ListItem {
     readonly property bool isAnonymous: myMessage.sender_id["@type"] === "messageSenderChat"
     readonly property var userInformation: tdLibWrapper.getUserInformation(myMessage.sender_id.user_id)
     property QtObject precalculatedValues: ListView.view.precalculatedValues
-    readonly property color textColor: isOwnMessage ? Theme.highlightColor : Theme.primaryColor
+    readonly property bool iris: IrisTheme.active
+    readonly property string textFontFamily: iris ? IrisTheme.fontFamily : Theme.fontFamily
+    readonly property color textColor: iris ? IrisTheme.ink : (isOwnMessage ? Theme.highlightColor : Theme.primaryColor)
+    readonly property color metaColor: iris ? IrisTheme.inkSecondary : (isOwnMessage ? Theme.secondaryHighlightColor : Theme.secondaryColor)
     readonly property int textAlign: isOwnMessage ? Text.AlignRight : Text.AlignLeft
     readonly property Page page: precalculatedValues.page
     readonly property bool isSelected: messageListItem.precalculatedValues.pageIsSelecting && page.selectedMessages.some(function(existingMessage) {
@@ -486,9 +490,12 @@ ListItem {
                 height: messageTextColumn.height + precalculatedValues.paddingMediumDouble
                 width: precalculatedValues.backgroundWidth
                 property bool isUnread: messageIndex > chatModel.getLastReadMessageIndex() && myMessage['@type'] !== "sponsoredMessage"
-                color: Theme.colorScheme === Theme.LightOnDark ? (isUnread ? Theme.secondaryHighlightColor : Theme.secondaryColor) : (isUnread ? Theme.backgroundGlowColor : Theme.overlayBackgroundColor)
-                radius: parent.width / 50
-                opacity: isUnread ? 0.5 : 0.2
+                color: messageListItem.iris ? (messageListItem.isOwnMessage ? IrisTheme.bubbleOwn : IrisTheme.bubbleOther)
+                       : (Theme.colorScheme === Theme.LightOnDark ? (isUnread ? Theme.secondaryHighlightColor : Theme.secondaryColor) : (isUnread ? Theme.backgroundGlowColor : Theme.overlayBackgroundColor))
+                radius: messageListItem.iris ? IrisTheme.radiusBubble : parent.width / 50
+                opacity: messageListItem.iris ? 1.0 : (isUnread ? 0.5 : 0.2)
+                border.width: messageListItem.iris ? IrisTheme.borderWidth : 0
+                border.color: messageListItem.iris ? (isUnread ? IrisTheme.attention : (messageListItem.isOwnMessage ? IrisTheme.accentBorder : IrisTheme.glassBorder)) : "transparent"
                 visible: appSettings.showStickersAsImages || (myMessage.content['@type'] !== "messageSticker" && myMessage.content['@type'] !== "messageAnimatedEmoji")
                 Behavior on color { ColorAnimation { duration: 200 } }
                 Behavior on opacity { FadeAnimation {} }
@@ -516,7 +523,8 @@ ListItem {
                                                 : Functions.getUserName(messageListItem.userInformation) ), font.pixelSize)
                     font.pixelSize: Theme.fontSizeExtraSmall
                     font.weight: Font.ExtraBold
-                    color: messageListItem.textColor
+                    font.family: messageListItem.textFontFamily
+                    color: messageListItem.iris ? IrisTheme.accent : messageListItem.textColor
                     maximumLineCount: 1
                     truncationMode: TruncationMode.Fade
                     textFormat: Text.StyledText
@@ -647,6 +655,7 @@ ListItem {
                     width: parent.width
                     text: Emoji.emojify(Functions.getMessageText(myMessage, false, page.myUserId, false), Theme.fontSizeMedium)
                     font.pixelSize: Theme.fontSizeSmall
+                    font.family: messageListItem.textFontFamily
                     color: messageListItem.textColor
                     wrapMode: Text.Wrap
                     textFormat: Text.StyledText
@@ -657,7 +666,7 @@ ListItem {
                         }
                     }
                     horizontalAlignment: messageListItem.textAlign
-                    linkColor: Theme.highlightColor
+                    linkColor: messageListItem.iris ? IrisTheme.accent : Theme.highlightColor
                     visible: (text !== "")
                 }
 
@@ -733,7 +742,8 @@ ListItem {
 
                     id: messageDateText
                     font.pixelSize: Theme.fontSizeTiny
-                    color: messageListItem.isOwnMessage ? Theme.secondaryHighlightColor : Theme.secondaryColor
+                    font.family: messageListItem.textFontFamily
+                    color: messageListItem.metaColor
                     horizontalAlignment: messageListItem.textAlign
                     text: getMessageStatusText(myMessage, messageIndex, chatView.lastReadSentIndex, messageDateText.useElapsed)
                     MouseArea {
@@ -757,7 +767,8 @@ ListItem {
                             text: getInteractionText(messageViewCount, reactions, font.pixelSize, Theme.highlightColor)
                             width: parent.width
                             font.pixelSize: Theme.fontSizeTiny
-                            color: messageListItem.isOwnMessage ? Theme.secondaryHighlightColor : Theme.secondaryColor
+                            font.family: messageListItem.textFontFamily
+                            color: messageListItem.metaColor
                             horizontalAlignment: messageListItem.textAlign
                             textFormat: Text.StyledText
                             maximumLineCount: 1

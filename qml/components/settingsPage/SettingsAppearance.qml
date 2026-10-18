@@ -19,6 +19,7 @@
 
 import QtQuick 2.6
 import Sailfish.Silica 1.0
+import WerkWolf.GTgram 1.0
 
 AccordionItem {
     text: qsTr("Appearance")
@@ -38,6 +39,60 @@ AccordionItem {
     Component {
         ResponsiveGrid {
             bottomPadding: Theme.paddingMedium
+
+            ComboBox {
+                id: themeComboBox
+                width: parent.columnWidth
+                label: qsTr("Theme")
+                description: qsTr("Iris: indigo and sand, set in JetBrains Mono")
+                menu: ContextMenu {
+                    id: themeMenu
+                    x: 0
+                    width: themeComboBox.width
+
+                    MenuItem {
+                        readonly property int value: AppSettings.ThemeDefault
+                        text: qsTr("Default (system ambience)")
+                        onClicked: {
+                            appSettings.appTheme = value
+                        }
+                    }
+                    MenuItem {
+                        readonly property int value: AppSettings.ThemeIris
+                        text: qsTr("Iris")
+                        onClicked: {
+                            appSettings.appTheme = value
+                        }
+                    }
+                }
+
+                Component.onCompleted: updateThemeSelection()
+
+                function updateThemeSelection() {
+                    var menuItems = themeMenu.children
+                    var n = menuItems.length
+                    for (var i=0; i<n; i++) {
+                        if (menuItems[i].value === appSettings.appTheme) {
+                            currentIndex = i
+                            return
+                        }
+                    }
+                }
+
+                Connections {
+                    target: appSettings
+                    onAppThemeChanged: {
+                        themeComboBox.updateThemeSelection()
+                    }
+                }
+            }
+
+            Item {
+                // Placeholder to keep the switches below in their columns
+                visible: parent.columns === 2
+                width: 1
+                height: 1
+            }
 
             TextSwitch {
                 width: parent.columnWidth

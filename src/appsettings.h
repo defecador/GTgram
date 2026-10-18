@@ -48,6 +48,7 @@ class AppSettings : public QObject {
     Q_PROPERTY(bool showReactionButton READ showReactionButton WRITE setShowReactionButton NOTIFY showReactionButtonChanged)
     Q_PROPERTY(bool autoplayAnimatedGifs READ autoplayAnimatedGifs WRITE setAutoplayAnimatedGifs NOTIFY autoplayAnimatedGifsChanged)
     Q_PROPERTY(SponsoredMess sponsoredMess READ getSponsoredMess WRITE setSponsoredMess NOTIFY sponsoredMessChanged)
+    Q_PROPERTY(AppTheme appTheme READ getAppTheme WRITE setAppTheme NOTIFY appThemeChanged)
 
 public:
     enum SponsoredMess {
@@ -63,6 +64,12 @@ public:
         NotificationFeedbackAll
     };
     Q_ENUM(NotificationFeedback)
+
+    enum AppTheme {
+        ThemeDefault,
+        ThemeIris
+    };
+    Q_ENUM(AppTheme)
 
 public:
     AppSettings(QObject *parent = Q_NULLPTR);
@@ -135,6 +142,9 @@ public:
     SponsoredMess getSponsoredMess() const;
     void setSponsoredMess(SponsoredMess sponsoredMess);
 
+    AppTheme getAppTheme() const;
+    void setAppTheme(AppTheme appTheme);
+
     bool autoplayAnimatedGifs() const;
     void setAutoplayAnimatedGifs(bool enable);
 
@@ -162,6 +172,7 @@ signals:
     void highlightUnreadConversationsChanged();
     void showReactionButtonChanged();
     void sponsoredMessChanged();
+    void appThemeChanged();
     void autoplayAnimatedGifsChanged();
 
 private:

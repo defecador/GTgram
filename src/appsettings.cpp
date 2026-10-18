@@ -45,6 +45,7 @@ namespace {
     const QString KEY_HIGHLIGHT_UNREADCONVS("highlightUnreadConversations");
     const QString KEY_SHOW_REACTION_BUTTON("showReactionButton");
     const QString KEY_AUTOPLAY_ANIMATED_GIFS("autoplayAnimatedGifs");
+    const QString KEY_APP_THEME("appTheme");
 }
 
 AppSettings::AppSettings(QObject *parent) : QObject(parent), settings(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/de.ygriega/gtgram/settings.conf", QSettings::NativeFormat)
@@ -372,6 +373,20 @@ void AppSettings::setSponsoredMess(SponsoredMess sponsoredMess)
         LOG(KEY_SPONSORED_MESS << sponsoredMess);
         settings.setValue(KEY_SPONSORED_MESS, sponsoredMess);
         emit sponsoredMessChanged();
+    }
+}
+
+AppSettings::AppTheme AppSettings::getAppTheme() const
+{
+    return (AppTheme) settings.value(KEY_APP_THEME, (int) AppSettings::ThemeDefault).toInt();
+}
+
+void AppSettings::setAppTheme(AppTheme appTheme)
+{
+    if (getAppTheme() != appTheme) {
+        LOG(KEY_APP_THEME << appTheme);
+        settings.setValue(KEY_APP_THEME, appTheme);
+        emit appThemeChanged();
     }
 }
 
