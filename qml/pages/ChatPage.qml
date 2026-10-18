@@ -34,6 +34,11 @@ Page {
 
     property bool loading: true;
     property bool isInitialized: false;
+    // chatModel is shared by every chat page. Until this page has loaded its own chat
+    // into it, replies still arriving for the previously open chat (e.g. when jumping
+    // via "Next unread chat") must not be taken for ours: they would mark this page
+    // as initialized, so chatModel.initialize() was skipped and it stayed loading.
+    property bool modelInitialized: false;
     readonly property int myUserId: tdLibWrapper.getUserInformation().id;
     property var chatInformation;
     property var secretChatDetails;
@@ -622,6 +627,7 @@ Page {
         }
         // Replace rather than push, so going back still leads to the overview page
         // instead of walking back through every chat visited this way.
+        Debug.log("[ChatPage] Opening next unread chat", nextChat.chat_id, "from", chatPage.chatInformation.id);
         pageStack.replace(Qt.resolvedUrl("../pages/ChatPage.qml"), {
             "chatInformation": nextChat.display
         });
@@ -677,6 +683,7 @@ Page {
     }
 
     onStatusChanged: {
+        Debug.log("[ChatPage] status of chat", chatInformation.id, "is now", status, "initialized:", isInitialized, "pageStack depth:", pageStack.depth);
         switch(status) {
         case PageStatus.Activating:
             tdLibWrapper.openChat(chatInformation.id);
@@ -697,6 +704,7 @@ Page {
         case PageStatus.Active:
             if (!chatPage.isInitialized) {
                 chatModel.initialize(chatInformation);
+                chatPage.modelInitialized = true;
 
                 pageStack.pushAttached(Qt.resolvedUrl("ChatInformationPage.qml"), { "chatInformation" : chatInformation, "privateChatUserInformation": chatPartnerInformation, "groupInformation": chatGroupInformation, "chatOnlineMemberCount": chatOnlineMemberCount});
 
@@ -848,6 +856,9 @@ Page {
     Connections {
         target: chatModel
         onMessagesReceived: {
+            if (!chatPage.modelInitialized) {
+                return;
+            }
             var proxyIndex = chatProxyModel.mapRowFromSource(modelIndex, -1);
             Debug.log("[ChatPage] Messages received, view has ", chatView.count, " messages, last known message index ", proxyIndex, "("+modelIndex+"), own messages were read before index ", lastReadSentIndex);
             if (totalCount === 0) {
@@ -909,6 +920,9 @@ Page {
             chatView.lastReadSentIndex = lastReadSentIndex;
         }
         onMessagesIncrementalUpdate: {
+            if (!chatPage.modelInitialized) {
+                return;
+            }
             var proxyIndex = chatProxyModel.mapRowFromSource(modelIndex, -1);
             Debug.log("Incremental update received. View now has ", chatView.count, " messages, view is on index ", proxyIndex, "("+modelIndex+"), own messages were read before index ", lastReadSentIndex);
             chatView.lastReadSentIndex = lastReadSentIndex;

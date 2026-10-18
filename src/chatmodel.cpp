@@ -431,6 +431,14 @@ void ChatModel::initialize(const QVariantMap &chatInformation)
 {
     const qlonglong chatId = chatInformation.value(ID).toLongLong();
     LOG("Initializing chat model..." << chatId);
+    // Opening a chat straight from another one (e.g. "Next unread chat") skips the
+    // clear() that going back through the overview does. A load still in flight for
+    // the previous chat would otherwise leave these flags set, so the first history
+    // reply of the new chat is treated as an incremental update and the chat page
+    // never leaves its loading state.
+    inReload = false;
+    inIncrementalUpdate = false;
+    searchModeActive = false;
     beginResetModel();
     qDeleteAll(messages);
     this->chatInformation = chatInformation;

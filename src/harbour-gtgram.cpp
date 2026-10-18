@@ -126,7 +126,11 @@ void migrateSettings() {
 
 int main(int argc, char *argv[])
 {
-    QLoggingCategory::setFilterRules(DEFAULT_LOG_FILTER);
+    // setFilterRules() would win over QT_LOGGING_RULES in Qt 5.6, defeating the
+    // documented override above, so only apply the default when none is given.
+    if (qEnvironmentVariableIsEmpty("QT_LOGGING_RULES")) {
+        QLoggingCategory::setFilterRules(DEFAULT_LOG_FILTER);
+    }
 
     QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
     QScopedPointer<QQuickView> view(SailfishApp::createView());
