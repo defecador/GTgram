@@ -627,7 +627,6 @@ Page {
         }
         // Replace rather than push, so going back still leads to the overview page
         // instead of walking back through every chat visited this way.
-        Debug.log("[ChatPage] Opening next unread chat", nextChat.chat_id, "from", chatPage.chatInformation.id);
         pageStack.replace(Qt.resolvedUrl("../pages/ChatPage.qml"), {
             "chatInformation": nextChat.display
         });
@@ -683,7 +682,6 @@ Page {
     }
 
     onStatusChanged: {
-        Debug.log("[ChatPage] status of chat", chatInformation.id, "is now", status, "initialized:", isInitialized, "pageStack depth:", pageStack.depth);
         switch(status) {
         case PageStatus.Activating:
             tdLibWrapper.openChat(chatInformation.id);
@@ -1281,6 +1279,13 @@ Page {
                     visible: chatPage.showSendOptionsMenuItems
                     text: qsTr("Send silently")
                     onClicked: chatPage.sendMessageWithOptions({ "silent": true })
+                }
+
+                MenuItem {
+                    // Also in the push-up menu at the end of the messages, but that one only
+                    // appears once the list has settled at its very end
+                    text: qsTr("Next unread chat")
+                    onClicked: chatPage.openNextUnreadChat()
                 }
             }
 
