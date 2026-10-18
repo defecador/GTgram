@@ -118,6 +118,26 @@ Page {
                 }
             }
 
+            Button {
+                text: qsTr("Source code on GitHub")
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                }
+                onClicked: {
+                    Qt.openUrlExternally("https://github.com/defecador/GTgram");
+                }
+            }
+
+            Button {
+                text: qsTr("Support me on Ko-fi")
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                }
+                onClicked: {
+                    Qt.openUrlExternally("https://ko-fi.com/gallerman73107");
+                }
+            }
+
             SectionHeader {
                 text: qsTr("About Telegram")
             }
