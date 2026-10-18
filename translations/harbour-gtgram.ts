@@ -1774,7 +1774,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Enter your query to start searching (at least 5 characters needed)</source>
+        <source>Enter your query to start searching (at least 5 characters to also search public chats)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

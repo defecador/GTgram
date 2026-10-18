@@ -1746,8 +1746,8 @@
         <translation>搜索对话…</translation>
     </message>
     <message>
-        <source>Enter your query to start searching (at least 5 characters needed)</source>
-        <translation>输入你要搜索的内容（至少需要输入5个字符）</translation>
+        <source>Enter your query to start searching (at least 5 characters to also search public chats)</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

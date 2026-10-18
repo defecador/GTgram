@@ -1750,8 +1750,8 @@
         <translation>Csevegés keresése...</translation>
     </message>
     <message>
-        <source>Enter your query to start searching (at least 5 characters needed)</source>
-        <translation>Írd be a kulcsszavadat, hogy elkezdj keresni (legalább 5 karakter szükséges)</translation>
+        <source>Enter your query to start searching (at least 5 characters to also search public chats)</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

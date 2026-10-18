@@ -1774,8 +1774,8 @@
         <translation>Sök en chatt...</translation>
     </message>
     <message>
-        <source>Enter your query to start searching (at least 5 characters needed)</source>
-        <translation>Ange din söksträng för att starta sökning (minst 5 tecken behövs)</translation>
+        <source>Enter your query to start searching (at least 5 characters to also search public chats)</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

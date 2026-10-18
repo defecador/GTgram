@@ -1774,8 +1774,8 @@
         <translation>A b c</translation>
     </message>
     <message>
-        <source>Enter your query to start searching (at least 5 characters needed)</source>
-        <translation>Iniciar búsqueda con al menos 5 caracteres</translation>
+        <source>Enter your query to start searching (at least 5 characters to also search public chats)</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
