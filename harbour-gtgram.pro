@@ -220,11 +220,15 @@ equals(QT_ARCH, arm64){
 # media stack, which for Telegram means tgcalls on top of tg_owt (Telegram's
 # WebRTC fork). Both are vendored under vendor/ (NOT committed to git - see
 # NOTICE.md for where to get them) rather than built from this .pro, because
-# tg_owt is a multi-hundred-MB prebuilt static lib per architecture; only
-# aarch64 has a prebuild, so this is aarch64-only for now.
+# tg_owt is a multi-hundred-MB prebuilt static lib per architecture; aarch64
+# and armv7hl have prebuilds, so calls are not available on other architectures.
 CONFIG += gtgram_voicecalls
+# The prebuilt aarch64 tg_owt was linked against libvpx.so.9; the armv7hl one
+# was built against the target's current libvpx.so.12.
+equals(QT_ARCH, arm): GTGRAM_LIBVPX_SOVERSION = 12
+else: GTGRAM_LIBVPX_SOVERSION = 9
 gtgram_voicecalls {
-    equals(QT_ARCH, arm64) {
+    equals(QT_ARCH, arm64)|equals(QT_ARCH, arm) {
         message(Voice calls: tgcalls + tg_owt enabled)
         DEFINES += GTGRAM_VOICE_CALLS
         # tg_owt/tgcalls need C++17 (std::optional); force gnu++17 specifically
@@ -266,11 +270,11 @@ gtgram_voicecalls {
                 -Wl,-rpath-link,$$PWD/bundledlibs/$${TARGET_ARCHITECTURE} \
                 -l:libssl.so.1.1 -l:libcrypto.so.1.1 -lz -lpulse \
                 -l:libopus.so.0 \
-                -l:libvpx.so.9 \
+                -l:libvpx.so.$${GTGRAM_LIBVPX_SOVERSION} \
                 -l:libavcodec.so.59 \
                 -l:libavutil.so.57
     } else {
-        warning(gtgram_voicecalls requested but QT_ARCH is not arm64: scope ignored)
+        warning(gtgram_voicecalls requested but QT_ARCH is not arm/arm64: scope ignored)
     }
 }
 
@@ -281,7 +285,7 @@ telegram.files = $$PWD/tdlib/$${TARGET_ARCHITECTURE}/lib
 telegram.path = /usr/share/$${TARGET}
 
 gtgram_voicecalls {
-    equals(QT_ARCH, arm64) {
+    equals(QT_ARCH, arm64)|equals(QT_ARCH, arm) {
         # Ships alongside libtdjson.so in the same directory, which the
         # sailfishapp CONFIG already puts on the binary's rpath.
         bundledlibs.files = $$files($$PWD/bundledlibs/$${TARGET_ARCHITECTURE}/*.so.*)

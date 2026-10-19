@@ -57,10 +57,10 @@ make %{?_smp_mflags}
 
 # >> build post
 # voicecallplugin/ lives in the same project and the same RPM as the app, but
-# its .so MUST end up in /usr/lib64/voicecall/plugins because voicecall-manager
+# its .so MUST end up in %{_libdir}/voicecall/plugins because voicecall-manager
 # loads providers inside its own process (there's no way to register from
 # outside - its D-Bus is read-only for that).
-%ifarch aarch64
+%ifarch aarch64 armv7hl
 cd voicecallplugin
 # Mandatory cleanup: leftover objects from a previous build (possibly a
 # different architecture) would otherwise be reused by make, and the link
@@ -79,10 +79,10 @@ rm -rf %{buildroot}
 %qmake5_install
 
 # >> install post
-%ifarch aarch64
-mkdir -p %{buildroot}/usr/lib64/voicecall/plugins
+%ifarch aarch64 armv7hl
+mkdir -p %{buildroot}%{_libdir}/voicecall/plugins
 install -m 644 voicecallplugin/libgtgram-voicecall-plugin.so \
-%{buildroot}/usr/lib64/voicecall/plugins/libgtgram-voicecall-plugin.so
+%{buildroot}%{_libdir}/voicecall/plugins/libgtgram-voicecall-plugin.so
 %endif
 # << install post
 
@@ -96,11 +96,11 @@ desktop-file-install --delete-original       \
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
-%ifarch aarch64
-/usr/lib64/voicecall/plugins/libgtgram-voicecall-plugin.so
+%ifarch aarch64 armv7hl
+%{_libdir}/voicecall/plugins/libgtgram-voicecall-plugin.so
 %endif
 # >> files
-%ifarch aarch64
-/usr/lib64/voicecall/plugins/libgtgram-voicecall-plugin.so
+%ifarch aarch64 armv7hl
+%{_libdir}/voicecall/plugins/libgtgram-voicecall-plugin.so
 %endif
 # << files

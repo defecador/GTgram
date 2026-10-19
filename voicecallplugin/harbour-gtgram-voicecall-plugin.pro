@@ -21,5 +21,6 @@ SOURCES += \
     gtgramvoicecallprovider.cpp \
     gtgramvoicecallproviderfactory.cpp
 
-target.path = /usr/lib64/voicecall/plugins
+equals(QT_ARCH, arm): target.path = /usr/lib/voicecall/plugins
+else: target.path = /usr/lib64/voicecall/plugins
 INSTALLS += target

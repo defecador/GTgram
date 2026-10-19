@@ -66,8 +66,8 @@ Files:
   - '%{_datadir}/%{name}'
   - '%{_datadir}/applications/%{name}.desktop'
   - '%{_datadir}/icons/hicolor/*/apps/%{name}.png'
-  - '%ifarch aarch64'
-  - '/usr/lib64/voicecall/plugins/libgtgram-voicecall-plugin.so'
+  - '%ifarch aarch64 armv7hl'
+  - '%{_libdir}/voicecall/plugins/libgtgram-voicecall-plugin.so'
   - '%endif'
 
 # For more information about yaml and what's supported in Sailfish OS
