@@ -559,7 +559,10 @@ void TDLibWrapper::sendPhotoMessage(qlonglong chatId, const QString &filePath, c
     QVariantMap photoInputFile;
     photoInputFile.insert(_TYPE, "inputFileLocal");
     photoInputFile.insert("path", filePath);
-    inputMessageContent.insert("photo", photoInputFile);
+    QVariantMap photoWrapper;
+    photoWrapper.insert(_TYPE, "inputPhoto");
+    photoWrapper.insert("photo", photoInputFile);
+    inputMessageContent.insert("photo", photoWrapper);
 
     requestObject.insert("input_message_content", inputMessageContent);
     this->sendRequest(requestObject);
@@ -579,7 +582,10 @@ void TDLibWrapper::sendVideoMessage(qlonglong chatId, const QString &filePath, c
     QVariantMap videoInputFile;
     videoInputFile.insert(_TYPE, "inputFileLocal");
     videoInputFile.insert("path", filePath);
-    inputMessageContent.insert("video", videoInputFile);
+    QVariantMap videoWrapper;
+    videoWrapper.insert(_TYPE, "inputVideo");
+    videoWrapper.insert("video", videoInputFile);
+    inputMessageContent.insert("video", videoWrapper);
 
     requestObject.insert("input_message_content", inputMessageContent);
     this->sendRequest(requestObject);
@@ -599,7 +605,10 @@ void TDLibWrapper::sendDocumentMessage(qlonglong chatId, const QString &filePath
     QVariantMap documentInputFile;
     documentInputFile.insert(_TYPE, "inputFileLocal");
     documentInputFile.insert("path", filePath);
-    inputMessageContent.insert("document", documentInputFile);
+    QVariantMap documentWrapper;
+    documentWrapper.insert(_TYPE, "inputDocument");
+    documentWrapper.insert("document", documentInputFile);
+    inputMessageContent.insert("document", documentWrapper);
 
     requestObject.insert("input_message_content", inputMessageContent);
     this->sendRequest(requestObject);
@@ -619,8 +628,11 @@ void TDLibWrapper::sendVoiceNoteMessage(qlonglong chatId, const QString &filePat
     QVariantMap documentInputFile;
     documentInputFile.insert(_TYPE, "inputFileLocal");
     documentInputFile.insert("path", filePath);
-    inputMessageContent.insert("voice_note", documentInputFile);
-    inputMessageContent.insert("duration", durationSeconds);
+    QVariantMap voice_noteWrapper;
+    voice_noteWrapper.insert(_TYPE, "inputVoiceNote");
+    voice_noteWrapper.insert("voice_note", documentInputFile);
+    voice_noteWrapper.insert("duration", durationSeconds);
+    inputMessageContent.insert("voice_note", voice_noteWrapper);
 
     requestObject.insert("input_message_content", inputMessageContent);
     this->sendRequest(requestObject);
@@ -658,7 +670,10 @@ void TDLibWrapper::sendStickerMessage(qlonglong chatId, const QString &fileId, q
     stickerInputFile.insert(_TYPE, "inputFileRemote");
     stickerInputFile.insert(ID, fileId);
 
-    inputMessageContent.insert("sticker", stickerInputFile);
+    QVariantMap inputSticker;
+    inputSticker.insert(_TYPE, "inputSticker");
+    inputSticker.insert("sticker", stickerInputFile);
+    inputMessageContent.insert("sticker", inputSticker);
 
     requestObject.insert("input_message_content", inputMessageContent);
     this->sendRequest(requestObject);
@@ -671,24 +686,38 @@ void TDLibWrapper::sendPollMessage(qlonglong chatId, const QString &question, co
     QVariantMap inputMessageContent;
     inputMessageContent.insert(_TYPE, "inputMessagePoll");
 
+    // TDLib expects formattedText for the question, the explanation and every option's text
+    auto formatted = [](const QString &text) {
+        QVariantMap formattedText;
+        formattedText.insert(_TYPE, "formattedText");
+        formattedText.insert("text", text);
+        return formattedText;
+    };
+
     QVariantMap pollType;
     if(correctOption > -1) {
-        pollType.insert(_TYPE, "pollTypeQuiz");
-        pollType.insert("correct_option_id", correctOption);
+        pollType.insert(_TYPE, "inputPollTypeQuiz");
+        pollType.insert("correct_option_ids", QVariantList() << correctOption);
         if(!explanation.isEmpty()) {
-            QVariantMap formattedExplanation;
-            formattedExplanation.insert("text", explanation);
-            pollType.insert("explanation", formattedExplanation);
+            pollType.insert("explanation", formatted(explanation));
         }
     } else {
-        pollType.insert(_TYPE, "pollTypeRegular");
-        pollType.insert("allow_multiple_answers", multiple);
+        pollType.insert(_TYPE, "inputPollTypeRegular");
+    }
+
+    QVariantList pollOptions;
+    for (const QVariant &option : options) {
+        QVariantMap pollOption;
+        pollOption.insert(_TYPE, "inputPollOption");
+        pollOption.insert("text", formatted(option.toString()));
+        pollOptions.append(pollOption);
     }
 
     inputMessageContent.insert(TYPE, pollType);
-    inputMessageContent.insert("question", question);
-    inputMessageContent.insert("options", options);
+    inputMessageContent.insert("question", formatted(question));
+    inputMessageContent.insert("options", pollOptions);
     inputMessageContent.insert("is_anonymous", anonymous);
+    inputMessageContent.insert("allows_multiple_answers", multiple && correctOption < 0);
 
     requestObject.insert("input_message_content", inputMessageContent);
     this->sendRequest(requestObject);

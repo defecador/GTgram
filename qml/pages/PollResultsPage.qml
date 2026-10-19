@@ -103,7 +103,7 @@ Page {
                 width: parent.width
                 wrapMode: Text.Wrap
                 color: Theme.secondaryHighlightColor
-                text: Emoji.emojify(pollData.question, font.pixelSize)
+                text: Emoji.emojify(Functions.pollText(pollData.question), font.pixelSize)
             }
 
             Column {
@@ -176,7 +176,7 @@ Page {
 
                             Icon {
                                 highlighted: true
-                                property bool isRight: pollResultsPage.isQuiz && pollData.type.correct_option_id === index
+                                property bool isRight: pollResultsPage.isQuiz && Functions.isPollOptionCorrect(pollData, index)
                                 source: "image://theme/icon-s-accept"
                                 visible: isRight
                                 anchors.verticalCenter: parent.verticalCenter
@@ -185,7 +185,7 @@ Page {
 
                         Label {
                             id: displayOptionLabel
-                            text: Emoji.emojify(modelData.text, Theme.fontSizeMedium)
+                            text: Emoji.emojify(Functions.pollText(modelData.text), Theme.fontSizeMedium)
                             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                             anchors {
                                 left: iconsColumn.right

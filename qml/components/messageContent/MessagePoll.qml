@@ -64,7 +64,7 @@ MessageContentBase {
     }
 
     function handleChoose(index) {
-        if(!pollData.type.allow_multiple_answers) {
+        if(!(pollData.allows_multiple_answers === true || pollData.type.allow_multiple_answers === true)) {
             chosenIndexes = [index];
             sendResponse();
             return;
@@ -95,7 +95,7 @@ MessageContentBase {
             font.pixelSize: Theme.fontSizeSmall
             width: parent.width
             visible: text !== ""
-            text: Emoji.emojify(pollData.question, Theme.fontSizeSmall)
+            text: Emoji.emojify(Functions.pollText(pollData.question), Theme.fontSizeSmall)
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             textFormat: Text.StyledText
             color: pollMessageComponent.isOwnMessage || pollMessageComponent.highlighted ? Theme.highlightColor : Theme.primaryColor
@@ -105,7 +105,7 @@ MessageContentBase {
             font.pixelSize: Theme.fontSizeTiny
             width: parent.width
             visible: text !== ""
-            text: pollData.is_closed ? qsTr("Final Result:") : (pollData.type.allow_multiple_answers ? qsTr("Multiple Answers are allowed.") : "")
+            text: pollData.is_closed ? qsTr("Final Result:") : ((pollData.allows_multiple_answers === true || pollData.type.allow_multiple_answers === true) ? qsTr("Multiple Answers are allowed.") : "")
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             color: pollMessageComponent.isOwnMessage || pollMessageComponent.highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
         }
@@ -122,7 +122,7 @@ MessageContentBase {
                 id: optionDelegate
                 width: pollMessageComponent.width
                 automaticCheck: false
-                text: Emoji.emojify(modelData.text, Theme.fontSizeMedium)
+                text: Emoji.emojify(Functions.pollText(modelData.text), Theme.fontSizeMedium)
                 checked: pollMessageComponent.chosenIndexes.indexOf(index) > -1
                 highlighted: pollMessageComponent.highlighted || down
                 onClicked: {
@@ -166,7 +166,7 @@ MessageContentBase {
                         id: correctAnswerIcon
                         anchors.bottom: parent.bottom
                         highlighted: pollMessageComponent.isOwnMessage || pollMessageComponent.highlighted
-                        readonly property bool isRight: pollMessageComponent.isQuiz && pollData.type.correct_option_id === index
+                        readonly property bool isRight: pollMessageComponent.isQuiz && Functions.isPollOptionCorrect(pollData, index)
                         source: "image://theme/icon-s-accept"
                         visible: isRight
                     }
@@ -184,7 +184,7 @@ MessageContentBase {
                             id: voteTextLabel
                             property int lastLineWidth
                             width: parent.width
-                            text: Emoji.emojify(modelData.text, Theme.fontSizeMedium)
+                            text: Emoji.emojify(Functions.pollText(modelData.text), Theme.fontSizeMedium)
                             textFormat: Text.StyledText
                             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                             color: pollMessageComponent.isOwnMessage || pollMessageComponent.highlighted ? Theme.highlightColor : Theme.primaryColor
@@ -272,7 +272,7 @@ MessageContentBase {
                 }
 
                 IconButton {
-                    visible: !pollData.is_closed && pollMessageComponent.chosenIndexes.length > 0 && pollData.type.allow_multiple_answers  && !pollMessageComponent.hasAnswered
+                    visible: !pollData.is_closed && pollMessageComponent.chosenIndexes.length > 0 && (pollData.allows_multiple_answers === true || pollData.type.allow_multiple_answers === true)  && !pollMessageComponent.hasAnswered
                     opacity: visible ? 1.0 : 0.0
                     Behavior on opacity { FadeAnimation {}}
                     icon.source: "image://theme/icon-m-send"

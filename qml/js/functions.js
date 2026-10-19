@@ -607,3 +607,15 @@ function getMessagesNeededForwardPermissions(messages) {
 function isWidescreen(appWindow) {
     return (appWindow.deviceOrientation & Silica.Orientation.LandscapeMask) || Silica.Screen.sizeCategory === Silica.Screen.Large || Silica.Screen.sizeCategory === Silica.Screen.ExtraLarge
 }
+
+// TDLib >= 1.8.6x sends poll questions/options as formattedText; older versions sent plain strings
+function pollText(value) {
+    return (value && typeof value === "object") ? (value.text || "") : (value || "");
+}
+
+function isPollOptionCorrect(poll, index) {
+    if (poll.type.correct_option_ids) {
+        return poll.type.correct_option_ids.indexOf(index) !== -1;
+    }
+    return poll.type.correct_option_id === index;
+}
