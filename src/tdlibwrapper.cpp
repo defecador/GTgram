@@ -25,11 +25,13 @@
 #include <QGuiApplication>
 #include <QLocale>
 #include <QProcess>
+#include <QTimer>
 #include <QSysInfo>
 #include <QJsonDocument>
 #include <QStandardPaths>
 #include <QDBusConnection>
 #include <QDBusInterface>
+#include <unistd.h>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <QRegularExpressionMatchIterator>
@@ -124,6 +126,7 @@ TDLibWrapper::TDLibWrapper(AppSettings *settings, MceInterface *mce, QObject *pa
     , networkConfigurationManager(new QNetworkConfigurationManager(this))
     , appSettings(settings)
     , mceInterface(mce)
+    , exitAfterClose(false)
     , authorizationState(AuthorizationState::Closed)
     , versionNumber(0)
     , joinChatRequested(false)
@@ -1999,6 +2002,9 @@ void TDLibWrapper::handleVersionDetected(const QString &version)
 
 void TDLibWrapper::handleAuthorizationStateChanged(const QString &authorizationState, const QVariantMap authorizationStateData)
 {
+    if (authorizationState == "authorizationStateClosed" && this->exitAfterClose) {
+        ::_exit(0);
+    }
     if (authorizationState == "authorizationStateClosed") {
         this->authorizationState = AuthorizationState::Closed;
     }
@@ -2048,6 +2054,11 @@ void TDLibWrapper::handleAuthorizationStateChanged(const QString &authorizationS
         this->authorizationState = AuthorizationState::AuthorizationStateLoggingOut;
     }
     if (authorizationState == "authorizationStateClosed") {
+        if (this->exitAfterClose) {
+            // Clean shutdown requested by closeAndExit(): must NOT fall through
+            // to the reload below, which wipes the data directory (logout path).
+            ::_exit(0);
+        }
         this->authorizationState = AuthorizationState::AuthorizationStateClosed;
         LOG("Reloading TD Lib...");
         this->basicGroups.clear();
@@ -2069,6 +2080,22 @@ void TDLibWrapper::handleAuthorizationStateChanged(const QString &authorizationS
     this->authorizationStateData = authorizationStateData;
     emit authorizationStateChanged(this->authorizationState, this->authorizationStateData);
 
+}
+
+void TDLibWrapper::closeAndExit()
+{
+    if (this->exitAfterClose) {
+        return;
+    }
+    this->exitAfterClose = true;
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "close");
+    this->sendRequest(requestObject);
+    // If TDLib never confirms (network stuck, client already closed) quit anyway.
+    QTimer::singleShot(8000, this, []() {
+        WARN("TDLib did not confirm the close within 8 s: exiting anyway");
+        ::_exit(0);
+    });
 }
 
 void TDLibWrapper::handleOptionUpdated(const QString &optionName, const QVariant &optionValue)

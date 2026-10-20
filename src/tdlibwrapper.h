@@ -160,6 +160,8 @@ public:
 
     // Direct TDLib functions
     Q_INVOKABLE void sendRequest(const QVariantMap &requestObject);
+    // Closes TDLib cleanly and then ends the process (used by headless push wake-ups).
+    void closeAndExit();
     Q_INVOKABLE void setAuthenticationPhoneNumber(const QString &phoneNumber);
     Q_INVOKABLE void setAuthenticationCode(const QString &authenticationCode);
     Q_INVOKABLE void setAuthenticationPassword(const QString &authenticationPassword);
@@ -412,6 +414,7 @@ private:
     TDLibReceiver *tdLibReceiver;
     DBusInterface *dbusInterface;
     QString versionString;
+    bool exitAfterClose;
     TDLibWrapper::AuthorizationState authorizationState;
     QVariantMap authorizationStateData;
     TDLibWrapper::ConnectionState connectionState;

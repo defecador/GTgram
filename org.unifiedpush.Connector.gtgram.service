@@ -1,0 +1,9 @@
+# D-Bus activation of the UnifiedPush connector (BETA): when a push wake-up
+# arrives and GTgram is closed, the distributor (Foghorn) starts the app through
+# this file. The "wake" mode travels in an environment variable because sailjail
+# compares argv literally with the desktop file's Exec: after "--" it must stay
+# a bare /usr/bin/harbour-gtgram, like Exec. See src/unifiedpushmanager.h and
+# Foghorn's docs/connectors.md.
+[D-BUS Service]
+Name=org.unifiedpush.Connector.gtgram
+Exec=/usr/bin/env GTGRAM_PUSH_WAKE=1 /usr/bin/sailjail -p harbour-gtgram.desktop -- /usr/bin/harbour-gtgram

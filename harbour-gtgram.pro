@@ -56,6 +56,7 @@ SOURCES += src/harbour-gtgram.cpp \
     src/tdlibfile.cpp \
     src/tdlibreceiver.cpp \
     src/tdlibwrapper.cpp \
+    src/unifiedpushmanager.cpp \
     src/textfiltermodel.cpp \
     src/tgsplugin.cpp
 
@@ -300,6 +301,12 @@ gtgram_voicecalls {
     }
 }
 
+# UnifiedPush (BETA): D-Bus activation of the connector, used by the distributor
+# (Foghorn) to start the closed app headless when a push wake-up arrives.
+unifiedpushservice.files = $$PWD/org.unifiedpush.Connector.gtgram.service
+unifiedpushservice.path = /usr/share/dbus-1/services
+INSTALLS += unifiedpushservice
+
 gui.files = qml
 gui.path = /usr/share/$${TARGET}
 
@@ -355,6 +362,7 @@ HEADERS += \
     src/tdlibreceiver.h \
     src/tdlibsecrets.h \
     src/tdlibwrapper.h \
+    src/unifiedpushmanager.h \
     src/textfiltermodel.h \
     src/tgsplugin.h
 

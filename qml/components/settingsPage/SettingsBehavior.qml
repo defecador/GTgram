@@ -39,6 +39,55 @@ AccordionItem {
                 }
             }
 
+            // Notifications through UnifiedPush/Foghorn while the app is closed (BETA):
+            // see src/unifiedpushmanager.h and the instructions page.
+            Column {
+                width: parent.columnWidth
+                TextSwitch {
+                    width: parent.width
+                    checked: unifiedPushManager.enabled
+                    text: qsTr("Notifications via UnifiedPush (BETA)")
+                    description: qsTr("Receive notifications while GTgram is closed: the Foghorn app wakes GTgram up when a message arrives. Requires the Foghorn app - read the instructions first.")
+                    automaticCheck: false
+                    onClicked: unifiedPushManager.setEnabled(!checked)
+                }
+                Label {
+                    x: Theme.itemSizeExtraSmall + Theme.paddingLarge
+                    width: parent.width - x - Theme.horizontalPageMargin
+                    visible: unifiedPushManager.enabled
+                    wrapMode: Text.Wrap
+                    font.pixelSize: Theme.fontSizeExtraSmall
+                    color: unifiedPushManager.status === "registered" ? Theme.highlightColor : Theme.errorColor
+                    text: {
+                        switch (unifiedPushManager.status) {
+                        case "registered":
+                            return qsTr("Active: Telegram wakes GTgram through %1.").arg(unifiedPushManager.endpointHost);
+                        case "registering":
+                            return qsTr("Connecting to Foghorn...");
+                        case "noDistributor":
+                            return qsTr("No distributor found: install Foghorn and start it.");
+                        case "error":
+                            return qsTr("It didn't work: %1").arg(unifiedPushManager.errorText);
+                        }
+                        return "";
+                    }
+                }
+                Row {
+                    x: Theme.itemSizeExtraSmall + Theme.paddingLarge
+                    spacing: Theme.paddingMedium
+                    topPadding: Theme.paddingSmall
+                    Button {
+                        text: qsTr("Instructions")
+                        onClicked: pageStack.push(Qt.resolvedUrl("../../pages/UnifiedPushHelpPage.qml"))
+                    }
+                    Button {
+                        visible: unifiedPushManager.enabled && unifiedPushManager.status !== "registered"
+                        text: qsTr("Try again")
+                        onClicked: unifiedPushManager.refresh()
+                    }
+                }
+            }
+
             TextSwitch {
                 width: parent.columnWidth
                 checked: appSettings.focusTextAreaOnChatOpen

@@ -250,4 +250,11 @@ ApplicationWindow
     CallOverlay {
         id: callOverlay
     }
+
+    // With UnifiedPush a windowless instance quits when idle - but not during a call.
+    Binding {
+        target: unifiedPushManager
+        property: "uiBusy"
+        value: callOverlay.callId !== 0
+    }
 }

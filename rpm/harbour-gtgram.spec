@@ -95,6 +95,7 @@ desktop-file-install --delete-original       \
 %{_bindir}/%{name}
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
+%{_datadir}/dbus-1/services/org.unifiedpush.Connector.gtgram.service
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 %ifarch aarch64 armv7hl
 %{_libdir}/voicecall/plugins/libgtgram-voicecall-plugin.so

@@ -175,6 +175,8 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("messageSenders", &TDLibReceiver::processMessageSenders);
     handlers.insert("error", &TDLibReceiver::processError);
     handlers.insert("ok", &TDLibReceiver::ok);
+    // Answer to registerDevice (UnifiedPush): counts as an "ok" for whoever asked.
+    handlers.insert("pushReceiverId", &TDLibReceiver::ok);
     handlers.insert("secretChat", &TDLibReceiver::processSecretChat);
     handlers.insert("updateSecretChat", &TDLibReceiver::processUpdateSecretChat);
     handlers.insert("importedContacts", &TDLibReceiver::processImportedContacts);

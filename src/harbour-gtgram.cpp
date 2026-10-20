@@ -59,6 +59,10 @@
 #include "gtgramutils.h"
 #include "knownusersmodel.h"
 #include "contactsmodel.h"
+#include "unifiedpushmanager.h"
+#include "dbusinterface.h"
+#include <QDBusConnection>
+#include <QDBusConnectionInterface>
 
 // The default filter can be overridden by QT_LOGGING_RULES envinronment variable, e.g.
 // QT_LOGGING_RULES="gtgram.*=true" harbour-gtgram
@@ -133,6 +137,25 @@ int main(int argc, char *argv[])
     }
 
     QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
+
+    // Started by the push distributor (Foghorn) through D-Bus activation for a
+    // wake-up (org.unifiedpush.Connector.gtgram.service). The mode comes in an
+    // environment variable because sailjail compares argv literally against the
+    // desktop file's Exec. Remove it so child processes do not inherit it.
+    const bool pushWakeMode = qEnvironmentVariableIsSet(UnifiedPushManager::WAKE_ENVIRONMENT_VARIABLE);
+    qunsetenv(UnifiedPushManager::WAKE_ENVIRONMENT_VARIABLE);
+    // GTgram is already running (window open or minimized): that instance gets
+    // the wake-up itself, and a second one would find TDLib's database locked.
+    if (pushWakeMode && QDBusConnection::sessionBus().interface()
+            && QDBusConnection::sessionBus().interface()->isServiceRegistered(INTERFACE_NAME)) {
+        WARN("Push wake-up received but GTgram is already running: exiting");
+        return 0;
+    }
+
+    // Claims the connector D-Bus name before any slow start-up work: the
+    // distributor gives an activated process only 8 seconds to answer.
+    UnifiedPushManager *unifiedPushManager = new UnifiedPushManager(pushWakeMode, app.data());
+
     QScopedPointer<QQuickView> view(SailfishApp::createView());
 
     QQmlContext *context = view.data()->rootContext();
@@ -214,7 +237,13 @@ int main(int argc, char *argv[])
     contactsProxyModel.setFilterCaseSensitivity(Qt::CaseInsensitive);
     context->setContextProperty("contactsProxyModel", &contactsProxyModel);
 
+    context->setContextProperty("unifiedPushManager", unifiedPushManager);
+    unifiedPushManager->setTdLibWrapper(tdLibWrapper);
+
     view->setSource(SailfishApp::pathTo("qml/harbour-gtgram.qml"));
-    view->show();
+    unifiedPushManager->setView(view.data());
+    if (!pushWakeMode) {
+        view->show();
+    }
     return app->exec();
 }
