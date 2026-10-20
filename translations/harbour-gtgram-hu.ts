@@ -1927,6 +1927,38 @@
         <source>When sounds are enabled, GTgram will use the current Sailfish OS notification sound for chats, which can be configured in the system settings.</source>
         <translation>Mikor a hangok be vannak kapcsolva, a GTgram a jelenlegi Sailfish OS értesítés hangokat fogja hasnálni a csevegésekhez, amelyet a rendszerbeállításokban lehet személyre szabni.</translation>
     </message>
+    <message>
+        <source>Notifications via UnifiedPush (BETA)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Receive notifications while GTgram is closed: the Foghorn app wakes GTgram up when a message arrives. Requires the Foghorn app - read the instructions first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Active: Telegram wakes GTgram through %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Connecting to Foghorn...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No distributor found: install Foghorn and start it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>It didn&apos;t work: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Instructions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Try again</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsPage</name>
@@ -2199,6 +2231,101 @@
     <message>
         <source>Sticker set successfully removed!</source>
         <translation>Matrica készlet sikeresen eltávolítva!</translation>
+    </message>
+</context>
+<context>
+    <name>UnifiedPushHelpPage</name>
+    <message>
+        <source>UnifiedPush (BETA)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>What it is</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Normally GTgram only shows notifications while it is running. With this option a small separate app, Foghorn, wakes GTgram up when a new message arrives, even if GTgram is closed. GTgram then starts without a window, downloads the message, shows the notification and closes again by itself. A notification may arrive a few seconds later than usual.&lt;br&gt;&lt;br&gt;&lt;b&gt;This is a BETA feature&lt;/b&gt;, and Foghorn itself is young software: if notifications stop arriving, turn the option off.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>1. Install Foghorn</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Install &lt;b&gt;Foghorn&lt;/b&gt; from OpenRepos (for example with the Storeman app): &lt;a href=&quot;https://openrepos.net/content/projectmoon/foghorn&quot;&gt;openrepos.net/content/projectmoon/foghorn&lt;/a&gt;&lt;br&gt;Open Foghorn once and check that its service is running.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>2. Leave Foghorn on Mozilla</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Foghorn&apos;s default push service, &lt;b&gt;Mozilla&lt;/b&gt;, works well with Telegram: you don&apos;t have to change anything.&lt;br&gt;&lt;br&gt;&lt;b&gt;Don&apos;t choose ntfy:&lt;/b&gt; in tests by RooTelegram, Telegram almost never delivered its wake-ups through the public ntfy.sh server. If you had changed it, go back to Mozilla in Foghorn&apos;s settings: GTgram notices it and registers again by itself.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>3. Open GTgram from its icon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>After installing or updating GTgram, open it once by tapping its icon. SailfishOS may ask you to allow the app&apos;s permissions, including the new &quot;UnifiedPush&quot; one: accept. Without this step Foghorn cannot start GTgram in the background.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>4. Turn on the option</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>In GTgram go to Settings, Behavior, and turn on &lt;b&gt;Notifications via UnifiedPush (BETA)&lt;/b&gt;. After a few seconds the status below the switch should say that it is active and show the name of the server (for example updates.push.services.mozilla.com).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>5. Try it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Close GTgram completely (close it from the home screen, don&apos;t just minimize it). Ask someone to write to you: the notification should appear within a few seconds.&lt;br&gt;&lt;br&gt;If Telegram is open on another device (another phone, a computer), Telegram itself waits a little before waking up this phone: then the notification may arrive up to about half a minute later. That is normal.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>How it behaves</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>• While the app window is open, or minimized, GTgram works as usual.&lt;br&gt;• When a message arrives with the app closed, GTgram starts without a window for 20-60 seconds, shows the notifications and closes.&lt;br&gt;• Tapping a notification while the app is closed starts GTgram from scratch, so the chat takes a few seconds to open.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>If it doesn&apos;t work</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>• Status &quot;no distributor&quot;: Foghorn is not installed or its service is stopped.&lt;br&gt;• Status &quot;error&quot;: open GTgram from its icon (step 3), then use &quot;Try again&quot;.&lt;br&gt;• No notifications although the status is active: check that Foghorn uses Mozilla (step 2), that GTgram is listed among Foghorn&apos;s registered apps, and the Internet connection.&lt;br&gt;• When in doubt: turn the option off. Everything goes back to how it was before.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Privacy</source>
+        <translation type="unfinished">Adatvédelem</translation>
+    </message>
+    <message>
+        <source>The wake-up that Telegram sends through the push service is encrypted, and GTgram doesn&apos;t even read it: it uses it only as a signal, then downloads the messages directly from Telegram, encrypted as usual. Telegram and Mozilla only learn the address where to deliver the wake-ups: whoever learned it could only wake GTgram up, not read anything.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Turning it off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Turn the switch off: GTgram tells Telegram to forget the address and unregisters from Foghorn.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Thanks</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Thanks to &lt;b&gt;projectmoon&lt;/b&gt;, the developer of Foghorn, for bringing UnifiedPush to SailfishOS, and to &lt;b&gt;RootGPT&lt;/b&gt;, whose RooTelegram implementation this is based on.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

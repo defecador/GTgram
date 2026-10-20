@@ -73,23 +73,23 @@
     </message>
     <message>
         <source>By %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Por %1</translation>
     </message>
     <message>
         <source>Based on %1, © 2020 Sebastian J. Wolf and %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Basado en %1, © 2020 Sebastian J. Wolf y %2</translation>
     </message>
     <message>
         <source>other contributors</source>
-        <translation type="unfinished"></translation>
+        <translation>otros colaboradores</translation>
     </message>
     <message>
         <source>Source code on GitHub</source>
-        <translation type="unfinished"></translation>
+        <translation>Código fuente en GitHub</translation>
     </message>
     <message>
         <source>Support me on Ko-fi</source>
-        <translation type="unfinished"></translation>
+        <translation>Apóyame en Ko-fi</translation>
     </message>
 </context>
 <context>
@@ -107,67 +107,67 @@
     <name>CallOverlay</name>
     <message>
         <source>Calling…</source>
-        <translation type="unfinished"></translation>
+        <translation>Llamando…</translation>
     </message>
     <message>
         <source>Incoming voice call</source>
-        <translation type="unfinished"></translation>
+        <translation>Llamada de voz entrante</translation>
     </message>
     <message>
         <source>Exchanging encryption keys…</source>
-        <translation type="unfinished"></translation>
+        <translation>Intercambiando claves de cifrado…</translation>
     </message>
     <message>
         <source>Ending call…</source>
-        <translation type="unfinished"></translation>
+        <translation>Finalizando llamada…</translation>
     </message>
     <message>
         <source>If these emoji match your contact&apos;s, the call is end-to-end encrypted</source>
-        <translation type="unfinished"></translation>
+        <translation>Si estos emojis coinciden con los de tu contacto, la llamada está cifrada de extremo a extremo</translation>
     </message>
     <message>
         <source>Decline</source>
-        <translation type="unfinished"></translation>
+        <translation>Rechazar</translation>
     </message>
     <message>
         <source>Accept</source>
-        <translation type="unfinished"></translation>
+        <translation>Aceptar</translation>
     </message>
     <message>
         <source>Unmute</source>
-        <translation type="unfinished"></translation>
+        <translation>Activar micrófono</translation>
     </message>
     <message>
         <source>Mute</source>
-        <translation type="unfinished"></translation>
+        <translation>Silenciar micrófono</translation>
     </message>
     <message>
         <source>Speaker off</source>
-        <translation type="unfinished"></translation>
+        <translation>Altavoz apagado</translation>
     </message>
     <message>
         <source>Speaker</source>
-        <translation type="unfinished"></translation>
+        <translation>Altavoz</translation>
     </message>
     <message>
         <source>End call</source>
-        <translation type="unfinished"></translation>
+        <translation>Finalizar llamada</translation>
     </message>
     <message>
         <source>Incoming video call</source>
-        <translation type="unfinished"></translation>
+        <translation>Videollamada entrante</translation>
     </message>
     <message>
         <source>Camera off</source>
-        <translation type="unfinished"></translation>
+        <translation>Cámara apagada</translation>
     </message>
     <message>
         <source>Camera on</source>
-        <translation type="unfinished"></translation>
+        <translation>Cámara encendida</translation>
     </message>
     <message>
         <source>Flip camera</source>
-        <translation type="unfinished"></translation>
+        <translation>Girar cámara</translation>
     </message>
 </context>
 <context>
@@ -264,11 +264,11 @@
     </message>
     <message>
         <source>Voice Call</source>
-        <translation type="unfinished"></translation>
+        <translation>Llamada de voz</translation>
     </message>
     <message>
         <source>Video Call</source>
-        <translation type="unfinished"></translation>
+        <translation>Videollamada</translation>
     </message>
 </context>
 <context>
@@ -564,63 +564,63 @@
     </message>
     <message>
         <source>Are you sure that you want to delete this chat? This action can&apos;t be undone and you lose the entire conversation forever!</source>
-        <translation type="unfinished"></translation>
+        <translation>¿Seguro que quieres eliminar este chat? Esta acción no se puede deshacer y perderás toda la conversación para siempre.</translation>
     </message>
     <message>
         <source>Obtaining Position...</source>
-        <translation type="unfinished"></translation>
+        <translation>Obteniendo posición...</translation>
     </message>
     <message numerus="yes">
         <source>Forward %Ln messages silently</source>
         <comment>dialog header</comment>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>Reenviar %Ln mensaje en silencio</numerusform>
+            <numerusform>Reenviar %Ln mensajes en silencio</numerusform>
         </translation>
     </message>
     <message>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Copiar</translation>
     </message>
     <message>
         <source>Forward Silently</source>
-        <translation type="unfinished"></translation>
+        <translation>Reenviar en silencio</translation>
     </message>
     <message>
         <source>No other chats with unread messages</source>
-        <translation type="unfinished"></translation>
+        <translation>No hay otros chats con mensajes sin leer</translation>
     </message>
     <message>
         <source>Next unread chat</source>
-        <translation type="unfinished"></translation>
+        <translation>Siguiente chat sin leer</translation>
     </message>
     <message>
         <source>Message scheduled for %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Mensaje programado para %1</translation>
     </message>
     <message>
         <source>Message will be sent when %1 is online</source>
-        <translation type="unfinished"></translation>
+        <translation>El mensaje se enviará cuando %1 esté en línea</translation>
     </message>
     <message>
         <source>Scheduled messages (%1)</source>
-        <translation type="unfinished"></translation>
+        <translation>Mensajes programados (%1)</translation>
     </message>
     <message>
         <source>Send when online</source>
-        <translation type="unfinished"></translation>
+        <translation>Enviar cuando esté en línea</translation>
     </message>
     <message>
         <source>Schedule message...</source>
-        <translation type="unfinished"></translation>
+        <translation>Programar mensaje...</translation>
     </message>
     <message>
         <source>Send silently</source>
-        <translation type="unfinished"></translation>
+        <translation>Enviar en silencio</translation>
     </message>
     <message>
         <source>Only the first shared file has been prepared.</source>
-        <translation type="unfinished"></translation>
+        <translation>Solo se ha preparado el primer archivo compartido.</translation>
     </message>
 </context>
 <context>
@@ -635,7 +635,7 @@
     </message>
     <message>
         <source>Search chats...</source>
-        <translation type="unfinished"></translation>
+        <translation>Buscar chats...</translation>
     </message>
     <message>
         <source>No chats found.</source>
@@ -1059,20 +1059,20 @@
     <message>
         <source>shared a contact</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>compartiste un contacto</translation>
     </message>
     <message>
         <source>shared the contact %1</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>compartiste el contacto %1</translation>
     </message>
     <message>
         <source>shared a contact</source>
-        <translation type="unfinished"></translation>
+        <translation>compartió un contacto</translation>
     </message>
     <message>
         <source>shared the contact %1</source>
-        <translation type="unfinished"></translation>
+        <translation>compartió el contacto %1</translation>
     </message>
 </context>
 <context>
@@ -1176,23 +1176,23 @@
     <name>MessageContact</name>
     <message>
         <source>Contact saved to address book</source>
-        <translation type="unfinished"></translation>
+        <translation>Contacto guardado en la libreta de direcciones</translation>
     </message>
     <message>
         <source>Could not save the contact</source>
-        <translation type="unfinished"></translation>
+        <translation>No se pudo guardar el contacto</translation>
     </message>
     <message>
         <source>Contact</source>
-        <translation type="unfinished"></translation>
+        <translation>Contacto</translation>
     </message>
     <message>
         <source>Message</source>
-        <translation type="unfinished"></translation>
+        <translation>Mensaje</translation>
     </message>
     <message>
         <source>Add to contacts</source>
-        <translation type="unfinished"></translation>
+        <translation>Añadir a contactos</translation>
     </message>
 </context>
 <context>
@@ -1235,11 +1235,11 @@
     </message>
     <message>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Copiar</translation>
     </message>
     <message>
         <source>Forward Silently</source>
-        <translation type="unfinished"></translation>
+        <translation>Reenviar en silencio</translation>
     </message>
 </context>
 <context>
@@ -1383,19 +1383,19 @@
     </message>
     <message>
         <source>Reply</source>
-        <translation type="unfinished"></translation>
+        <translation>Responder</translation>
     </message>
     <message>
         <source>reacted to your message</source>
-        <translation type="unfinished"></translation>
+        <translation>reaccionó a tu mensaje</translation>
     </message>
     <message>
         <source>reacted %1 to your message</source>
-        <translation type="unfinished"></translation>
+        <translation>reaccionó con %1 a tu mensaje</translation>
     </message>
     <message>
         <source>sent you a message</source>
-        <translation type="unfinished"></translation>
+        <translation>te envió un mensaje</translation>
     </message>
 </context>
 <context>
@@ -1474,11 +1474,11 @@
     </message>
     <message>
         <source>All</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos</translation>
     </message>
     <message>
         <source>Private</source>
-        <translation type="unfinished"></translation>
+        <translation>Privados</translation>
     </message>
     <message>
         <source>Groups</source>
@@ -1486,7 +1486,7 @@
     </message>
     <message>
         <source>Channels</source>
-        <translation type="unfinished"></translation>
+        <translation>Canales</translation>
     </message>
     <message>
         <source>About GTgram</source>
@@ -1667,66 +1667,66 @@
     <name>ScheduleMessageDialog</name>
     <message>
         <source>Schedule message</source>
-        <translation type="unfinished"></translation>
+        <translation>Programar mensaje</translation>
     </message>
     <message>
         <source>Schedule</source>
-        <translation type="unfinished"></translation>
+        <translation>Programar</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation type="unfinished"></translation>
+        <translation>Fecha</translation>
     </message>
     <message>
         <source>Time</source>
-        <translation type="unfinished"></translation>
+        <translation>Hora</translation>
     </message>
     <message>
         <source>Messages can only be scheduled up to a year ahead.</source>
-        <translation type="unfinished"></translation>
+        <translation>Los mensajes solo se pueden programar con hasta un año de antelación.</translation>
     </message>
     <message>
         <source>Pick a time in the future.</source>
-        <translation type="unfinished"></translation>
+        <translation>Elige una hora futura.</translation>
     </message>
 </context>
 <context>
     <name>ScheduledMessagesPage</name>
     <message>
         <source>Reschedule message</source>
-        <translation type="unfinished"></translation>
+        <translation>Reprogramar mensaje</translation>
     </message>
     <message>
         <source>Reschedule</source>
-        <translation type="unfinished"></translation>
+        <translation>Reprogramar</translation>
     </message>
     <message>
         <source>Scheduled messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Mensajes programados</translation>
     </message>
     <message>
         <source>No scheduled messages</source>
-        <translation type="unfinished"></translation>
+        <translation>No hay mensajes programados</translation>
     </message>
     <message>
         <source>Long-press the send button to schedule one.</source>
-        <translation type="unfinished"></translation>
+        <translation>Mantén pulsado el botón de enviar para programar uno.</translation>
     </message>
     <message>
         <source>Send now</source>
-        <translation type="unfinished"></translation>
+        <translation>Enviar ahora</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>Eliminar</translation>
     </message>
     <message>
         <source>Deleting message</source>
-        <translation type="unfinished"></translation>
+        <translation>Eliminando mensaje</translation>
     </message>
     <message>
         <source>When online</source>
-        <translation type="unfinished"></translation>
+        <translation>Cuando esté en línea</translation>
     </message>
 </context>
 <context>
@@ -1775,7 +1775,7 @@
     </message>
     <message>
         <source>Enter your query to start searching (at least 5 characters to also search public chats)</source>
-        <translation type="unfinished"></translation>
+        <translation>Escribe tu consulta para empezar a buscar (al menos 5 caracteres para buscar también en chats públicos)</translation>
     </message>
 </context>
 <context>
@@ -1806,19 +1806,19 @@
     </message>
     <message>
         <source>Theme</source>
-        <translation type="unfinished"></translation>
+        <translation>Tema</translation>
     </message>
     <message>
         <source>Iris: indigo and sand, set in JetBrains Mono</source>
-        <translation type="unfinished"></translation>
+        <translation>Iris: índigo y arena, en JetBrains Mono</translation>
     </message>
     <message>
         <source>Default (system ambience)</source>
-        <translation type="unfinished"></translation>
+        <translation>Predeterminado (ambiente del sistema)</translation>
     </message>
     <message>
         <source>Iris</source>
-        <translation type="unfinished"></translation>
+        <translation>Iris</translation>
     </message>
 </context>
 <context>
@@ -1917,27 +1917,27 @@
     </message>
     <message>
         <source>Show reaction button on tap</source>
-        <translation type="unfinished"></translation>
+        <translation>Mostrar el botón de reacción al tocar</translation>
     </message>
     <message>
         <source>The reaction button may appear when you tap the message bubble, to make access to the reactions even easier.</source>
-        <translation type="unfinished"></translation>
+        <translation>El botón de reacción puede aparecer al tocar el globo del mensaje, para acceder aún más fácil a las reacciones.</translation>
     </message>
     <message>
         <source>Show chat deletion menu item</source>
-        <translation type="unfinished"></translation>
+        <translation>Mostrar la opción de eliminar chat en el menú</translation>
     </message>
     <message>
         <source>Deleting a chat is irreversible and rarely needed. Turn this off to keep the entry out of the pulley menu.</source>
-        <translation type="unfinished"></translation>
+        <translation>Eliminar un chat es irreversible y rara vez hace falta. Desactívalo para que la opción no aparezca en el menú desplegable.</translation>
     </message>
     <message>
         <source>Autoplay animations</source>
-        <translation type="unfinished"></translation>
+        <translation>Reproducir animaciones automáticamente</translation>
     </message>
     <message>
         <source>Automatically play animated GIFs. On some devices, this has been known to cause crashes in the media subsystem; turn this off if you experience that.</source>
-        <translation type="unfinished"></translation>
+        <translation>Reproduce automáticamente los GIF animados. En algunos dispositivos esto ha causado fallos en el subsistema multimedia; desactívalo si te ocurre.</translation>
     </message>
     <message>
         <source>GTgram will wait a bit before messages are marked as read</source>
@@ -1950,6 +1950,38 @@
     <message>
         <source>When sounds are enabled, GTgram will use the current Sailfish OS notification sound for chats, which can be configured in the system settings.</source>
         <translation>Cuando los sonidos están habilitados, GTgram utilizará sonido de notificación actual de Sailfish OS para los grupos, que se puede ajustar a configuración del sistema.</translation>
+    </message>
+    <message>
+        <source>Notifications via UnifiedPush (BETA)</source>
+        <translation>Notificaciones mediante UnifiedPush (BETA)</translation>
+    </message>
+    <message>
+        <source>Receive notifications while GTgram is closed: the Foghorn app wakes GTgram up when a message arrives. Requires the Foghorn app - read the instructions first.</source>
+        <translation>Recibe notificaciones con GTgram cerrado: la aplicación Foghorn despierta a GTgram cuando llega un mensaje. Requiere la aplicación Foghorn; lee primero las instrucciones.</translation>
+    </message>
+    <message>
+        <source>Active: Telegram wakes GTgram through %1.</source>
+        <translation>Activo: Telegram despierta a GTgram a través de %1.</translation>
+    </message>
+    <message>
+        <source>Connecting to Foghorn...</source>
+        <translation>Conectando con Foghorn...</translation>
+    </message>
+    <message>
+        <source>No distributor found: install Foghorn and start it.</source>
+        <translation>No se encontró ningún distribuidor: instala Foghorn e inícialo.</translation>
+    </message>
+    <message>
+        <source>It didn&apos;t work: %1</source>
+        <translation>No funcionó: %1</translation>
+    </message>
+    <message>
+        <source>Instructions</source>
+        <translation>Instrucciones</translation>
+    </message>
+    <message>
+        <source>Try again</source>
+        <translation>Reintentar</translation>
     </message>
 </context>
 <context>
@@ -2224,6 +2256,101 @@
     <message>
         <source>Sticker set successfully removed!</source>
         <translation>¡Album pegatinas quitado correctamente!</translation>
+    </message>
+</context>
+<context>
+    <name>UnifiedPushHelpPage</name>
+    <message>
+        <source>UnifiedPush (BETA)</source>
+        <translation>UnifiedPush (BETA)</translation>
+    </message>
+    <message>
+        <source>What it is</source>
+        <translation>Qué es</translation>
+    </message>
+    <message>
+        <source>Normally GTgram only shows notifications while it is running. With this option a small separate app, Foghorn, wakes GTgram up when a new message arrives, even if GTgram is closed. GTgram then starts without a window, downloads the message, shows the notification and closes again by itself. A notification may arrive a few seconds later than usual.&lt;br&gt;&lt;br&gt;&lt;b&gt;This is a BETA feature&lt;/b&gt;, and Foghorn itself is young software: if notifications stop arriving, turn the option off.</source>
+        <translation>Normalmente GTgram solo muestra notificaciones mientras se está ejecutando. Con esta opción, una pequeña aplicación aparte, Foghorn, despierta a GTgram cuando llega un mensaje nuevo, incluso si GTgram está cerrado. GTgram arranca entonces sin ventana, descarga el mensaje, muestra la notificación y se cierra de nuevo por sí solo. Una notificación puede tardar unos segundos más de lo habitual.&lt;br&gt;&lt;br&gt;&lt;b&gt;Esta es una función BETA&lt;/b&gt;, y el propio Foghorn es un software joven: si dejan de llegar notificaciones, desactiva la opción.</translation>
+    </message>
+    <message>
+        <source>1. Install Foghorn</source>
+        <translation>1. Instala Foghorn</translation>
+    </message>
+    <message>
+        <source>Install &lt;b&gt;Foghorn&lt;/b&gt; from OpenRepos (for example with the Storeman app): &lt;a href=&quot;https://openrepos.net/content/projectmoon/foghorn&quot;&gt;openrepos.net/content/projectmoon/foghorn&lt;/a&gt;&lt;br&gt;Open Foghorn once and check that its service is running.</source>
+        <translation>Instala &lt;b&gt;Foghorn&lt;/b&gt; desde OpenRepos (por ejemplo con la aplicación Storeman): &lt;a href=&quot;https://openrepos.net/content/projectmoon/foghorn&quot;&gt;openrepos.net/content/projectmoon/foghorn&lt;/a&gt;&lt;br&gt;Abre Foghorn una vez y comprueba que su servicio esté en marcha.</translation>
+    </message>
+    <message>
+        <source>2. Leave Foghorn on Mozilla</source>
+        <translation>2. Deja Foghorn en Mozilla</translation>
+    </message>
+    <message>
+        <source>Foghorn&apos;s default push service, &lt;b&gt;Mozilla&lt;/b&gt;, works well with Telegram: you don&apos;t have to change anything.&lt;br&gt;&lt;br&gt;&lt;b&gt;Don&apos;t choose ntfy:&lt;/b&gt; in tests by RooTelegram, Telegram almost never delivered its wake-ups through the public ntfy.sh server. If you had changed it, go back to Mozilla in Foghorn&apos;s settings: GTgram notices it and registers again by itself.</source>
+        <translation>El servicio push predeterminado de Foghorn, &lt;b&gt;Mozilla&lt;/b&gt;, funciona bien con Telegram: no tienes que cambiar nada.&lt;br&gt;&lt;br&gt;&lt;b&gt;No elijas ntfy:&lt;/b&gt; en las pruebas de RooTelegram, Telegram casi nunca entregó sus avisos a través del servidor público ntfy.sh. Si lo habías cambiado, vuelve a Mozilla en los ajustes de Foghorn: GTgram lo detecta y se registra de nuevo por sí solo.</translation>
+    </message>
+    <message>
+        <source>3. Open GTgram from its icon</source>
+        <translation>3. Abre GTgram desde su icono</translation>
+    </message>
+    <message>
+        <source>After installing or updating GTgram, open it once by tapping its icon. SailfishOS may ask you to allow the app&apos;s permissions, including the new &quot;UnifiedPush&quot; one: accept. Without this step Foghorn cannot start GTgram in the background.</source>
+        <translation>Tras instalar o actualizar GTgram, ábrelo una vez tocando su icono. SailfishOS puede pedirte que autorices los permisos de la aplicación, incluido el nuevo «UnifiedPush»: acepta. Sin este paso Foghorn no puede iniciar GTgram en segundo plano.</translation>
+    </message>
+    <message>
+        <source>4. Turn on the option</source>
+        <translation>4. Activa la opción</translation>
+    </message>
+    <message>
+        <source>In GTgram go to Settings, Behavior, and turn on &lt;b&gt;Notifications via UnifiedPush (BETA)&lt;/b&gt;. After a few seconds the status below the switch should say that it is active and show the name of the server (for example updates.push.services.mozilla.com).</source>
+        <translation>En GTgram ve a Ajustes, Comportamiento, y activa &lt;b&gt;Notificaciones mediante UnifiedPush (BETA)&lt;/b&gt;. Tras unos segundos, el estado bajo el interruptor debería indicar que está activo y mostrar el nombre del servidor (por ejemplo updates.push.services.mozilla.com).</translation>
+    </message>
+    <message>
+        <source>5. Try it</source>
+        <translation>5. Pruébalo</translation>
+    </message>
+    <message>
+        <source>Close GTgram completely (close it from the home screen, don&apos;t just minimize it). Ask someone to write to you: the notification should appear within a few seconds.&lt;br&gt;&lt;br&gt;If Telegram is open on another device (another phone, a computer), Telegram itself waits a little before waking up this phone: then the notification may arrive up to about half a minute later. That is normal.</source>
+        <translation>Cierra GTgram por completo (ciérralo desde la pantalla de inicio, no solo lo minimices). Pide a alguien que te escriba: la notificación debería aparecer en pocos segundos.&lt;br&gt;&lt;br&gt;Si Telegram está abierto en otro dispositivo (otro teléfono, un ordenador), el propio Telegram espera un poco antes de despertar este teléfono: entonces la notificación puede tardar hasta medio minuto. Es normal.</translation>
+    </message>
+    <message>
+        <source>How it behaves</source>
+        <translation>Cómo se comporta</translation>
+    </message>
+    <message>
+        <source>• While the app window is open, or minimized, GTgram works as usual.&lt;br&gt;• When a message arrives with the app closed, GTgram starts without a window for 20-60 seconds, shows the notifications and closes.&lt;br&gt;• Tapping a notification while the app is closed starts GTgram from scratch, so the chat takes a few seconds to open.</source>
+        <translation>• Mientras la ventana de la aplicación está abierta o minimizada, GTgram funciona como siempre.&lt;br&gt;• Cuando llega un mensaje con la aplicación cerrada, GTgram arranca sin ventana durante 20-60 segundos, muestra las notificaciones y se cierra.&lt;br&gt;• Al tocar una notificación con la aplicación cerrada, GTgram arranca desde cero, así que el chat tarda unos segundos en abrirse.</translation>
+    </message>
+    <message>
+        <source>If it doesn&apos;t work</source>
+        <translation>Si no funciona</translation>
+    </message>
+    <message>
+        <source>• Status &quot;no distributor&quot;: Foghorn is not installed or its service is stopped.&lt;br&gt;• Status &quot;error&quot;: open GTgram from its icon (step 3), then use &quot;Try again&quot;.&lt;br&gt;• No notifications although the status is active: check that Foghorn uses Mozilla (step 2), that GTgram is listed among Foghorn&apos;s registered apps, and the Internet connection.&lt;br&gt;• When in doubt: turn the option off. Everything goes back to how it was before.</source>
+        <translation>• Estado «ningún distribuidor»: Foghorn no está instalado o su servicio está detenido.&lt;br&gt;• Estado «error»: abre GTgram desde su icono (paso 3) y pulsa «Reintentar».&lt;br&gt;• No llegan notificaciones aunque el estado sea activo: comprueba que Foghorn use Mozilla (paso 2), que GTgram figure entre las aplicaciones registradas de Foghorn y la conexión a Internet.&lt;br&gt;• Si tienes dudas: desactiva la opción. Todo vuelve a ser como antes.</translation>
+    </message>
+    <message>
+        <source>Privacy</source>
+        <translation type="unfinished">Privacidad</translation>
+    </message>
+    <message>
+        <source>The wake-up that Telegram sends through the push service is encrypted, and GTgram doesn&apos;t even read it: it uses it only as a signal, then downloads the messages directly from Telegram, encrypted as usual. Telegram and Mozilla only learn the address where to deliver the wake-ups: whoever learned it could only wake GTgram up, not read anything.</source>
+        <translation>El aviso que Telegram envía a través del servicio push está cifrado, y GTgram ni siquiera lo lee: lo usa solo como señal y luego descarga los mensajes directamente de Telegram, cifrados como siempre. Telegram y Mozilla solo conocen la dirección donde entregar los avisos: quien la conociera solo podría despertar a GTgram, no leer nada.</translation>
+    </message>
+    <message>
+        <source>Turning it off</source>
+        <translation>Desactivarlo</translation>
+    </message>
+    <message>
+        <source>Turn the switch off: GTgram tells Telegram to forget the address and unregisters from Foghorn.</source>
+        <translation>Apaga el interruptor: GTgram le dice a Telegram que olvide la dirección y se da de baja en Foghorn.</translation>
+    </message>
+    <message>
+        <source>Thanks</source>
+        <translation>Agradecimientos</translation>
+    </message>
+    <message>
+        <source>Thanks to &lt;b&gt;projectmoon&lt;/b&gt;, the developer of Foghorn, for bringing UnifiedPush to SailfishOS, and to &lt;b&gt;RootGPT&lt;/b&gt;, whose RooTelegram implementation this is based on.</source>
+        <translation>Gracias a &lt;b&gt;projectmoon&lt;/b&gt;, desarrollador de Foghorn, por traer UnifiedPush a SailfishOS, y a &lt;b&gt;RootGPT&lt;/b&gt;, cuya implementación en RooTelegram sirve de base a esta.</translation>
     </message>
 </context>
 <context>
@@ -2682,38 +2809,38 @@
     <message>
         <source>shared a contact</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>compartiste un contacto</translation>
     </message>
     <message>
         <source>shared a contact</source>
-        <translation type="unfinished"></translation>
+        <translation>compartió un contacto</translation>
     </message>
 </context>
 <context>
     <name>harbour-gtgram</name>
     <message>
         <source>Unknown caller</source>
-        <translation type="unfinished"></translation>
+        <translation>Llamante desconocido</translation>
     </message>
     <message>
         <source>Call declined</source>
-        <translation type="unfinished"></translation>
+        <translation>Llamada rechazada</translation>
     </message>
     <message>
         <source>No answer</source>
-        <translation type="unfinished"></translation>
+        <translation>Sin respuesta</translation>
     </message>
     <message>
         <source>Missed call</source>
-        <translation type="unfinished"></translation>
+        <translation>Llamada perdida</translation>
     </message>
     <message>
         <source>Call failed</source>
-        <translation type="unfinished"></translation>
+        <translation>La llamada falló</translation>
     </message>
     <message>
         <source>Send shared content</source>
-        <translation type="unfinished"></translation>
+        <translation>Enviar contenido compartido</translation>
     </message>
 </context>
 </TS>
