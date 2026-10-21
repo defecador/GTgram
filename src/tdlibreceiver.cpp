@@ -225,7 +225,11 @@ void TDLibReceiver::receiverLoop()
           VERBOSE("Raw result:" << receivedJsonDocument.toJson(QJsonDocument::Indented).constData());
           processReceivedDocument(receivedJsonDocument);
       }
-      if (this->powerSavingMode) {
+      // Only pause when TDLib had nothing for us. Pausing after every update
+      // (as it used to) makes the queue drain at 4 updates per second in the
+      // background: with hundreds of file updates in flight a new message, and
+      // its notification, waited minutes behind them.
+      if (this->powerSavingMode && !result) {
           msleep(POWERSAVING_TDLIB_REQUEST_INTERVAL);
       }
     }

@@ -121,6 +121,7 @@ private:
     void unregisterFromDistributor();
     QString findDistributor() const;
     void sendEndpointToTelegram();
+    void forceTelegramSync();
     void setStatus(const QString &status, const QString &errorText = QString());
     void noteActivity();
     QString configDirectory() const;

@@ -20,26 +20,41 @@
 #define DEBUG_MODULE TextFilterModel
 #include "debuglog.h"
 
-TextFilterModel::TextFilterModel(QObject *parent) : QSortFilterProxyModel(parent)
+TextFilterModel::TextFilterModel(QObject *parent) : QAbstractListModel(parent), filterRole(Qt::DisplayRole)
 {
-    setDynamicSortFilter(true);
-    setFilterCaseSensitivity(Qt::CaseInsensitive);
-    setFilterFixedString(QString());
+}
+
+QObject *TextFilterModel::sourceModel() const
+{
+    return source.data();
 }
 
 void TextFilterModel::setSource(QObject *model)
 {
-    setSourceModel(qobject_cast<QAbstractItemModel*>(model));
-}
-
-void TextFilterModel::setSourceModel(QAbstractItemModel *model)
-{
-    if (sourceModel() != model) {
-        LOG(model);
-        QSortFilterProxyModel::setSourceModel(model);
-        updateFilterRole();
-        emit sourceChanged();
+    QAbstractItemModel *newSource = qobject_cast<QAbstractItemModel*>(model);
+    if (source.data() == newSource) {
+        return;
     }
+    LOG(newSource);
+    beginResetModel();
+    if (source) {
+        source->disconnect(this);
+    }
+    source = newSource;
+    if (source) {
+        connect(source.data(), &QObject::destroyed, this, &TextFilterModel::sourceDestroyed);
+        connect(source.data(), &QAbstractItemModel::modelReset, this, &TextFilterModel::sourceReset);
+        connect(source.data(), &QAbstractItemModel::rowsInserted, this, &TextFilterModel::sourceStructureChanged);
+        connect(source.data(), &QAbstractItemModel::rowsRemoved, this, &TextFilterModel::sourceStructureChanged);
+        connect(source.data(), &QAbstractItemModel::rowsMoved, this, &TextFilterModel::sourceStructureChanged);
+        connect(source.data(), &QAbstractItemModel::layoutChanged, this, &TextFilterModel::sourceStructureChanged);
+        connect(source.data(), &QAbstractItemModel::dataChanged, this, &TextFilterModel::sourceDataChanged);
+    }
+    updateFilterRole();
+    rebuild();
+    endResetModel();
+    emit sourceChanged();
+    emit countChanged();
 }
 
 QString TextFilterModel::getFilterRoleName() const
@@ -54,6 +69,7 @@ void TextFilterModel::setFilterRoleName(QString role)
         LOG(role);
         updateFilterRole();
         emit filterRoleNameChanged();
+        synchronize();
     }
 }
 
@@ -67,8 +83,72 @@ void TextFilterModel::setFilterText(QString text)
     if (filterText.compare(text, Qt::CaseInsensitive) != 0) {
         filterText = text;
         LOG(text);
-        setFilterFixedString(text);
         emit filterTextChanged();
+        synchronize();
+    }
+}
+
+int TextFilterModel::rowCount(const QModelIndex &parent) const
+{
+    return parent.isValid() ? 0 : rows.count();
+}
+
+QVariant TextFilterModel::data(const QModelIndex &index, int role) const
+{
+    if (source && index.isValid() && index.row() >= 0 && index.row() < rows.count()) {
+        const QPersistentModelIndex &sourceIndex = rows.at(index.row());
+        if (sourceIndex.isValid()) {
+            return source->data(sourceIndex, role);
+        }
+    }
+    return QVariant();
+}
+
+QHash<int,QByteArray> TextFilterModel::roleNames() const
+{
+    return source ? source->roleNames() : QHash<int,QByteArray>();
+}
+
+void TextFilterModel::sourceDestroyed()
+{
+    beginResetModel();
+    source = Q_NULLPTR;
+    rows.clear();
+    endResetModel();
+    emit sourceChanged();
+    emit countChanged();
+}
+
+void TextFilterModel::sourceReset()
+{
+    beginResetModel();
+    rebuild();
+    endResetModel();
+    emit countChanged();
+}
+
+void TextFilterModel::sourceStructureChanged()
+{
+    synchronize();
+}
+
+void TextFilterModel::sourceDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
+{
+    if (!source || !topLeft.isValid() || topLeft.parent().isValid()) {
+        return;
+    }
+    // A change to the role we filter on (or an unspecified change) can make a row
+    // enter or leave the filtered list.
+    if (!filterText.isEmpty() && (roles.isEmpty() || roles.contains(filterRole))) {
+        synchronize();
+    }
+    // Forward the change for rows that are (still) in the list.
+    for (int i = 0; i < rows.count(); i++) {
+        const QPersistentModelIndex &sourceIndex = rows.at(i);
+        if (sourceIndex.isValid() && sourceIndex.row() >= topLeft.row() && sourceIndex.row() <= bottomRight.row()) {
+            const QModelIndex proxyIndex(index(i, 0));
+            emit dataChanged(proxyIndex, proxyIndex, roles);
+        }
     }
 }
 
@@ -93,6 +173,90 @@ int TextFilterModel::findRole(QAbstractItemModel *model, QString role)
 
 void TextFilterModel::updateFilterRole()
 {
-    const int role = findRole(sourceModel(), filterRoleName);
-    setFilterRole((role >= 0) ? role : Qt::DisplayRole);
+    const int role = findRole(source.data(), filterRoleName);
+    filterRole = (role >= 0) ? role : Qt::DisplayRole;
+}
+
+bool TextFilterModel::matches(int sourceRow) const
+{
+    if (filterText.isEmpty()) {
+        return true;
+    }
+    return source->data(source->index(sourceRow, 0), filterRole).toString().contains(filterText, Qt::CaseInsensitive);
+}
+
+void TextFilterModel::rebuild()
+{
+    rows.clear();
+    if (!source) {
+        return;
+    }
+    const int n = source->rowCount();
+    rows.reserve(n);
+    for (int i = 0; i < n; i++) {
+        if (matches(i)) {
+            rows.append(QPersistentModelIndex(source->index(i, 0)));
+        }
+    }
+}
+
+// Brings `rows` in line with the source using the smallest set of remove, move
+// and insert notifications, so a view keeps every delegate that did not change.
+void TextFilterModel::synchronize()
+{
+    if (!source) {
+        return;
+    }
+    const int oldCount = rows.count();
+
+    // Wanted rows, in source order.
+    QVector<int> wanted;
+    const int n = source->rowCount();
+    wanted.reserve(n);
+    for (int i = 0; i < n; i++) {
+        if (matches(i)) {
+            wanted.append(i);
+        }
+    }
+    QSet<int> wantedSet;
+    for (int r : wanted) {
+        wantedSet.insert(r);
+    }
+
+    // 1. Remove rows that no longer pass (or whose source row is gone).
+    for (int i = rows.count() - 1; i >= 0; i--) {
+        if (!rows.at(i).isValid() || !wantedSet.contains(rows.at(i).row())) {
+            beginRemoveRows(QModelIndex(), i, i);
+            rows.remove(i);
+            endRemoveRows();
+        }
+    }
+
+    // 2. Walk the wanted order: move a row up from further down, or insert it.
+    for (int i = 0; i < wanted.count(); i++) {
+        const int wantedRow = wanted.at(i);
+        if (i < rows.count() && rows.at(i).row() == wantedRow) {
+            continue;
+        }
+        int found = -1;
+        for (int j = i + 1; j < rows.count(); j++) {
+            if (rows.at(j).row() == wantedRow) {
+                found = j;
+                break;
+            }
+        }
+        if (found >= 0) {
+            beginMoveRows(QModelIndex(), found, found, QModelIndex(), i);
+            rows.move(found, i);
+            endMoveRows();
+        } else {
+            beginInsertRows(QModelIndex(), i, i);
+            rows.insert(i, QPersistentModelIndex(source->index(wantedRow, 0)));
+            endInsertRows();
+        }
+    }
+
+    if (rows.count() != oldCount) {
+        emit countChanged();
+    }
 }

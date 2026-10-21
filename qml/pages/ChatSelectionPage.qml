@@ -48,9 +48,53 @@ Dialog {
     */
     property var payload: ({})
 
+    // Forwarding allows picking several chats: tap to toggle, then use the
+    // button at the bottom. Keys are chat ids (as strings), values are true.
+    property var selectedChats: ({})
+    property int selectedCount: 0
+    readonly property bool multiSelect: state === "forwardMessages"
+
+    function toggleChatSelection(chatId) {
+        var key = String(chatId);
+        var updated = {};
+        for (var existing in selectedChats) {
+            updated[existing] = true;
+        }
+        if (updated[key]) {
+            delete updated[key];
+        } else {
+            updated[key] = true;
+        }
+        selectedChats = updated;
+        selectedCount = Object.keys(updated).length;
+    }
+
+    function forwardToSelected() {
+        var chatIds = Object.keys(selectedChats);
+        if (chatIds.length === 0) {
+            return;
+        }
+        if (chatIds.length === 1) {
+            // One target keeps the usual behaviour: open that chat.
+            chatSelectionPage.acceptDestinationProperties = { "chatInformation" : tdLibWrapper.getChat(chatIds[0]) };
+            chatSelectionPage.acceptDestination = Qt.resolvedUrl("../pages/ChatPage.qml");
+            chatSelectionPage.canAccept = true;
+            chatSelectionPage.accept();
+            return;
+        }
+        for (var i = 0; i < chatIds.length; i++) {
+            var chat = tdLibWrapper.getChat(chatIds[i]);
+            var toSecretChat = chat.type && chat.type["@type"] === "chatTypeSecret";
+            tdLibWrapper.forwardMessages(chatIds[i], payload.fromChatId, payload.messageIds, toSecretChat, false, !!payload.silently);
+        }
+        appNotification.show(qsTr("Forwarded to %Ln chat(s)", "", chatIds.length));
+        pageStack.pop();
+    }
+
     onAccepted: {
         switch(chatSelectionPage.state) {
         case "forwardMessages":
+            // Only reached with a single chosen chat, see forwardToSelected().
             acceptDestinationInstance.forwardMessages(payload.fromChatId, payload.messageIds, payload.silently)
             break;
         case "fillTextArea": // ReplyMarkupButtons: inlineKeyboardButtonTypeSwitchInline
@@ -101,7 +145,7 @@ Dialog {
 
         anchors {
             top: chatSearchField.bottom
-            bottom: parent.bottom
+            bottom: forwardBar.top
             left: parent.left
             right: parent.right
         }
@@ -119,10 +163,15 @@ Dialog {
 
         delegate: ChatListViewItem {
             ownUserId: chatSelectionPage.myUserId
+            readonly property bool chosen: chatSelectionPage.multiSelect && !!chatSelectionPage.selectedChats[String(display.id)]
+            highlighted: down || chosen
             onClicked: {
+                if (chatSelectionPage.multiSelect) {
+                    chatSelectionPage.toggleChatSelection(display.id);
+                    return;
+                }
                 var chat = tdLibWrapper.getChat(display.id);
                 switch(chatSelectionPage.state) {
-                case "forwardMessages":
                 case "fillTextArea":
                     chatSelectionPage.acceptDestinationProperties = { "chatInformation" :  chat};
                     chatSelectionPage.acceptDestination = Qt.resolvedUrl("../pages/ChatPage.qml");
@@ -146,5 +195,23 @@ Dialog {
         }
 
         VerticalScrollDecorator {}
+    }
+
+    Item {
+        id: forwardBar
+        visible: chatSelectionPage.multiSelect && chatSelectionPage.selectedCount > 0
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+        }
+        height: visible ? forwardButton.height + 2 * Theme.paddingMedium : 0
+
+        Button {
+            id: forwardButton
+            anchors.centerIn: parent
+            text: qsTr("Forward to %Ln chat(s)", "", chatSelectionPage.selectedCount)
+            onClicked: chatSelectionPage.forwardToSelected()
+        }
     }
 }

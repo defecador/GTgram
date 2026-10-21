@@ -45,6 +45,7 @@ namespace {
     const QString EXTRA_REGISTER("unifiedPush:register");
     const QString EXTRA_REGISTER_SIMPLE("unifiedPush:registerSimple");
     const QString EXTRA_UNREGISTER("unifiedPush:unregister");
+    const QString EXTRA_SYNC("unifiedPush:sync");
     const QString KEY_WEBPUSH_AUTH("webPushAuth");
     const QString KEY_TOKEN("token");
     const QString KEY_ENDPOINT("endpoint");
@@ -294,6 +295,25 @@ void UnifiedPushManager::handleMessage(const QString &token)
     Q_UNUSED(token)
     WARN("Wake-up received");
     noteActivity();
+    forceTelegramSync();
+}
+
+// TDLib does not poll while the app is "offline": after the phone has slept its
+// connections can be dead without TDLib noticing, so a wake-up alone changes
+// nothing until the app is opened. processPushNotification makes TDLib check
+// all connections at once and fetch what is new. The payload is a push TDLib
+// cannot use (no chat), so it answers 406 "force loading data from the server",
+// which is exactly what is wanted here and is ignored.
+void UnifiedPushManager::forceTelegramSync()
+{
+    if (!tdLibWrapper || tdLibWrapper->getAuthorizationState() != TDLibWrapper::AuthorizationReady) {
+        return;
+    }
+    QVariantMap request;
+    request.insert(QStringLiteral("@type"), QStringLiteral("processPushNotification"));
+    request.insert(QStringLiteral("payload"), QStringLiteral("{\"loc_key\":\"MESSAGE_MUTED\"}"));
+    request.insert(QStringLiteral("@extra"), EXTRA_SYNC);
+    tdLibWrapper->sendRequest(request);
 }
 
 void UnifiedPushManager::handleUnregistered(const QString &token)
@@ -317,6 +337,10 @@ void UnifiedPushManager::handleAuthorizationStateChanged(const TDLibWrapper::Aut
     Q_UNUSED(authorizationStateData)
     if (authorizationState == TDLibWrapper::AuthorizationReady) {
         sendEndpointToTelegram();
+        if (wakeMode) {
+            // Started by a push: fetch what is new right away.
+            forceTelegramSync();
+        }
     }
 }
 
