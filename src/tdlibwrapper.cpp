@@ -215,6 +215,7 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(secretChatUpdated(qlonglong, QVariantMap)), this, SLOT(handleSecretChatUpdated(qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(recentStickersUpdated(QVariantList)), this, SIGNAL(recentStickersUpdated(QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(stickers(QVariantList)), this, SIGNAL(stickersReceived(QVariantList)));
+    connect(this->tdLibReceiver, SIGNAL(animations(QVariantList)), this, SIGNAL(savedAnimationsReceived(QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(installedStickerSetsUpdated(QVariantList)), this, SIGNAL(installedStickerSetsUpdated(QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(stickerSets(QVariantList)), this, SLOT(handleStickerSets(QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(stickerSet(QVariantMap)), this, SIGNAL(stickerSetReceived(QVariantMap)));
@@ -1379,15 +1380,46 @@ void TDLibWrapper::getInlineQueryResults(qlonglong botUserId, qlonglong chatId, 
     this->sendRequest(requestObject);
 }
 
+void TDLibWrapper::getSavedAnimations()
+{
+    LOG("Getting saved animations (GIFs)");
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "getSavedAnimations");
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::sendAnimationMessage(qlonglong chatId, int animationFileId, qlonglong replyToMessageId)
+{
+    LOG("Sending animation" << chatId << animationFileId << replyToMessageId);
+    QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId));
+    QVariantMap inputMessageContent;
+    inputMessageContent.insert(_TYPE, "inputMessageAnimation");
+
+    QVariantMap animationFile;
+    animationFile.insert(_TYPE, "inputFileId");
+    animationFile.insert(ID, animationFileId);
+    QVariantMap inputAnimation;
+    inputAnimation.insert(_TYPE, "inputAnimation");
+    inputAnimation.insert("animation", animationFile);
+    inputMessageContent.insert("animation", inputAnimation);
+
+    requestObject.insert("input_message_content", inputMessageContent);
+    this->sendRequest(requestObject);
+}
+
 void TDLibWrapper::sendInlineQueryResultMessage(qlonglong chatId, qlonglong threadId, qlonglong replyToMessageId, const QString &queryId, const QString &resultId)
 {
-
+    Q_UNUSED(threadId) // forum topics are not supported (TDLib now wants a topic object here)
     LOG("Send Inline Query Result Message" << chatId);
     QVariantMap requestObject;
     requestObject.insert(_TYPE, "sendInlineQueryResultMessage");
     requestObject.insert(CHAT_ID, chatId);
-    requestObject.insert("message_thread_id", threadId);
-    requestObject.insert("reply_to_message_id", replyToMessageId);
+    if (replyToMessageId) {
+        QVariantMap replyTo;
+        replyTo.insert(_TYPE, TYPE_INPUT_MESSAGE_REPLY_TO_MESSAGE);
+        replyTo.insert(MESSAGE_ID, replyToMessageId);
+        requestObject.insert(REPLY_TO, replyTo);
+    }
     requestObject.insert("query_id", queryId);
     requestObject.insert("result_id", resultId);
 

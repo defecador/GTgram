@@ -204,6 +204,8 @@ public:
     Q_INVOKABLE void deleteMessages(const QString &chatId, const QVariantList messageIds);
     Q_INVOKABLE void getMapThumbnailFile(const QString &chatId, double latitude, double longitude, int width, int height, const QString &extra);
     Q_INVOKABLE void getRecentStickers();
+    Q_INVOKABLE void getSavedAnimations();
+    Q_INVOKABLE void sendAnimationMessage(qlonglong chatId, int animationFileId, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void getInstalledStickerSets();
     Q_INVOKABLE void getStickerSet(const QString &setId);
     Q_INVOKABLE void getSupergroupMembers(const QString &groupId, int limit, int offset);
@@ -323,6 +325,7 @@ signals:
     void secretChatUpdated(qlonglong secretChatId, const QVariantMap &secretChat);
     void recentStickersUpdated(const QVariantList &stickerIds);
     void stickersReceived(const QVariantList &stickers);
+    void savedAnimationsReceived(const QVariantList &animations);
     void installedStickerSetsUpdated(const QVariantList &stickerSetIds);
     void stickerSetsReceived(const QVariantList &stickerSets);
     void stickerSetReceived(const QVariantMap &stickerSet);

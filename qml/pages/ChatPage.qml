@@ -30,7 +30,7 @@ import "../js/functions.js" as Functions
 Page {
     id: chatPage
     allowedOrientations: Orientation.All
-    backNavigation: !stickerPickerLoader.active
+    backNavigation: !stickerPickerLoader.active && !gifPickerLoader.active
 
     property bool loading: true;
     property bool isInitialized: false;
@@ -1184,7 +1184,7 @@ Page {
             contentWidth: width
 
             PullDownMenu {
-                visible: (chatInformation.id !== chatPage.myUserId || chatPage.showScheduledMessagesMenuItem || chatPage.showSendOptionsMenuItems) && !stickerPickerLoader.active && !voiceNoteOverlayLoader.active && !messageOverlayLoader.active && !stickerSetOverlayLoader.active
+                visible: (chatInformation.id !== chatPage.myUserId || chatPage.showScheduledMessagesMenuItem || chatPage.showSendOptionsMenuItems) && !stickerPickerLoader.active && !gifPickerLoader.active && !voiceNoteOverlayLoader.active && !messageOverlayLoader.active && !stickerSetOverlayLoader.active
 
                 MenuItem {
                     id: deleteChatMenuItem
@@ -1524,7 +1524,7 @@ Page {
                         id: chatView
 
                         visible: !blurred
-                        property bool blurred: messageOverlayLoader.item || stickerPickerLoader.item || voiceNoteOverlayLoader.item || inlineQuery.hasOverlay || stickerSetOverlayLoader.item
+                        property bool blurred: messageOverlayLoader.item || stickerPickerLoader.item || gifPickerLoader.item || voiceNoteOverlayLoader.item || inlineQuery.hasOverlay || stickerSetOverlayLoader.item
 
                         anchors.fill: parent
                         opacity: chatPage.loading ? 0 : 1
@@ -1873,6 +1873,31 @@ Page {
                     }
 
                     Loader {
+                        id: gifPickerLoader
+                        active: false
+                        asynchronous: true
+                        width: parent.width
+                        height: active ? parent.height : 0
+                        source: "../components/GifPicker.qml"
+                        onLoaded: item.chatId = chatInformation.id
+                    }
+
+                    Connections {
+                        target: gifPickerLoader.item
+                        onGifPicked: {
+                            if (gif.kind === "saved") {
+                                tdLibWrapper.sendAnimationMessage(chatInformation.id, gif.fileId, newMessageColumn.replyToMessageId);
+                            } else {
+                                tdLibWrapper.sendInlineQueryResultMessage(chatInformation.id, 0, newMessageColumn.replyToMessageId, gif.queryId, gif.resultId);
+                            }
+                            gifPickerLoader.active = false;
+                            attachmentOptionsFlickable.isNeeded = false;
+                            newMessageInReplyToRow.inReplyToMessage = null;
+                            newMessageColumn.editMessageId = "0";
+                        }
+                    }
+
+                    Loader {
                         id: messageOverlayLoader
 
                         property var overlayMessage;
@@ -2051,6 +2076,7 @@ Page {
                                 onClicked: {
                                     voiceNoteOverlayLoader.active = !voiceNoteOverlayLoader.active;
                                     stickerPickerLoader.active = false;
+                                    gifPickerLoader.active = false;
                                 }
                             }
                             IconButton {
@@ -2079,7 +2105,27 @@ Page {
                                 highlighted: down || stickerPickerLoader.active
                                 onClicked: {
                                     stickerPickerLoader.active = !stickerPickerLoader.active;
+                                    gifPickerLoader.active = false;
                                     voiceNoteOverlayLoader.active = false;
+                                }
+                            }
+                            BackgroundItem {
+                                id: gifButton
+                                visible: chatPage.hasSendPrivilege("can_send_other_messages")
+                                width: Theme.itemSizeSmall
+                                height: Theme.itemSizeSmall
+                                highlighted: down || gifPickerLoader.active
+                                onClicked: {
+                                    gifPickerLoader.active = !gifPickerLoader.active;
+                                    stickerPickerLoader.active = false;
+                                    voiceNoteOverlayLoader.active = false;
+                                }
+                                Label {
+                                    anchors.centerIn: parent
+                                    text: "GIF"
+                                    font.pixelSize: Theme.fontSizeSmall
+                                    font.bold: true
+                                    color: gifButton.highlighted ? Theme.highlightColor : Theme.primaryColor
                                 }
                             }
                             IconButton {
@@ -2427,6 +2473,7 @@ Page {
                                 if (attachmentOptionsFlickable.isNeeded) {
                                     attachmentOptionsFlickable.isNeeded = false;
                                     stickerPickerLoader.active = false;
+                                    gifPickerLoader.active = false;
                                     voiceNoteOverlayLoader.active = false;
                                 } else {
                                     attachmentOptionsFlickable.isNeeded = true;
