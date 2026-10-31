@@ -363,8 +363,9 @@ void AppSettings::setShowReactionButton(bool enable)
 
 AppSettings::SponsoredMess AppSettings::getSponsoredMess() const
 {
+    // Ads are off unless the user turns them on (Settings > Behavior > Ads)
     return (SponsoredMess) settings.value(KEY_SPONSORED_MESS, (int)
-        AppSettings::SponsoredMessHandle).toInt();
+        AppSettings::SponsoredMessIgnore).toInt();
 }
 
 void AppSettings::setSponsoredMess(SponsoredMess sponsoredMess)

@@ -517,7 +517,7 @@ ListItem {
                     text: messageListItem.isOwnMessage
                           ? qsTr("You")
                           : Emoji.emojify( myMessage['@type'] === "sponsoredMessage"
-                                          ? tdLibWrapper.getChat(myMessage.sponsor_chat_id).title
+                                          ? (myMessage.title || (myMessage.sponsor_chat_id ? tdLibWrapper.getChat(myMessage.sponsor_chat_id).title : qsTr("Sponsored")))
                                           : ( messageListItem.isAnonymous
                                                 ? page.chatInformation.title
                                                 : Functions.getUserName(messageListItem.userInformation) ), font.pixelSize)

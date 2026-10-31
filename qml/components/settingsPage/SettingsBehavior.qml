@@ -189,6 +189,17 @@ AccordionItem {
 
             TextSwitch {
                 width: parent.columnWidth
+                checked: appSettings.sponsoredMess !== AppSettings.SponsoredMessIgnore
+                text: qsTr("Ads")
+                description: qsTr("Show the sponsored messages (ads) that Telegram adds to some channels. Turned off by default.")
+                automaticCheck: false
+                onClicked: {
+                    appSettings.sponsoredMess = checked ? AppSettings.SponsoredMessIgnore : AppSettings.SponsoredMessHandle
+                }
+            }
+
+            TextSwitch {
+                width: parent.columnWidth
                 checked: appSettings.showReactionButton
                 text: qsTr("Show reaction button on tap")
                 description: qsTr("The reaction button may appear when you tap the message bubble, to make access to the reactions even easier.")

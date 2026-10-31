@@ -632,6 +632,27 @@ Page {
         });
     }
 
+    // The chat the "next unread chat" banner at the bottom points to, or null
+    // when it should not be shown. Only worked out while the user sits at the
+    // end of a fully read chat: scanning the chat list is not cheap.
+    property var nextUnreadChatForBanner: null
+    function refreshNextUnreadBanner() {
+        if (chatPage.status === PageStatus.Active && !chatPage.loading && chatInformation.unread_count === 0
+                && chatView.atYEnd) {
+            chatPage.nextUnreadChatForBanner = chatPage.findNextUnreadChat();
+        } else {
+            chatPage.nextUnreadChatForBanner = null;
+        }
+    }
+
+    Timer {
+        // Another chat may become unread while this one is open
+        interval: 5000
+        repeat: true
+        running: chatPage.status === PageStatus.Active
+        onTriggered: chatPage.refreshNextUnreadBanner()
+    }
+
     Timer {
         id: scheduledMessagesCountTimer
         // Telegram only reports the first scheduled message of a chat by itself, so recount
@@ -912,6 +933,7 @@ Page {
             chatInformation.unread_count = unreadCount;
             chatUnreadMessagesItem.visible = ( !chatPage.loading && unreadCount > 0 && chatOverviewItem.visible );
             chatUnreadMessagesCount.text = Functions.formatUnreadCount(unreadCount)
+            chatPage.refreshNextUnreadBanner();
         }
         onLastReadSentMessageUpdated: {
             Debug.log("[ChatPage] Updating last read sent index, new index: ", lastReadSentIndex);
@@ -1596,6 +1618,8 @@ Page {
                             handleScrollPositionChanged();
                         }
 
+                        onAtYEndChanged: chatPage.refreshNextUnreadBanner()
+
                         onQuickScrollAnimatingChanged: {
                             if (!quickScrollAnimating) {
                                 handleScrollPositionChanged();
@@ -1846,6 +1870,50 @@ Page {
                             anchors.fill: parent
                             onClicked: {
                                 chatView.scrollToIndex(chatView.count - 1 - chatInformation.unread_count)
+                            }
+                        }
+                    }
+
+                    // Shown at the bottom once this chat is read and another one is waiting.
+                    // A tap-able banner instead of the push-up menu, which only opens when the
+                    // list sits exactly at its end.
+                    BackgroundItem {
+                        id: nextUnreadBanner
+                        visible: !!chatPage.nextUnreadChatForBanner && !chatPage.loading && chatOverviewItem.visible
+                                 && !stickerPickerLoader.active && !gifPickerLoader.active && !voiceNoteOverlayLoader.active
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            bottom: parent.bottom
+                        }
+                        height: Theme.itemSizeSmall
+                        onClicked: chatPage.openNextUnreadChat()
+
+                        Rectangle {
+                            anchors.fill: parent
+                            color: Theme.rgba(Theme.highlightBackgroundColor, nextUnreadBanner.down ? 0.95 : 0.85)
+                        }
+                        Label {
+                            anchors {
+                                left: parent.left
+                                leftMargin: Theme.horizontalPageMargin
+                                right: nextUnreadIcon.left
+                                rightMargin: Theme.paddingMedium
+                                verticalCenter: parent.verticalCenter
+                            }
+                            truncationMode: TruncationMode.Fade
+                            color: Theme.primaryColor
+                            text: chatPage.nextUnreadChatForBanner
+                                  ? qsTr("Next unread chat: %1").arg(chatPage.nextUnreadChatForBanner.title)
+                                  : ""
+                        }
+                        Icon {
+                            id: nextUnreadIcon
+                            source: "image://theme/icon-m-right"
+                            anchors {
+                                right: parent.right
+                                rightMargin: Theme.horizontalPageMargin
+                                verticalCenter: parent.verticalCenter
                             }
                         }
                     }

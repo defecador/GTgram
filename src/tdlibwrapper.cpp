@@ -867,6 +867,10 @@ void TDLibWrapper::getChatPinnedMessage(qlonglong chatId)
 
 void TDLibWrapper::getChatSponsoredMessage(qlonglong chatId)
 {
+    if (appSettings->getSponsoredMess() == AppSettings::SponsoredMessIgnore) {
+        // Ads are turned off: do not even ask for them
+        return;
+    }
     LOG("Retrieving sponsored message" << chatId);
     QVariantMap requestObject;
     // getChatSponsoredMessage has been replaced with getChatSponsoredMessages
