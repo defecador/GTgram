@@ -27,6 +27,24 @@ Page {
 
     property bool loading: true
     property var authorizationStateData: null
+    // Which authentication request was just sent ("phone", "code" or "password"),
+    // so a failure can bring the matching input back instead of leaving the
+    // page loading forever. Empty when nothing is pending.
+    property string pendingStep: ""
+
+    // Back to the phone number input, e.g. after a typo in the number. TDLib
+    // accepts a new phone number while it is still waiting for the code, the
+    // password or the registration.
+    function changePhoneNumber() {
+        initializationPage.pendingStep = "";
+        initializationPage.loading = false;
+        enterPinColumn.visible = false;
+        enterPasswordColumn.visible = false;
+        waitRegistrationColumn.visible = false;
+        linkingErrorColumn.visible = false;
+        welcomeColumn.visible = true;
+        phoneNumberTextField.focus = true;
+    }
 
     Component.onCompleted: {
         initializationPage.authorizationStateData = tdLibWrapper.getAuthorizationStateData();
@@ -63,7 +81,21 @@ Page {
 
     Connections {
         target: tdLibWrapper
+        onErrorReceived: {
+            // The error text itself is shown by the overview page; here we only
+            // make sure the page does not keep waiting for an answer.
+            if (initializationPage.pendingStep === "") {
+                return;
+            }
+            var failedStep = initializationPage.pendingStep;
+            initializationPage.pendingStep = "";
+            initializationPage.loading = false;
+            welcomeColumn.visible = (failedStep === "phone");
+            enterPinColumn.visible = (failedStep === "code");
+            enterPasswordColumn.visible = (failedStep === "password");
+        }
         onAuthorizationStateChanged: {
+            initializationPage.pendingStep = "";
             switch (tdLibWrapper.authorizationState) {
             case TelegramAPI.WaitCode:
                 initializationPage.loading = false;
@@ -182,6 +214,7 @@ Page {
                     onClicked: enter()
                     function enter() {
                         initializationPage.loading = true;
+                        initializationPage.pendingStep = "phone";
                         welcomeColumn.visible = false;
                         tdLibWrapper.setAuthenticationPhoneNumber(phoneNumberTextField.text);
                     }
@@ -246,9 +279,18 @@ Page {
                     }
                     onClicked: {
                         initializationPage.loading = true;
+                        initializationPage.pendingStep = "password";
                         enterPasswordColumn.visible = false;
                         tdLibWrapper.setAuthenticationPassword(enterPasswordField.text);
                     }
+                }
+
+                Button {
+                    text: qsTr("Wrong phone number? Change it")
+                    anchors {
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    onClicked: initializationPage.changePhoneNumber()
                 }
             }
 
@@ -289,9 +331,18 @@ Page {
                     onClicked: enter()
                     function enter() {
                         initializationPage.loading = true;
+                        initializationPage.pendingStep = "code";
                         enterPinColumn.visible = false;
                         tdLibWrapper.setAuthenticationCode(enterPinField.text);
                     }
+                }
+
+                Button {
+                    text: qsTr("Wrong phone number? Change it")
+                    anchors {
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    onClicked: initializationPage.changePhoneNumber()
                 }
             }
 
@@ -434,6 +485,14 @@ Page {
                         }
 
                     }
+                }
+
+                Button {
+                    text: qsTr("Wrong phone number? Change it")
+                    anchors {
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    onClicked: initializationPage.changePhoneNumber()
                 }
             }
 
