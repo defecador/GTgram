@@ -636,7 +636,13 @@ Page {
     // when it should not be shown. Only worked out while the user sits at the
     // end of a fully read chat: scanning the chat list is not cheap.
     property var nextUnreadChatForBanner: null
+    // The banner goes away on its own after a few seconds; it is offered again
+    // once the user has scrolled away from the end and back.
+    property bool nextUnreadBannerDismissed: false
     function refreshNextUnreadBanner() {
+        if (!chatView.atYEnd) {
+            chatPage.nextUnreadBannerDismissed = false;
+        }
         if (chatPage.status === PageStatus.Active && !chatPage.loading && chatInformation.unread_count === 0
                 && chatView.atYEnd) {
             chatPage.nextUnreadChatForBanner = chatPage.findNextUnreadChat();
@@ -1879,8 +1885,32 @@ Page {
                     // list sits exactly at its end.
                     BackgroundItem {
                         id: nextUnreadBanner
-                        visible: !!chatPage.nextUnreadChatForBanner && !chatPage.loading && chatOverviewItem.visible
+                        readonly property bool wanted: !!chatPage.nextUnreadChatForBanner && !chatPage.loading && chatOverviewItem.visible
                                  && !stickerPickerLoader.active && !gifPickerLoader.active && !voiceNoteOverlayLoader.active
+                                 && !chatPage.nextUnreadBannerDismissed
+                        opacity: wanted ? 1.0 : 0.0
+                        visible: opacity > 0
+                        Behavior on opacity { FadeAnimation {} }
+                        // Untouched for 5 seconds: let it go
+                        onWantedChanged: {
+                            if (wanted) {
+                                nextUnreadHideTimer.restart();
+                            } else {
+                                nextUnreadHideTimer.stop();
+                            }
+                        }
+                        onDownChanged: {
+                            if (down) {
+                                nextUnreadHideTimer.stop();
+                            } else if (wanted) {
+                                nextUnreadHideTimer.restart();
+                            }
+                        }
+                        Timer {
+                            id: nextUnreadHideTimer
+                            interval: 5000
+                            onTriggered: chatPage.nextUnreadBannerDismissed = true
+                        }
                         anchors {
                             left: parent.left
                             right: parent.right
