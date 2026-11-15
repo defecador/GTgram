@@ -191,6 +191,7 @@ public:
     Q_INVOKABLE void getMessageProperties(qlonglong chatId, qlonglong messageId);
     Q_INVOKABLE void getChatScheduledMessages(qlonglong chatId);
     Q_INVOKABLE void getChatPinnedMessages(qlonglong chatId);
+    Q_INVOKABLE void searchChatSharedMessages(qlonglong chatId, const QString &filter, qlonglong fromMessageId = 0, int limit = 50);
     Q_INVOKABLE void editMessageSchedulingState(qlonglong chatId, qlonglong messageId, const QVariantMap &sendOptions);
     Q_INVOKABLE void getMessageLinkInfo(const QString &url, const QString &extra = "");
     Q_INVOKABLE void getExternalLinkInfo(const QString &url, const QString &extra = "");
@@ -309,6 +310,7 @@ signals:
     void messagePropertiesReceived(qlonglong chatId, qlonglong messageId, const QVariantMap &messageProperties);
     void scheduledMessagesReceived(qlonglong chatId, const QVariantList &messages);
     void pinnedMessagesReceived(qlonglong chatId, const QVariantList &messages);
+    void sharedMessagesReceived(qlonglong chatId, const QString &filter, const QVariantList &messages, int totalCount, qlonglong nextFromMessageId);
     void messageSendSucceeded(qlonglong messageId, qlonglong oldMessageId, const QVariantMap &message);
     void activeNotificationsUpdated(const QVariantList notificationGroups);
     void notificationGroupUpdated(const QVariantMap notificationGroupUpdate);

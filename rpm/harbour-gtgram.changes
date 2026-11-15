@@ -4,6 +4,10 @@
 # * date Author's Name <author's email> version-release
 # - Summary of changes
 
+* Sun Nov 15 2026 Guillermo Torres <guillermo.torresbelando@mailfence.com> 0.18-61
+- Media, Links and Files tabs in a chat's information page, showing
+  everything shared in the chat, loaded page by page as you scroll
+
 * Sun Sep 27 2026 Guillermo Torres <guillermo.torresbelando@mailfence.com> 0.18-60
 - Fix reaction notifications: build them from TDLib's unread reactions
   (TDLib has no push reaction notification without a push service)

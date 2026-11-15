@@ -428,6 +428,11 @@ void TDLibReceiver::processMessages(const QVariantMap &receivedInformation)
 {
     const int total_count = receivedInformation.value(TOTAL_COUNT).toInt();
     const QString extra(receivedInformation.value(_EXTRA).toString());
+    if (extra.startsWith(QStringLiteral("searchChatSharedMessages:"))) {
+        // Older TDLib answers searchChatMessages with plain "messages"
+        emitSharedMessages(extra, receivedInformation);
+        return;
+    }
     if (extra.startsWith(QStringLiteral("getChatScheduledMessages:"))) {
         // Same "messages" type as chat history, but these must never reach the chat model
         const qlonglong chatId = extra.mid(extra.indexOf(':') + 1).toLongLong();
@@ -443,6 +448,10 @@ void TDLibReceiver::processFoundChatMessages(const QVariantMap &receivedInformat
 {
     const int total_count = receivedInformation.value(TOTAL_COUNT).toInt();
     const QString extra(receivedInformation.value(_EXTRA).toString());
+    if (extra.startsWith(QStringLiteral("searchChatSharedMessages:"))) {
+        emitSharedMessages(extra, receivedInformation);
+        return;
+    }
     if (extra.startsWith(QStringLiteral("getChatPinnedMessages:"))) {
         // Same "foundChatMessages" type as a live in-chat text search, but
         // this must never be mistaken for one - see the extra-tag dispatch
@@ -454,6 +463,24 @@ void TDLibReceiver::processFoundChatMessages(const QVariantMap &receivedInformat
     }
     LOG("Received found chat messages, amount: " << total_count);
     emit messagesReceived(cleanupList(receivedInformation.value(MESSAGES).toList()), total_count);
+}
+
+void TDLibReceiver::emitSharedMessages(const QString &extra, const QVariantMap &receivedInformation)
+{
+    // extra is "searchChatSharedMessages:<chat id>:<filter type>"
+    const QStringList parts(extra.split(':'));
+    const qlonglong chatId = parts.value(1).toLongLong();
+    const QString filter(parts.value(2));
+    const QVariantList messages(cleanupList(receivedInformation.value(MESSAGES).toList()));
+    qlonglong nextFromMessageId;
+    if (receivedInformation.contains("next_from_message_id")) {
+        nextFromMessageId = receivedInformation.value("next_from_message_id").toLongLong();
+    } else {
+        // Older TDLib has no next_from_message_id: continue from the oldest message received
+        nextFromMessageId = messages.isEmpty() ? 0 : messages.last().toMap().value(ID).toLongLong();
+    }
+    LOG("Received" << messages.count() << "shared messages" << filter << "for chat" << chatId << "next from" << nextFromMessageId);
+    emit sharedMessagesReceived(chatId, filter, messages, receivedInformation.value(TOTAL_COUNT).toInt(), nextFromMessageId);
 }
 
 void TDLibReceiver::processSponsoredMessage(const QVariantMap &receivedInformation)
