@@ -435,6 +435,11 @@ void TDLibReceiver::processMessages(const QVariantMap &receivedInformation)
         emit scheduledMessagesReceived(chatId, cleanupList(receivedInformation.value(MESSAGES).toList()));
         return;
     }
+    if (extra.startsWith(QStringLiteral("sendMessageAlbum:"))) {
+        // Reply to a sent album: the messages arrive separately as updateNewMessage
+        LOG("Album sent, amount: " << total_count);
+        return;
+    }
     LOG("Received new messages, amount: " << total_count);
     emit messagesReceived(cleanupList(receivedInformation.value(MESSAGES).toList()), total_count);
 }

@@ -4,6 +4,10 @@
 # * date Author's Name <author's email> version-release
 # - Summary of changes
 
+* Sun Nov 15 2026 Guillermo Torres <guillermo.torresbelando@mailfence.com> 0.18-62
+- Pick several photos at once when attaching from the gallery; they are
+  sent together as an album (split into albums of 10 when more)
+
 * Sun Sep 27 2026 Guillermo Torres <guillermo.torresbelando@mailfence.com> 0.18-60
 - Fix reaction notifications: build them from TDLib's unread reactions
   (TDLib has no push reaction notification without a push service)
