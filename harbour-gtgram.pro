@@ -102,6 +102,10 @@ DISTFILES += qml/harbour-gtgram.qml \
     qml/components/chatInformationPage/ChatInformationTabItemBase.qml \
     qml/components/chatInformationPage/ChatInformationTabItemDebug.qml \
     qml/components/chatInformationPage/ChatInformationTabItemMembersGroups.qml \
+    qml/components/chatInformationPage/ChatInformationTabItemMedia.qml \
+    qml/components/chatInformationPage/ChatInformationTabItemLinks.qml \
+    qml/components/chatInformationPage/ChatInformationTabItemFiles.qml \
+    qml/components/chatInformationPage/ChatInformationSharedMessages.qml \
     qml/components/chatInformationPage/ChatInformationTabItemSettings.qml \
     qml/components/chatInformationPage/ChatInformationTabView.qml \
     qml/components/chatInformationPage/EditGroupChatPermissionsColumn.qml \

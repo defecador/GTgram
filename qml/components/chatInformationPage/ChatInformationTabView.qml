@@ -33,11 +33,6 @@ Item {
 
     Item {
         id: tabViewHeader
-        /*
-         * Tab view was prepared for
-         * shared media/links/…, but for this
-         * we need message search with filters
-         */
 
         height: visible ? headerGrid.height : 0
         clip: true
@@ -131,6 +126,22 @@ Item {
                 image: "image://theme/icon-m-people"
             });
         }
+        // Shared content, newest first, paged in as the user scrolls
+        tabModel.append({
+            tab:"ChatInformationTabItemMedia",
+            title: qsTr("Media", "Button: photos and videos shared in the chat"),
+            image: "image://theme/icon-m-image"
+        });
+        tabModel.append({
+            tab:"ChatInformationTabItemLinks",
+            title: qsTr("Links", "Button: links shared in the chat"),
+            image: "image://theme/icon-m-link"
+        });
+        tabModel.append({
+            tab:"ChatInformationTabItemFiles",
+            title: qsTr("Files", "Button: files shared in the chat"),
+            image: "image://theme/icon-m-file-document"
+        });
         if(!(isPrivateChat || isSecretChat) && (groupInformation.status.can_restrict_members || groupInformation.status["@type"] === "chatMemberStatusCreator")) {
             tabModel.append({
                 tab:"ChatInformationTabItemSettings",

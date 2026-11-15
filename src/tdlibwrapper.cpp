@@ -200,6 +200,7 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(messagePropertiesReceived(qlonglong, qlonglong, QVariantMap)), this, SIGNAL(messagePropertiesReceived(qlonglong, qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(scheduledMessagesReceived(qlonglong, QVariantList)), this, SIGNAL(scheduledMessagesReceived(qlonglong, QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(pinnedMessagesReceived(qlonglong, QVariantList)), this, SIGNAL(pinnedMessagesReceived(qlonglong, QVariantList)));
+    connect(this->tdLibReceiver, SIGNAL(sharedMessagesReceived(qlonglong, QString, QVariantList, int, qlonglong)), this, SIGNAL(sharedMessagesReceived(qlonglong, QString, QVariantList, int, qlonglong)));
     connect(this->tdLibReceiver, SIGNAL(messageSendSucceeded(qlonglong, qlonglong, QVariantMap)), this, SIGNAL(messageSendSucceeded(qlonglong, qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(activeNotificationsUpdated(QVariantList)), this, SIGNAL(activeNotificationsUpdated(QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(notificationGroupUpdated(QVariantMap)), this, SIGNAL(notificationGroupUpdated(QVariantMap)));
@@ -799,6 +800,26 @@ void TDLibWrapper::getChatPinnedMessages(qlonglong chatId)
     // TDLib answers with a plain "foundChatMessages" object, just like a live
     // in-chat text search; the extra is how the receiver tells them apart
     requestObject.insert(_EXTRA, QString("getChatPinnedMessages:%1").arg(chatId));
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::searchChatSharedMessages(qlonglong chatId, const QString &filter, qlonglong fromMessageId, int limit)
+{
+    // One page of a chat's shared media/links/files for the chat information page.
+    // filter is a TDLib SearchMessagesFilter type, e.g. "searchMessagesFilterPhotoAndVideo"
+    LOG("Searching shared messages" << chatId << filter << fromMessageId << limit);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "searchChatMessages");
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert("query", QString());
+    QVariantMap filterObject;
+    filterObject.insert(_TYPE, filter);
+    requestObject.insert("filter", filterObject);
+    requestObject.insert("from_message_id", fromMessageId);
+    requestObject.insert("offset", 0);
+    requestObject.insert("limit", limit);
+    // Same answer type as a live in-chat text search; the extra keeps them apart
+    requestObject.insert(_EXTRA, QString("searchChatSharedMessages:%1:%2").arg(chatId).arg(filter));
     this->sendRequest(requestObject);
 }
 
@@ -2337,6 +2358,11 @@ void TDLibWrapper::handleErrorReceived(int code, const QString &message, const Q
         } else if (parts.size() == 2 && parts.at(0) == QStringLiteral("getChatPinnedMessages")) {
             LOG("Could not get pinned messages" << parts.at(1) << code << message);
             emit pinnedMessagesReceived(parts.at(1).toLongLong(), QVariantList());
+            return;
+        } else if (parts.size() == 3 && parts.at(0) == QStringLiteral("searchChatSharedMessages")) {
+            // Treat a failure as "nothing (more) shared", so the tab stops loading
+            LOG("Could not get shared messages" << parts.at(1) << parts.at(2) << code << message);
+            emit sharedMessagesReceived(parts.at(1).toLongLong(), parts.at(2), QVariantList(), 0, 0);
             return;
         }
     }

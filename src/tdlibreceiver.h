@@ -60,6 +60,7 @@ signals:
     void messagesReceived(const QVariantList &messages, int totalCount);
     void scheduledMessagesReceived(qlonglong chatId, const QVariantList &messages);
     void pinnedMessagesReceived(qlonglong chatId, const QVariantList &messages);
+    void sharedMessagesReceived(qlonglong chatId, const QString &filter, const QVariantList &messages, int totalCount, qlonglong nextFromMessageId);
     void messageLinkInfoReceived(const QString &url, const QVariantMap &messageLinkInfo, const QString &extra);
     void sponsoredMessageReceived(qlonglong chatId, const QVariantMap &message);
     void newMessageReceived(qlonglong chatId, const QVariantMap &message);
@@ -154,6 +155,7 @@ private:
     void processChatOnlineMemberCountUpdated(const QVariantMap &receivedInformation);
     void processMessages(const QVariantMap &receivedInformation);
     void processFoundChatMessages(const QVariantMap &receivedInformation);
+    void emitSharedMessages(const QString &extra, const QVariantMap &receivedInformation);
     void processSponsoredMessage(const QVariantMap &receivedInformation);
     void processSponsoredMessages(const QVariantMap &receivedInformation);
     void processUpdateNewMessage(const QVariantMap &receivedInformation);
