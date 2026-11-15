@@ -46,6 +46,7 @@ namespace {
     const QString KEY_SHOW_REACTION_BUTTON("showReactionButton");
     const QString KEY_AUTOPLAY_ANIMATED_GIFS("autoplayAnimatedGifs");
     const QString KEY_APP_THEME("appTheme");
+    const QString KEY_RECENT_EMOJIS("recentEmojis");
 }
 
 AppSettings::AppSettings(QObject *parent) : QObject(parent), settings(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/de.ygriega/gtgram/settings.conf", QSettings::NativeFormat)
@@ -402,5 +403,18 @@ void AppSettings::setAutoplayAnimatedGifs(bool enable)
         LOG(KEY_AUTOPLAY_ANIMATED_GIFS << enable);
         settings.setValue(KEY_AUTOPLAY_ANIMATED_GIFS, enable);
         emit autoplayAnimatedGifsChanged();
+    }
+}
+
+QString AppSettings::getRecentEmojis() const
+{
+    return settings.value(KEY_RECENT_EMOJIS, QString()).toString();
+}
+
+void AppSettings::setRecentEmojis(const QString &recentEmojis)
+{
+    if (getRecentEmojis() != recentEmojis) {
+        settings.setValue(KEY_RECENT_EMOJIS, recentEmojis);
+        emit recentEmojisChanged();
     }
 }
