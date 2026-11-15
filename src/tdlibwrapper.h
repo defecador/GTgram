@@ -180,6 +180,7 @@ public:
     Q_INVOKABLE void unpinMessage(const QString &chatId, const QString &messageId);
     Q_INVOKABLE void sendTextMessage(qlonglong chatId, const QString &message, qlonglong replyToMessageId = 0, const QVariantMap &sendOptions = QVariantMap());
     Q_INVOKABLE void sendPhotoMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0, const QVariantMap &sendOptions = QVariantMap());
+    Q_INVOKABLE void sendPhotoAlbum(qlonglong chatId, const QStringList &filePaths, const QString &message, qlonglong replyToMessageId = 0, const QVariantMap &sendOptions = QVariantMap());
     Q_INVOKABLE void sendVideoMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0, const QVariantMap &sendOptions = QVariantMap());
     Q_INVOKABLE void sendDocumentMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0, const QVariantMap &sendOptions = QVariantMap());
     Q_INVOKABLE void sendVoiceNoteMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0, const QVariantMap &sendOptions = QVariantMap(), int durationSeconds = 0);

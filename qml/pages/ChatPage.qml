@@ -267,6 +267,7 @@ Page {
         attachmentPreviewRow.voiceNoteDurationSeconds = 0;
         attachmentPreviewRow.isLocation = false;
         attachmentPreviewRow.fileProperties = null;
+        attachmentPreviewRow.pictureFilePaths = [];
         attachmentPreviewRow.locationData = null;
         attachmentPreviewRow.attachmentDescription = "";
         gtgramUtils.stopGeoLocationUpdates();
@@ -393,7 +394,9 @@ Page {
             tdLibWrapper.editMessageText(chatInformation.id, newMessageColumn.editMessageId, newMessageTextField.text);
         } else {
             if (attachmentPreviewRow.visible) {
-                if (attachmentPreviewRow.isPicture) {
+                if (attachmentPreviewRow.isPicture && attachmentPreviewRow.pictureFilePaths.length > 1) {
+                    tdLibWrapper.sendPhotoAlbum(chatInformation.id, attachmentPreviewRow.pictureFilePaths, newMessageTextField.text, newMessageColumn.replyToMessageId, options);
+                } else if (attachmentPreviewRow.isPicture) {
                     tdLibWrapper.sendPhotoMessage(chatInformation.id, attachmentPreviewRow.fileProperties.filePath, newMessageTextField.text, newMessageColumn.replyToMessageId, options);
                 }
                 if (attachmentPreviewRow.isVideo) {
@@ -2135,13 +2138,36 @@ Page {
                                 visible: chatPage.hasSendPrivilege("can_send_photos")
                                 icon.source: "image://theme/icon-m-image"
                                 onClicked: {
-                                    var picker = pageStack.push("Sailfish.Pickers.ImagePickerPage", {
+                                    // Multi-select picker: tap several photos, then accept.
+                                    // Two or more are sent together as an album.
+                                    var picker = pageStack.push("Sailfish.Pickers.MultiImagePickerDialog", {
                                         allowedOrientations: chatPage.allowedOrientations
                                     })
-                                    picker.selectedContentPropertiesChanged.connect(function(){
+                                    picker.accepted.connect(function(){
+                                        var selectedPictures = [];
+                                        var selectedPaths = [];
+                                        for (var i = 0; i < picker.selectedContent.count; i += 1) {
+                                            var item = picker.selectedContent.get(i);
+                                            var itemPath = item.filePath ? item.filePath.toString() : chatPage.normalizeSharedFilePath(item.url);
+                                            if (itemPath !== "") {
+                                                selectedPictures.push(item);
+                                                selectedPaths.push(itemPath);
+                                            }
+                                        }
+                                        if (selectedPaths.length === 0) {
+                                            return;
+                                        }
+                                        Debug.log("Selected pictures: ", selectedPaths.join(", "));
+                                        clearAttachmentPreviewRow();
                                         attachmentOptionsFlickable.isNeeded = false;
-                                        Debug.log("Selected document: ", picker.selectedContentProperties.filePath );
-                                        attachmentPreviewRow.fileProperties = picker.selectedContentProperties;
+                                        var first = selectedPictures[0];
+                                        attachmentPreviewRow.fileProperties = {
+                                            filePath: selectedPaths[0],
+                                            fileName: first.fileName || chatPage.getSharedFileName(selectedPaths[0]),
+                                            mimeType: first.mimeType || "",
+                                            url: first.url ? first.url.toString() : "file://" + encodeURI(selectedPaths[0])
+                                        };
+                                        attachmentPreviewRow.pictureFilePaths = selectedPaths;
                                         attachmentPreviewRow.isPicture = true;
                                         controlSendButton();
                                     })
@@ -2271,6 +2297,8 @@ Page {
                         property var locationData: null;
                         property var geocodedAddress: qsTr("Unknown address")
                         property var fileProperties: null;
+                        // Every picked photo when several were chosen (sent as an album)
+                        property var pictureFilePaths: [];
                         property string attachmentDescription: "";
 
                         function getLocationDescription() {
@@ -2319,15 +2347,18 @@ Page {
                         Label {
                             id: attachmentPreviewText
                             font.pixelSize: Theme.fontSizeSmall
-                            text: ( attachmentPreviewRow.isVoiceNote || attachmentPreviewRow.isLocation ) ? attachmentPreviewRow.attachmentDescription : ( !!attachmentPreviewRow.fileProperties ? attachmentPreviewRow.fileProperties.fileName || "" : "" );
+                            text: ( attachmentPreviewRow.isVoiceNote || attachmentPreviewRow.isLocation ) ? attachmentPreviewRow.attachmentDescription
+                                  : ( attachmentPreviewRow.isPicture && attachmentPreviewRow.pictureFilePaths.length > 1 ) ? qsTr("%Ln photos", "", attachmentPreviewRow.pictureFilePaths.length)
+                                  : ( !!attachmentPreviewRow.fileProperties ? attachmentPreviewRow.fileProperties.fileName || "" : "" );
                             anchors.verticalCenter: parent.verticalCenter
 
-                            width: parent.width - removeAttachmentsIconButton.width - Theme.paddingMedium
+                            width: parent.width - removeAttachmentsIconButton.width - Theme.paddingMedium - (attachmentPreviewImage.visible ? attachmentPreviewImage.width + Theme.paddingMedium : 0)
                             maximumLineCount: 2
                             wrapMode: Text.Wrap
                             truncationMode: TruncationMode.Fade
                             color: Theme.secondaryColor
                             visible: attachmentPreviewRow.isDocument || attachmentPreviewRow.isVoiceNote || attachmentPreviewRow.isLocation
+                                     || (attachmentPreviewRow.isPicture && attachmentPreviewRow.pictureFilePaths.length > 1)
                         }
                     }
 

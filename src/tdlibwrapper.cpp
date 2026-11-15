@@ -572,6 +572,49 @@ void TDLibWrapper::sendPhotoMessage(qlonglong chatId, const QString &filePath, c
     this->sendRequest(requestObject);
 }
 
+void TDLibWrapper::sendPhotoAlbum(qlonglong chatId, const QStringList &filePaths, const QString &message, qlonglong replyToMessageId, const QVariantMap &sendOptions)
+{
+    LOG("Sending photo album" << chatId << filePaths << message << replyToMessageId);
+    // Telegram groups 2 to 10 items per album, so longer selections go out as
+    // several albums in a row. Only the very first photo carries the caption
+    // and the reply, like in the official apps.
+    const int maxAlbumSize = 10;
+    for (int start = 0; start < filePaths.size(); start += maxAlbumSize) {
+        const QStringList chunk(filePaths.mid(start, maxAlbumSize));
+        const QString caption(start == 0 ? message : QString());
+        const qlonglong replyTo(start == 0 ? replyToMessageId : 0);
+        if (chunk.size() == 1) {
+            sendPhotoMessage(chatId, chunk.first(), caption, replyTo, sendOptions);
+            continue;
+        }
+        QVariantMap requestObject(newSendMessageRequest(chatId, replyTo, sendOptions));
+        requestObject.insert(_TYPE, "sendMessageAlbum");
+        QVariantList inputMessageContents;
+        for (int i = 0; i < chunk.size(); i++) {
+            QVariantMap inputMessageContent;
+            inputMessageContent.insert(_TYPE, "inputMessagePhoto");
+            QVariantMap formattedText;
+            formattedText.insert("text", i == 0 ? caption : QString());
+            formattedText.insert(_TYPE, "formattedText");
+            inputMessageContent.insert("caption", formattedText);
+            QVariantMap photoInputFile;
+            photoInputFile.insert(_TYPE, "inputFileLocal");
+            photoInputFile.insert("path", chunk.at(i));
+            QVariantMap photoWrapper;
+            photoWrapper.insert(_TYPE, "inputPhoto");
+            photoWrapper.insert("photo", photoInputFile);
+            inputMessageContent.insert("photo", photoWrapper);
+            inputMessageContents.append(inputMessageContent);
+        }
+        requestObject.insert("input_message_contents", inputMessageContents);
+        // TDLib answers with a plain "messages" object, just like for chat history; the
+        // extra keeps the receiver from mistaking it for history (the new messages
+        // themselves arrive as updateNewMessage)
+        requestObject.insert(_EXTRA, QString("sendMessageAlbum:%1").arg(chatId));
+        this->sendRequest(requestObject);
+    }
+}
+
 void TDLibWrapper::sendVideoMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId, const QVariantMap &sendOptions)
 {
     LOG("Sending video message" << chatId << filePath << message << replyToMessageId);
