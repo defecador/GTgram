@@ -49,6 +49,7 @@ class AppSettings : public QObject {
     Q_PROPERTY(bool autoplayAnimatedGifs READ autoplayAnimatedGifs WRITE setAutoplayAnimatedGifs NOTIFY autoplayAnimatedGifsChanged)
     Q_PROPERTY(SponsoredMess sponsoredMess READ getSponsoredMess WRITE setSponsoredMess NOTIFY sponsoredMessChanged)
     Q_PROPERTY(AppTheme appTheme READ getAppTheme WRITE setAppTheme NOTIFY appThemeChanged)
+    Q_PROPERTY(QString recentEmojis READ getRecentEmojis WRITE setRecentEmojis NOTIFY recentEmojisChanged)
 
 public:
     enum SponsoredMess {
@@ -145,6 +146,9 @@ public:
     AppTheme getAppTheme() const;
     void setAppTheme(AppTheme appTheme);
 
+    QString getRecentEmojis() const;
+    void setRecentEmojis(const QString &recentEmojis);
+
     bool autoplayAnimatedGifs() const;
     void setAutoplayAnimatedGifs(bool enable);
 
@@ -173,6 +177,7 @@ signals:
     void showReactionButtonChanged();
     void sponsoredMessChanged();
     void appThemeChanged();
+    void recentEmojisChanged();
     void autoplayAnimatedGifsChanged();
 
 private:

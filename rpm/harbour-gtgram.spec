@@ -13,7 +13,7 @@ Name:       harbour-gtgram
 
 Summary:    GTgram is a Telegram client for Sailfish OS
 Version:    0.18
-Release:    60
+Release:    63
 Group:      Qt/Qt
 License:    LICENSE
 URL:        http://werkwolf.eu/

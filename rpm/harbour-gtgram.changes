@@ -4,6 +4,10 @@
 # * date Author's Name <author's email> version-release
 # - Summary of changes
 
+* Sun Nov 15 2026 Guillermo Torres <guillermo.torresbelando@mailfence.com> 0.18-63
+- Emoji picker in the chat input: tap the smiley next to the attach button
+  to browse emojis by category; recently used ones are remembered
+
 * Sun Sep 27 2026 Guillermo Torres <guillermo.torresbelando@mailfence.com> 0.18-60
 - Fix reaction notifications: build them from TDLib's unread reactions
   (TDLib has no push reaction notification without a push service)

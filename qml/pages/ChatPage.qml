@@ -30,7 +30,7 @@ import "../js/functions.js" as Functions
 Page {
     id: chatPage
     allowedOrientations: Orientation.All
-    backNavigation: !stickerPickerLoader.active && !gifPickerLoader.active
+    backNavigation: !stickerPickerLoader.active && !gifPickerLoader.active && !emojiPickerLoader.active
 
     property bool loading: true;
     property bool isInitialized: false;
@@ -422,6 +422,15 @@ Page {
         newMessageColumn.editMessageId = "0";
         gtgramUtils.stopGeoLocationUpdates();
         sendOptionsColumn.open = false;
+        emojiPickerLoader.active = false;
+    }
+
+    // Puts an emoji from the emoji picker at the cursor of the message field
+    function insertEmoji(emoji) {
+        var text = newMessageTextField.text;
+        var position = Math.max(0, Math.min(newMessageTextField.cursorPosition, text.length));
+        newMessageTextField.text = text.substring(0, position) + emoji + text.substring(position);
+        newMessageTextField.cursorPosition = position + emoji.length;
     }
 
     function sendMessageWithOptions(sendOptions) {
@@ -1212,7 +1221,7 @@ Page {
             contentWidth: width
 
             PullDownMenu {
-                visible: (chatInformation.id !== chatPage.myUserId || chatPage.showScheduledMessagesMenuItem || chatPage.showSendOptionsMenuItems) && !stickerPickerLoader.active && !gifPickerLoader.active && !voiceNoteOverlayLoader.active && !messageOverlayLoader.active && !stickerSetOverlayLoader.active
+                visible: (chatInformation.id !== chatPage.myUserId || chatPage.showScheduledMessagesMenuItem || chatPage.showSendOptionsMenuItems) && !stickerPickerLoader.active && !gifPickerLoader.active && !emojiPickerLoader.active && !voiceNoteOverlayLoader.active && !messageOverlayLoader.active && !stickerSetOverlayLoader.active
 
                 MenuItem {
                     id: deleteChatMenuItem
@@ -1552,7 +1561,7 @@ Page {
                         id: chatView
 
                         visible: !blurred
-                        property bool blurred: messageOverlayLoader.item || stickerPickerLoader.item || gifPickerLoader.item || voiceNoteOverlayLoader.item || inlineQuery.hasOverlay || stickerSetOverlayLoader.item
+                        property bool blurred: messageOverlayLoader.item || stickerPickerLoader.item || gifPickerLoader.item || emojiPickerLoader.item || voiceNoteOverlayLoader.item || inlineQuery.hasOverlay || stickerSetOverlayLoader.item
 
                         anchors.fill: parent
                         opacity: chatPage.loading ? 0 : 1
@@ -1886,7 +1895,7 @@ Page {
                     BackgroundItem {
                         id: nextUnreadBanner
                         readonly property bool wanted: !!chatPage.nextUnreadChatForBanner && !chatPage.loading && chatOverviewItem.visible
-                                 && !stickerPickerLoader.active && !gifPickerLoader.active && !voiceNoteOverlayLoader.active
+                                 && !stickerPickerLoader.active && !gifPickerLoader.active && !emojiPickerLoader.active && !voiceNoteOverlayLoader.active
                                  && !chatPage.nextUnreadBannerDismissed
                         opacity: wanted ? 1.0 : 0.0
                         visible: opacity > 0
@@ -1968,6 +1977,20 @@ Page {
                             newMessageInReplyToRow.inReplyToMessage = null;
                             newMessageColumn.editMessageId = "0";
                         }
+                    }
+
+                    Loader {
+                        id: emojiPickerLoader
+                        active: false
+                        asynchronous: true
+                        width: parent.width
+                        height: active ? parent.height : 0
+                        source: "../components/EmojiPicker.qml"
+                    }
+
+                    Connections {
+                        target: emojiPickerLoader.item
+                        onEmojiPicked: chatPage.insertEmoji(emoji)
                     }
 
                     Loader {
@@ -2175,6 +2198,7 @@ Page {
                                     voiceNoteOverlayLoader.active = !voiceNoteOverlayLoader.active;
                                     stickerPickerLoader.active = false;
                                     gifPickerLoader.active = false;
+                                    emojiPickerLoader.active = false;
                                 }
                             }
                             IconButton {
@@ -2205,6 +2229,7 @@ Page {
                                     stickerPickerLoader.active = !stickerPickerLoader.active;
                                     gifPickerLoader.active = false;
                                     voiceNoteOverlayLoader.active = false;
+                                    emojiPickerLoader.active = false;
                                 }
                             }
                             BackgroundItem {
@@ -2217,6 +2242,7 @@ Page {
                                     gifPickerLoader.active = !gifPickerLoader.active;
                                     stickerPickerLoader.active = false;
                                     voiceNoteOverlayLoader.active = false;
+                                    emojiPickerLoader.active = false;
                                 }
                                 Label {
                                     anchors.centerIn: parent
@@ -2523,7 +2549,7 @@ Page {
 
                         TextArea {
                             id: newMessageTextField
-                            width: parent.width - (attachmentIconButton.visible ? attachmentIconButton.width : 0) - (newMessageSendButton.visible ? newMessageSendButton.width : 0) - (cancelInlineQueryButton.visible ? cancelInlineQueryButton.width : 0)
+                            width: parent.width - (emojiIconButton.visible ? emojiIconButton.width : 0) - (attachmentIconButton.visible ? attachmentIconButton.width : 0) - (newMessageSendButton.visible ? newMessageSendButton.width : 0) - (cancelInlineQueryButton.visible ? cancelInlineQueryButton.width : 0)
                             height: Math.min(chatContainer.height / 3, implicitHeight)
                             anchors.verticalCenter: parent.verticalCenter
                             font.pixelSize: Theme.fontSizeSmall
@@ -2556,6 +2582,30 @@ Page {
                             onActiveFocusChanged: {
                                 if (activeFocus) {
                                     messageOptionsDrawer.open = false
+                                }
+                            }
+                        }
+
+                        IconButton {
+                            id: emojiIconButton
+                            icon.source: "../../images/icon-m-emoji.svg"
+                            icon.sourceSize {
+                                width: Theme.iconSizeMedium
+                                height: Theme.iconSizeMedium
+                            }
+                            highlighted: down || emojiPickerLoader.active
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: Theme.paddingSmall
+                            enabled: !stickerSetOverlayLoader.item && !attachmentPreviewRow.isLocation
+                            visible: !inlineQuery.userNameIsValid
+                            onClicked: {
+                                emojiPickerLoader.active = !emojiPickerLoader.active;
+                                if (emojiPickerLoader.active) {
+                                    stickerPickerLoader.active = false;
+                                    gifPickerLoader.active = false;
+                                    voiceNoteOverlayLoader.active = false;
+                                    // Let the emoji grid use the space of the keyboard
+                                    newMessageTextField.focus = false;
                                 }
                             }
                         }

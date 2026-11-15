@@ -90,6 +90,7 @@ DISTFILES += qml/harbour-gtgram.qml \
     qml/components/ReplyMarkupButtons.qml \
     qml/components/StickerPicker.qml \
     qml/components/GifPicker.qml \
+    qml/components/EmojiPicker.qml \
     qml/components/PhotoTextsListItem.qml \
     qml/components/StickerSetOverlay.qml \
     qml/components/TDLibImage.qml \
